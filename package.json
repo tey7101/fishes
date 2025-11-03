@@ -1,0 +1,23 @@
+{
+  "name": "fish-art-2",
+  "version": "1.0.0",
+  "description": "Fish Art - AI 鱼涂鸦游戏",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "fish",
+    "art",
+    "drawing",
+    "game"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1"
+  }
+}
+

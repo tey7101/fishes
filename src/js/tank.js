@@ -1284,7 +1284,7 @@ function showWelcomeModalInTank(fishImageUrl, needsModeration) {
                 margin-top: 10px;
                 transition: all 0.3s;
             " onmouseover="this.style.background='#4F46E5'" onmouseout="this.style.background='#6366F1'">
-                Continue Watching
+                Watch It Swim in Tank
             </button>
         </div>
     `;

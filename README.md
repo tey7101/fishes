@@ -1,12 +1,12 @@
 fishtalk 2025-11-7
 
-# FishArt.Online - Interactive Fish Drawing
+# FishTalk.App - Interactive Fish Drawing
 
-🐟 **[FishArt.Online](https://fishart.online)** 🐟
+🐟 **[FishTalk.App](https://fishtalk.app)** 🐟
 
 Users have their fish drawings AI-validated in real time and watch their creations swim in a shared tank. 
 
-[![Fish Drawing](https://img.shields.io/badge/Game-Live-brightgreen)](https://fishart.online)
+[![Fish Drawing](https://img.shields.io/badge/Game-Live-brightgreen)](https://fishtalk.app)
 [![AI Powered](https://img.shields.io/badge/AI-ONNX-blue)](https://onnx.ai/)
 [![Community](https://img.shields.io/badge/Community-Voting-orange)](#features)
 

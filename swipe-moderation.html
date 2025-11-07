@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Swipe Fish Moderation</title>
-    <link rel="stylesheet" href="src/css/style.css">
-    <link rel="stylesheet" href="src/css/swipe-moderation.css">
+    <link rel="stylesheet" href="/src/css/style.css">
+    <link rel="stylesheet" href="/src/css/swipe-moderation.css">
     
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-601YXTKK0L"></script>
@@ -22,8 +22,8 @@
         <div class="swipe-header">
             <h1>🐟 Swipe to Moderate</h1>
             <div class="header-controls">
-                <button class="help-btn" onclick="showHelpModal()">❓ Help</button>
-                <button class="back-btn" onclick="window.location.href='moderation.html'">← Back to Full Moderation</button>
+                <button class="help-btn" onclick="showHelpModal()">�?Help</button>
+                <button class="back-btn" onclick="window.location.href='moderation.html'">�?Back to Full Moderation</button>
                 <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
         </div>
@@ -80,7 +80,7 @@
             
             <div class="action-buttons">
                 <button class="action-btn reject-btn" onclick="swipeAction('reject')" title="Delete Only (No Validity Marking)">
-                    🗑️ Delete
+                    🗑�?Delete
                 </button>
                 <button class="action-btn validity-btn invalid-btn" onclick="swipeAction('mark-invalid')" title="Mark as Invalid Fish">
                     🚫 Invalid
@@ -95,13 +95,13 @@
                     🐟 Valid
                 </button>
                 <button class="action-btn approve-btn" onclick="swipeAction('approve')" title="Approve Only (No Validity Marking)">
-                    ✅ Approve
+                    �?Approve
                 </button>
             </div>
             
             <div class="undo-container">
                 <button id="undoBtn" class="action-btn undo-btn" onclick="undoLastAction()" title="Undo Last Action" disabled>
-                    ↶ Undo
+                    �?Undo
                 </button>
             </div>
         </div>
@@ -136,7 +136,7 @@
             <div class="help-modal-content">
                 <div class="help-header">
                     <h2>🐟 Swipe Moderation Guide</h2>
-                    <button class="close-btn" onclick="hideHelpModal()">✕</button>
+                    <button class="close-btn" onclick="hideHelpModal()">�?/button>
                 </div>
                 <div class="help-body">
                     <div class="help-section">
@@ -165,7 +165,7 @@
                         <h3>🔧 Button Actions</h3>
                         <div class="help-grid">
                             <div class="help-item">
-                                <span class="help-btn reject-btn">🗑️ Delete</span>
+                                <span class="help-btn reject-btn">🗑�?Delete</span>
                                 <span>Remove fish from site</span>
                             </div>
                             <div class="help-item">
@@ -185,7 +185,7 @@
                                 <span>Mark as "valid fish" for training</span>
                             </div>
                             <div class="help-item">
-                                <span class="help-btn approve-btn">✅ Approve</span>
+                                <span class="help-btn approve-btn">�?Approve</span>
                                 <span>Allow fish on the site</span>
                             </div>
                         </div>
@@ -214,12 +214,12 @@
     </div>
 
     <!-- Firebase SDK -->
-    <script src="src/js/footer-utils.js"></script>
+    <script src="/src/js/footer-utils.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     
-    <script src="src/js/firebase-init.js"></script>
-    <script src="src/js/fish-utils.js"></script>
-    <script src="src/js/swipe-moderation.js"></script>
+    <script src="/src/js/firebase-init.js"></script>
+    <script src="/src/js/fish-utils.js"></script>
+    <script src="/src/js/swipe-moderation.js"></script>
 </body>
 </html>

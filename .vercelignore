@@ -1,0 +1,43 @@
+# Node modules
+node_modules/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Python scripts
+*.py
+
+# Development files
+server.js
+package.json
+package-lock.json
+*.code-workspace
+start.bat
+启动服务器.txt
+
+# Git
+.git/
+.gitignore
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+
+# Cache
+.cache/
+
+# Editor
+.vscode/
+.idea/
+
+# SEO files (keep the ones needed)
+SEO/
+
+# Test/Debug files
+debug.html
+

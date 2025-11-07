@@ -88,37 +88,37 @@
     <h1>🐟 FishArt 调试工具</h1>
 
     <div class="debug-section">
-        <h2>1. 环境检测</h2>
+        <h2>1. 环境检�?/h2>
         <div id="env-status"></div>
     </div>
 
     <div class="debug-section">
-        <h2>2. BACKEND_URL 检测</h2>
+        <h2>2. BACKEND_URL 检�?/h2>
         <div id="backend-status"></div>
     </div>
 
     <div class="debug-section">
-        <h2>3. 依赖库检测</h2>
+        <h2>3. 依赖库检�?/h2>
         <div id="libs-status"></div>
     </div>
 
     <div class="debug-section">
-        <h2>4. API 连通性测试</h2>
+        <h2>4. API 连通性测�?/h2>
         <button id="test-backend">测试后端连接</button>
         <div id="api-test-result"></div>
     </div>
 
     <div class="debug-section">
         <h2>5. 浏览器控制台日志</h2>
-        <p>请打开浏览器开发者工具（F12）查看详细日志</p>
+        <p>请打开浏览器开发者工具（F12）查看详细日�?/p>
         <div id="console-logs"></div>
     </div>
 
-    <!-- 加载必要的脚本 -->
-    <script src="src/js/fish-utils.js"></script>
+    <!-- 加载必要的脚�?-->
+    <script src="/src/js/fish-utils.js"></script>
     
     <script>
-        // 捕获控制台日志
+        // 捕获控制台日�?
         const logs = [];
         const originalConsole = {
             log: console.log,
@@ -141,7 +141,7 @@
             ).join('\n') + '</pre>';
         }
 
-        // 1. 环境检测
+        // 1. 环境检�?
         function checkEnvironment() {
             const envDiv = document.getElementById('env-status');
             const hostname = window.location.hostname;
@@ -149,35 +149,35 @@
             
             envDiv.innerHTML = `
                 <div class="status info">
-                    <strong>当前域名：</strong> <code>${hostname}</code><br>
-                    <strong>协议：</strong> <code>${window.location.protocol}</code><br>
-                    <strong>环境：</strong> <code>${isLocal ? '本地开发' : '生产环境'}</code>
+                    <strong>当前域名�?/strong> <code>${hostname}</code><br>
+                    <strong>协议�?/strong> <code>${window.location.protocol}</code><br>
+                    <strong>环境�?/strong> <code>${isLocal ? '本地开�? : '生产环境'}</code>
                 </div>
             `;
         }
 
-        // 2. BACKEND_URL 检测
+        // 2. BACKEND_URL 检�?
         function checkBackendURL() {
             const backendDiv = document.getElementById('backend-status');
             
             if (typeof window.BACKEND_URL === 'undefined') {
                 backendDiv.innerHTML = `
                     <div class="status error">
-                        <strong>❌ 错误：</strong> <code>window.BACKEND_URL</code> 未定义<br>
-                        <strong>原因：</strong> fish-utils.js 可能未正确加载<br>
-                        <strong>解决：</strong> 检查 fish-utils.js 文件路径是否正确
+                        <strong>�?错误�?/strong> <code>window.BACKEND_URL</code> 未定�?br>
+                        <strong>原因�?/strong> fish-utils.js 可能未正确加�?br>
+                        <strong>解决�?/strong> 检�?fish-utils.js 文件路径是否正确
                     </div>
                 `;
             } else {
                 backendDiv.innerHTML = `
                     <div class="status success">
-                        <strong>✅ BACKEND_URL 已定义：</strong> <code>${window.BACKEND_URL}</code>
+                        <strong>�?BACKEND_URL 已定义：</strong> <code>${window.BACKEND_URL}</code>
                     </div>
                 `;
             }
         }
 
-        // 3. 依赖库检测
+        // 3. 依赖库检�?
         function checkLibraries() {
             const libsDiv = document.getElementById('libs-status');
             const checks = [
@@ -189,24 +189,24 @@
             const results = checks.map(lib => {
                 const status = lib.check();
                 return `<div class="status ${status ? 'success' : 'error'}">
-                    ${status ? '✅' : '❌'} ${lib.name}: ${status ? '已加载' : '未加载'}
+                    ${status ? '�? : '�?} ${lib.name}: ${status ? '已加�? : '未加�?}
                 </div>`;
             });
 
             libsDiv.innerHTML = results.join('');
         }
 
-        // 4. API 连通性测试
+        // 4. API 连通性测�?
         document.getElementById('test-backend').addEventListener('click', async function() {
             const button = this;
             const resultDiv = document.getElementById('api-test-result');
             
             button.disabled = true;
-            resultDiv.innerHTML = '<div class="status info">⏳ 正在测试后端连接...</div>';
+            resultDiv.innerHTML = '<div class="status info">�?正在测试后端连接...</div>';
 
             try {
                 if (typeof window.BACKEND_URL === 'undefined') {
-                    throw new Error('BACKEND_URL 未定义');
+                    throw new Error('BACKEND_URL 未定�?);
                 }
 
                 console.log('Testing backend URL:', window.BACKEND_URL);
@@ -223,7 +223,7 @@
                     const data = await response.json();
                     resultDiv.innerHTML = `
                         <div class="status success">
-                            <strong>✅ 后端连接成功！</strong><br>
+                            <strong>�?后端连接成功�?/strong><br>
                             状态码: ${response.status}<br>
                             响应数据: <pre>${JSON.stringify(data, null, 2)}</pre>
                         </div>
@@ -235,10 +235,10 @@
                 console.error('Backend test failed:', error);
                 resultDiv.innerHTML = `
                     <div class="status error">
-                        <strong>❌ 后端连接失败</strong><br>
+                        <strong>�?后端连接失败</strong><br>
                         错误信息: <code>${error.message}</code><br>
                         <strong>可能的原因：</strong><br>
-                        1. 后端服务器未启动或不可访问<br>
+                        1. 后端服务器未启动或不可访�?br>
                         2. CORS 配置问题<br>
                         3. 网络连接问题<br>
                         4. URL 配置错误
@@ -249,7 +249,7 @@
             }
         });
 
-        // 页面加载时执行所有检查
+        // 页面加载时执行所有检�?
         window.addEventListener('DOMContentLoaded', () => {
             console.log('Debug page loaded');
             checkEnvironment();
@@ -257,12 +257,12 @@
             checkLibraries();
         });
 
-        // 如果 fish-utils.js 加载失败，显示错误
+        // 如果 fish-utils.js 加载失败，显示错�?
         window.addEventListener('error', (e) => {
             if (e.filename && e.filename.includes('fish-utils.js')) {
                 document.getElementById('backend-status').innerHTML = `
                     <div class="status error">
-                        <strong>❌ 加载失败：</strong> fish-utils.js 文件加载失败<br>
+                        <strong>�?加载失败�?/strong> fish-utils.js 文件加载失败<br>
                         错误: ${e.message}<br>
                         文件: ${e.filename}
                     </div>

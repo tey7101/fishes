@@ -26,9 +26,9 @@
     <!-- Canonical URL -->
     <link rel="canonical" href="https://fishart.online/tank.html">
     
-    <link rel="stylesheet" href="src/css/style.css?v=2.0">
-    <link rel="stylesheet" href="src/css/animations.css?v=2.0">
-    <link rel="stylesheet" href="src/css/cute-theme.css?v=2.0">
+    <link rel="stylesheet" href="/src/css/style.css?v=2.0">
+    <link rel="stylesheet" href="/src/css/animations.css?v=2.0">
+    <link rel="stylesheet" href="/src/css/cute-theme.css?v=2.0">
     <link rel="icon" type="image/png" href="/fish_logo.png">
     
     <style>
@@ -398,7 +398,7 @@
                 flex-wrap: wrap !important;
             }
             
-            /* 排序和鱼数量控制区域紧凑化 */
+            /* 排序和鱼数量控制区域紧凑�?*/
             .sort-fish-controls {
                 padding: 4px 8px !important;
                 gap: 6px !important;
@@ -580,14 +580,14 @@
 <body>
   <!-- 鱼缸容器 -->
   <div class="tank-wrapper">
-    <!-- 装饰层 -->
+    <!-- 装饰�?-->
     <div class="tank-decorations">
       <!-- 水草 -->
       <div class="seaweed seaweed-left"></div>
       <div class="seaweed seaweed-right"></div>
       <!-- 底部沙地 -->
       <div class="sand-layer"></div>
-      <!-- 装饰物 -->
+      <!-- 装饰�?-->
       <div class="decoration shell"></div>
       <div class="decoration starfish"></div>
       <div class="decoration rock"></div>
@@ -604,9 +604,9 @@
     </div>
   </div>
   
-  <!-- 控制栏 -->
+  <!-- 控制�?-->
   <div class="cute-controls-container" style="padding: 10px 15px;">
-    <!-- 标题和主要控制 -->
+    <!-- 标题和主要控�?-->
     <div class="control-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
       <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
         <h1 style="margin: 0; font-size: 20px; color: #6366F1; display: flex; align-items: center; gap: 6px;">
@@ -618,7 +618,7 @@
         <div class="sort-fish-controls" style="display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1)); padding: 8px 16px; border-radius: 15px; backdrop-filter: blur(10px); box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15); flex-wrap: wrap;">
           <select id="tank-sort" class="cute-select" style="padding: 12px 16px; font-size: 15px; border: 2px solid #C7D2FE; border-radius: 12px; background: white; font-weight: 600; cursor: pointer; color: #000; box-shadow: 0 2px 6px rgba(0,0,0,0.08); transition: all 0.3s ease;">
             <option value="recent" style="color: #000;">🆕 Most Recent</option>
-            <option value="popular" style="color: #000;">⭐ Most Popular</option>
+            <option value="popular" style="color: #000;">�?Most Popular</option>
             <option value="random" style="color: #000;">🎲 Random</option>
           </select>
           <select id="fish-capacity" class="cute-select" style="padding: 12px 16px; font-size: 15px; border: 2px solid #C7D2FE; border-radius: 12px; background: white; font-weight: 600; cursor: pointer; color: #000; box-shadow: 0 2px 6px rgba(0,0,0,0.08); transition: all 0.3s ease;">
@@ -640,7 +640,7 @@
         </div>
       </div>
       
-      <!-- 右侧按钮组 -->
+      <!-- 右侧按钮�?-->
       <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
         <a href="index.html" class="cute-button cute-button-primary" style="display: flex; align-items: center; gap: 4px; padding: 10px 16px; font-size: 14px; background: #27ae60;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -682,7 +682,7 @@
       </div>
     </div>
     
-    <!-- 加载指示器 -->
+    <!-- 加载指示�?-->
     <div id="loading-indicator" class="cute-loader" style="display: none;">
       <div class="cute-loader-dot"></div>
       <div class="cute-loader-dot"></div>
@@ -696,16 +696,16 @@
       </p>
     </div>
   </div>
-  <script src="src/js/footer-utils.js"></script>
+  <script src="/src/js/footer-utils.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="src/js/firebase-init.js"></script>
-  <script src="src/js/fish-utils.js"></script>
-  <script src="src/js/modal-utils.js"></script>
-  <script src="src/js/social-config.js?v=2.1"></script>
-  <script src="src/js/social-share.js?v=2.1"></script>
-  <script src="src/js/tank.js"></script>
+  <script src="/src/js/firebase-init.js"></script>
+  <script src="/src/js/fish-utils.js"></script>
+  <script src="/src/js/modal-utils.js"></script>
+  <script src="/src/js/social-config.js?v=2.1"></script>
+  <script src="/src/js/social-share.js?v=2.1"></script>
+  <script src="/src/js/tank.js"></script>
   <script>
     // Initialize navigation authentication
     initializeAuthNavigation();

@@ -253,15 +253,20 @@
                 
                 if (response.ok) {
                     resultDiv.className = 'result success';
-                    resultDiv.textContent = '✅ Success!\n\n' + 
-                        'Subscription ID: ' + result.subscriptionId + '\n' +
-                        'Approval URL: ' + result.url + '\n\n' +
-                        '👉 Click the link above to complete PayPal approval';
+                    resultDiv.innerHTML = '✅ Success!<br><br>' + 
+                        '<strong>Subscription ID:</strong> ' + result.subscriptionId + '<br><br>' +
+                        '<strong>Approval URL:</strong><br>' +
+                        '<a href="' + result.url + '" target="_blank" style="color: #0066cc; text-decoration: underline; word-break: break-all;">' + result.url + '</a><br><br>' +
+                        '<button onclick="window.open(\'' + result.url + '\', \'_blank\')" style="padding: 10px 20px; background: #0070ba; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px;">🚀 打开PayPal授权页面</button><br><br>' +
+                        '👉 点击上面的链接或按钮完成PayPal授权';
                     
-                    // 可选：自动打开PayPal approval页面
-                    if (confirm('Open PayPal approval page?')) {
-                        window.open(result.url, '_blank');
-                    }
+                    // 自动尝试打开（如果浏览器允许）
+                    setTimeout(() => {
+                        const newWindow = window.open(result.url, '_blank');
+                        if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                            console.log('弹窗被阻止，请手动点击链接');
+                        }
+                    }, 500);
                 } else {
                     resultDiv.className = 'result error';
                     resultDiv.textContent = '❌ Error Details:\n\n' + 

@@ -561,3 +561,104 @@
   }
 }
 
+/* ===== 支付方式选择器 ===== */
+.payment-method-selector {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  border: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+.payment-method-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.payment-methods {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.payment-method-option {
+  flex: 1;
+  max-width: 150px;
+  position: relative;
+}
+
+.payment-method-radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.payment-method-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 3px solid #ddd;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+}
+
+.payment-method-button:hover {
+  border-color: #bbb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.payment-method-radio:checked + .payment-method-button {
+  border-color: #4CD964;
+  background: linear-gradient(180deg, #f0fff0 0%, #e6ffe6 100%);
+  color: #2d7a3f;
+  box-shadow: 0 4px 0 rgba(76, 217, 100, 0.3);
+}
+
+.payment-method-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.payment-method-icon.stripe-icon {
+  filter: grayscale(100%);
+  transition: filter 0.2s;
+}
+
+.payment-method-radio:checked + .payment-method-button .stripe-icon {
+  filter: grayscale(0%);
+}
+
+.payment-method-icon.paypal-icon {
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.payment-method-radio:checked + .payment-method-button .paypal-icon {
+  opacity: 1;
+}
+
+/* 支付方式选择器响应式 */
+@media (max-width: 480px) {
+  .payment-methods {
+    flex-direction: column;
+  }
+  
+  .payment-method-option {
+    max-width: none;
+  }
+}
+

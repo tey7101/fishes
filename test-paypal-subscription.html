@@ -264,11 +264,18 @@
                     }
                 } else {
                     resultDiv.className = 'result error';
-                    resultDiv.textContent = '❌ Error: ' + (result.error || result.message);
+                    resultDiv.textContent = '❌ Error Details:\n\n' + 
+                        'Status: ' + response.status + '\n' +
+                        'Error: ' + (result.error || 'Unknown error') + '\n' +
+                        'Message: ' + (result.message || 'No message') + '\n\n' +
+                        'Full Response:\n' + JSON.stringify(result, null, 2);
+                    console.error('API Error:', result);
                 }
             } catch (error) {
                 resultDiv.className = 'result error';
-                resultDiv.textContent = '❌ Error: ' + error.message;
+                resultDiv.textContent = '❌ Error: ' + error.message + '\n\n' +
+                    'Stack: ' + error.stack;
+                console.error('Request Error:', error);
             }
         }
         

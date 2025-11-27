@@ -16,6 +16,7 @@ const createCheckoutHandler = require('../lib/api_handlers/payment/create-checko
 const webhookHandler = require('../lib/api_handlers/payment/webhook.js');
 const paypalCreateSubscriptionHandler = require('../lib/api_handlers/payment/paypal-create-subscription.js');
 const paypalWebhookHandler = require('../lib/api_handlers/payment/paypal-webhook.js');
+const paypalSyncSubscriptionHandler = require('../lib/api_handlers/payment/paypal-sync-subscription.js');
 const manageSubscriptionHandler = require('../lib/api_handlers/payment/manage-subscription.js');
 
 module.exports = async function handler(req, res) {
@@ -34,6 +35,8 @@ module.exports = async function handler(req, res) {
         return await paypalCreateSubscriptionHandler(req, res);
       case 'paypal-webhook':
         return await paypalWebhookHandler(req, res);
+      case 'paypal-sync-subscription':
+        return await paypalSyncSubscriptionHandler(req, res);
       
       // 通用
       case 'manage-subscription':

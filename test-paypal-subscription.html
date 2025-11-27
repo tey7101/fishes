@@ -197,6 +197,24 @@
             <div id="statusResult" class="result" style="display: none;"></div>
         </div>
         
+        <!-- Test 2.5: Sync Subscription (for local dev) -->
+        <div class="section">
+            <h2>2️⃣.5 Sync Subscription (本地开发)</h2>
+            <p style="margin-bottom: 15px; color: #666; font-size: 14px;">
+                本地开发环境PayPal无法访问webhook，授权后需要手动同步订阅状态
+            </p>
+            <div class="test-group">
+                <label>User ID:</label>
+                <input type="text" id="syncUserId" value="test-user-123" placeholder="Enter user ID">
+            </div>
+            <div class="test-group">
+                <label>Subscription ID (从PayPal返回URL中获取):</label>
+                <input type="text" id="syncSubscriptionId" placeholder="例如: I-AKDH1UETNSNA">
+            </div>
+            <button class="info" onclick="syncSubscription()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">🔄 Sync Subscription</button>
+            <div id="syncResult" class="result" style="display: none;"></div>
+        </div>
+        
         <!-- Test 3: Cancel Subscription -->
         <div class="section">
             <h2>3️⃣ Cancel Subscription</h2>
@@ -230,6 +248,27 @@
         // 自动设置webhook URL
         document.getElementById('webhookUrl').textContent = 
             window.location.origin + '/api/payment?action=paypal-webhook';
+        
+        // 从URL参数中提取subscription_id和user_id（如果从PayPal返回）
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const subscriptionId = urlParams.get('subscription_id');
+            const provider = urlParams.get('provider');
+            
+            if (subscriptionId && provider === 'paypal') {
+                // 自动填充同步表单
+                document.getElementById('syncSubscriptionId').value = subscriptionId;
+                
+                // 显示提示
+                const syncSection = document.querySelector('.section h2');
+                if (syncSection && syncSection.textContent.includes('Sync Subscription')) {
+                    const resultDiv = document.getElementById('syncResult');
+                    resultDiv.style.display = 'block';
+                    resultDiv.className = 'result info';
+                    resultDiv.textContent = '✅ 检测到PayPal返回的订阅ID，请点击"Sync Subscription"按钮同步订阅状态';
+                }
+            }
+        });
         
         // 创建订阅
         async function createSubscription() {
@@ -313,6 +352,57 @@
             } catch (error) {
                 resultDiv.className = 'result error';
                 resultDiv.textContent = '❌ Error: ' + error.message;
+            }
+        }
+        
+        // 同步订阅状态（本地开发环境）
+        async function syncSubscription() {
+            const userId = document.getElementById('syncUserId').value;
+            const subscriptionId = document.getElementById('syncSubscriptionId').value;
+            const resultDiv = document.getElementById('syncResult');
+            
+            if (!subscriptionId) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ 请输入Subscription ID';
+                return;
+            }
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = '⏳ 正在同步订阅状态...';
+            
+            try {
+                const response = await fetch('/api/payment?action=paypal-sync-subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, subscriptionId })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = '✅ 订阅同步成功！<br><br>' + 
+                        '<strong>订阅信息:</strong><br>' +
+                        'User ID: ' + result.subscription.userId + '<br>' +
+                        'Plan: ' + result.subscription.plan + '<br>' +
+                        'Provider: ' + result.subscription.provider + '<br>' +
+                        'Subscription ID: ' + result.subscription.subscriptionId + '<br>' +
+                        'Status: ' + (result.subscription.isActive ? 'Active' : 'Inactive') + '<br>' +
+                        'PayPal Status: ' + result.paypalStatus + '<br><br>' +
+                        '👉 现在可以点击"Check Status"查看订阅详情';
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = '❌ 同步失败:\n\n' + 
+                        'Error: ' + (result.error || 'Unknown error') + '\n' +
+                        'Message: ' + (result.message || 'No message') + '\n\n' +
+                        'Full Response:\n' + JSON.stringify(result, null, 2);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ Error: ' + error.message;
+                console.error('Sync Error:', error);
             }
         }
         

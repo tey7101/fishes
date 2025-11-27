@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayPal API 调试工具</title>
+    <style>
+        body {
+            font-family: monospace;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1, h2 {
+            color: #333;
+            border-bottom: 2px solid #0070ba;
+            padding-bottom: 10px;
+        }
+        
+        button {
+            background: #0070ba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #005ea6;
+        }
+        
+        .debug-output {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .error {
+            color: #ff4444;
+        }
+        
+        .success {
+            color: #44ff44;
+        }
+        
+        .info {
+            color: #4444ff;
+        }
+        
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px;
+            width: 200px;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .status.ok {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 PayPal API 调试工具</h1>
+    
+    <!-- 环境检查 -->
+    <div class="container">
+        <h2>1. 环境检查</h2>
+        <button onclick="checkEnvironment()">检查环境配置</button>
+        <button onclick="testConnection()">测试API连接</button>
+        <div id="envStatus" class="status" style="display: none;"></div>
+        <div id="envOutput" class="debug-output" style="display: none;"></div>
+    </div>
+    
+    <!-- 简单API测试 -->
+    <div class="container">
+        <h2>2. 快速API测试</h2>
+        <div>
+            <input type="text" id="testUserId" value="debug-user-001" placeholder="用户ID">
+            <button onclick="quickCreateTest()">创建订阅测试</button>
+        </div>
+        <div id="apiOutput" class="debug-output" style="display: none;"></div>
+    </div>
+    
+    <!-- 手动API调用 -->
+    <div class="container">
+        <h2>3. 手动API调用</h2>
+        <div>
+            <select id="apiAction">
+                <option value="paypal-create-subscription">创建订阅</option>
+                <option value="manage-subscription">管理订阅</option>
+                <option value="paypal-sync-subscription">同步订阅</option>
+            </select>
+            <button onclick="callAPI()">调用API</button>
+            <button onclick="testSyncAPI()">快速测试同步</button>
+        </div>
+        <div>
+            <textarea id="apiPayload" rows="5" cols="80" placeholder="JSON payload (可选)">{
+  "userId": "debug-user-001",
+  "planId": "plus",
+  "billingPeriod": "monthly"
+}</textarea>
+        </div>
+        <div id="manualOutput" class="debug-output" style="display: none;"></div>
+    </div>
+    
+    <!-- 实时日志 -->
+    <div class="container">
+        <h2>4. 实时日志</h2>
+        <button onclick="clearLogs()">清空日志</button>
+        <div id="realTimeLog" class="debug-output">等待操作...</div>
+    </div>
+
+    <script>
+        let logContainer = document.getElementById('realTimeLog');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            logContainer.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        function clearLogs() {
+            logContainer.innerHTML = '日志已清空\n';
+        }
+        
+        // 检查环境配置
+        async function checkEnvironment() {
+            const statusDiv = document.getElementById('envStatus');
+            const outputDiv = document.getElementById('envOutput');
+            
+            statusDiv.style.display = 'block';
+            outputDiv.style.display = 'block';
+            
+            statusDiv.className = 'status warning';
+            statusDiv.textContent = '⏳ 正在检查环境...';
+            
+            log('开始环境检查', 'info');
+            
+            try {
+                // 检查基本连接
+                const response = await fetch('/api/payment', {
+                    method: 'GET'
+                });
+                
+                const result = await response.json();
+                
+                outputDiv.innerHTML = `
+<span class="info">环境检查结果:</span>
+<span class="info">API端点状态: ${response.status}</span>
+<span class="info">响应内容:</span>
+${JSON.stringify(result, null, 2)}
+
+<span class="info">浏览器信息:</span>
+User Agent: ${navigator.userAgent}
+当前URL: ${window.location.href}
+时间: ${new Date().toISOString()}
+                `;
+                
+                if (response.ok) {
+                    statusDiv.className = 'status ok';
+                    statusDiv.textContent = '✅ API端点可访问';
+                    log('API端点检查通过', 'success');
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = '❌ API端点异常';
+                    log('API端点检查失败: ' + response.status, 'error');
+                }
+                
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ 网络连接失败';
+                outputDiv.innerHTML = `<span class="error">错误详情:\n${error.message}\n\n堆栈:\n${error.stack}</span>`;
+                log('环境检查失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 测试API连接
+        async function testConnection() {
+            log('开始API连接测试', 'info');
+            
+            try {
+                const response = await fetch('/api/payment?action=invalid-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ test: true })
+                });
+                
+                const result = await response.json();
+                
+                if (response.status === 400 && result.available) {
+                    log('API路由正常，可用端点: ' + result.available.join(', '), 'success');
+                } else {
+                    log('API响应异常: ' + JSON.stringify(result), 'error');
+                }
+                
+            } catch (error) {
+                log('API连接测试失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 快速创建测试
+        async function quickCreateTest() {
+            const userId = document.getElementById('testUserId').value;
+            const outputDiv = document.getElementById('apiOutput');
+            
+            outputDiv.style.display = 'block';
+            outputDiv.innerHTML = '<span class="info">⏳ 正在测试创建订阅...</span>';
+            
+            log(`开始快速测试，用户ID: ${userId}`, 'info');
+            
+            try {
+                const payload = {
+                    userId: userId,
+                    planId: 'plus',
+                    billingPeriod: 'monthly'
+                };
+                
+                log('发送请求: ' + JSON.stringify(payload), 'info');
+                
+                const response = await fetch('/api/payment?action=paypal-create-subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                outputDiv.innerHTML = `
+<span class="info">请求状态: ${response.status}</span>
+<span class="info">响应头: ${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}</span>
+
+<span class="${response.ok ? 'success' : 'error'}">响应内容:</span>
+${JSON.stringify(result, null, 2)}
+                `;
+                
+                if (response.ok) {
+                    log('订阅创建成功: ' + result.subscriptionId, 'success');
+                    if (result.url) {
+                        outputDiv.innerHTML += `\n\n<span class="success">PayPal链接:</span>\n${result.url}`;
+                    }
+                } else {
+                    log('订阅创建失败: ' + (result.error || result.message), 'error');
+                }
+                
+            } catch (error) {
+                outputDiv.innerHTML = `<span class="error">网络错误:\n${error.message}\n\n堆栈:\n${error.stack}</span>`;
+                log('快速测试失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 手动API调用
+        async function callAPI() {
+            const action = document.getElementById('apiAction').value;
+            const payloadText = document.getElementById('apiPayload').value;
+            const outputDiv = document.getElementById('manualOutput');
+            
+            outputDiv.style.display = 'block';
+            outputDiv.innerHTML = '<span class="info">⏳ 正在调用API...</span>';
+            
+            log(`手动API调用: ${action}`, 'info');
+            
+            try {
+                let payload = {};
+                if (payloadText.trim()) {
+                    payload = JSON.parse(payloadText);
+                }
+                
+                log('请求载荷: ' + JSON.stringify(payload), 'info');
+                
+                const response = await fetch(`/api/payment?action=${action}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                outputDiv.innerHTML = `
+<span class="info">API调用: ${action}</span>
+<span class="info">状态码: ${response.status}</span>
+<span class="info">请求载荷:</span>
+${JSON.stringify(payload, null, 2)}
+
+<span class="${response.ok ? 'success' : 'error'}">响应结果:</span>
+${JSON.stringify(result, null, 2)}
+                `;
+                
+                if (response.ok) {
+                    log(`API调用成功: ${action}`, 'success');
+                } else {
+                    log(`API调用失败: ${action} - ${result.error || result.message}`, 'error');
+                }
+                
+            } catch (error) {
+                outputDiv.innerHTML = `<span class="error">调用失败:\n${error.message}\n\n堆栈:\n${error.stack}</span>`;
+                log('手动API调用失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 快速测试同步API
+        async function testSyncAPI() {
+            const outputDiv = document.getElementById('manualOutput');
+            outputDiv.style.display = 'block';
+            outputDiv.innerHTML = '<span class="info">⏳ 测试同步API...</span>';
+            
+            log('开始测试同步API', 'info');
+            
+            try {
+                // 使用测试数据
+                const testPayload = {
+                    userId: 'test-sync-user',
+                    subscriptionId: 'I-TEST123456789'
+                };
+                
+                log('发送测试同步请求: ' + JSON.stringify(testPayload), 'info');
+                
+                const response = await fetch('/api/payment?action=paypal-sync-subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testPayload)
+                });
+                
+                const result = await response.json();
+                
+                outputDiv.innerHTML = `
+<span class="info">同步API测试结果:</span>
+<span class="info">状态码: ${response.status}</span>
+<span class="info">请求数据:</span>
+${JSON.stringify(testPayload, null, 2)}
+
+<span class="${response.ok ? 'success' : 'error'}">响应结果:</span>
+${JSON.stringify(result, null, 2)}
+
+<span class="info">分析:</span>
+${response.status === 400 && result.error === 'Invalid action' ? 
+  '<span class="error">❌ API端点未注册，需要检查payment-api.js配置</span>' :
+  response.status === 500 && result.error === 'PayPal not configured' ?
+  '<span class="error">❌ PayPal未配置，需要设置.env.local文件</span>' :
+  response.status === 400 && result.error && result.error.includes('subscriptionId') ?
+  '<span class="success">✅ API端点正常，但测试订阅ID无效（这是正常的）</span>' :
+  response.ok ?
+  '<span class="success">✅ 同步API工作正常</span>' :
+  '<span class="error">❓ 未知错误，请检查服务器日志</span>'
+}
+                `;
+                
+                if (response.status === 400 && result.error === 'Invalid action') {
+                    log('同步API端点未注册！', 'error');
+                } else if (response.status >= 400 && response.status < 500) {
+                    log('同步API端点正常，参数验证工作', 'success');
+                } else if (response.ok) {
+                    log('同步API完全正常', 'success');
+                } else {
+                    log('同步API测试异常: ' + result.error, 'error');
+                }
+                
+            } catch (error) {
+                outputDiv.innerHTML = `<span class="error">测试失败:\n${error.message}\n\n堆栈:\n${error.stack}</span>`;
+                log('同步API测试失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 页面加载时自动检查环境
+        window.addEventListener('DOMContentLoaded', () => {
+            log('PayPal调试工具已加载', 'success');
+            log('建议先点击"检查环境配置"按钮', 'info');
+        });
+    </script>
+</body>
+</html>

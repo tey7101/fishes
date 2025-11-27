@@ -958,12 +958,14 @@ class AuthUI {
               email: $email,
               nick_name: $nickName,
               avatar_url: $avatarUrl,
+              user_language: "English",
               is_banned: false
             }
           ) {
             id
             email
             nick_name
+            user_language
           }
         }
       `;

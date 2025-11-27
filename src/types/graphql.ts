@@ -6167,6 +6167,8 @@ export type User_Subscriptions = {
   is_active?: Maybe<Scalars['Boolean']['output']>;
   /** An object relationship */
   member_type: Member_Types;
+  payment_provider?: Maybe<Scalars['String']['output']>;
+  paypal_subscription_id?: Maybe<Scalars['String']['output']>;
   plan: Scalars['String']['output'];
   stripe_customer_id?: Maybe<Scalars['String']['output']>;
   stripe_subscription_id?: Maybe<Scalars['String']['output']>;
@@ -6278,6 +6280,8 @@ export type User_Subscriptions_Bool_Exp = {
   id?: InputMaybe<Int_Comparison_Exp>;
   is_active?: InputMaybe<Boolean_Comparison_Exp>;
   member_type?: InputMaybe<Member_Types_Bool_Exp>;
+  payment_provider?: InputMaybe<String_Comparison_Exp>;
+  paypal_subscription_id?: InputMaybe<String_Comparison_Exp>;
   plan?: InputMaybe<String_Comparison_Exp>;
   stripe_customer_id?: InputMaybe<String_Comparison_Exp>;
   stripe_subscription_id?: InputMaybe<String_Comparison_Exp>;
@@ -6306,6 +6310,8 @@ export type User_Subscriptions_Insert_Input = {
   id?: InputMaybe<Scalars['Int']['input']>;
   is_active?: InputMaybe<Scalars['Boolean']['input']>;
   member_type?: InputMaybe<Member_Types_Obj_Rel_Insert_Input>;
+  payment_provider?: InputMaybe<Scalars['String']['input']>;
+  paypal_subscription_id?: InputMaybe<Scalars['String']['input']>;
   plan?: InputMaybe<Scalars['String']['input']>;
   stripe_customer_id?: InputMaybe<Scalars['String']['input']>;
   stripe_subscription_id?: InputMaybe<Scalars['String']['input']>;
@@ -6321,6 +6327,8 @@ export type User_Subscriptions_Max_Fields = {
   current_period_end?: Maybe<Scalars['timestamp']['output']>;
   current_period_start?: Maybe<Scalars['timestamp']['output']>;
   id?: Maybe<Scalars['Int']['output']>;
+  payment_provider?: Maybe<Scalars['String']['output']>;
+  paypal_subscription_id?: Maybe<Scalars['String']['output']>;
   plan?: Maybe<Scalars['String']['output']>;
   stripe_customer_id?: Maybe<Scalars['String']['output']>;
   stripe_subscription_id?: Maybe<Scalars['String']['output']>;
@@ -6334,6 +6342,8 @@ export type User_Subscriptions_Max_Order_By = {
   current_period_end?: InputMaybe<Order_By>;
   current_period_start?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  payment_provider?: InputMaybe<Order_By>;
+  paypal_subscription_id?: InputMaybe<Order_By>;
   plan?: InputMaybe<Order_By>;
   stripe_customer_id?: InputMaybe<Order_By>;
   stripe_subscription_id?: InputMaybe<Order_By>;
@@ -6348,6 +6358,8 @@ export type User_Subscriptions_Min_Fields = {
   current_period_end?: Maybe<Scalars['timestamp']['output']>;
   current_period_start?: Maybe<Scalars['timestamp']['output']>;
   id?: Maybe<Scalars['Int']['output']>;
+  payment_provider?: Maybe<Scalars['String']['output']>;
+  paypal_subscription_id?: Maybe<Scalars['String']['output']>;
   plan?: Maybe<Scalars['String']['output']>;
   stripe_customer_id?: Maybe<Scalars['String']['output']>;
   stripe_subscription_id?: Maybe<Scalars['String']['output']>;
@@ -6361,6 +6373,8 @@ export type User_Subscriptions_Min_Order_By = {
   current_period_end?: InputMaybe<Order_By>;
   current_period_start?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
+  payment_provider?: InputMaybe<Order_By>;
+  paypal_subscription_id?: InputMaybe<Order_By>;
   plan?: InputMaybe<Order_By>;
   stripe_customer_id?: InputMaybe<Order_By>;
   stripe_subscription_id?: InputMaybe<Order_By>;
@@ -6393,6 +6407,8 @@ export type User_Subscriptions_Order_By = {
   id?: InputMaybe<Order_By>;
   is_active?: InputMaybe<Order_By>;
   member_type?: InputMaybe<Member_Types_Order_By>;
+  payment_provider?: InputMaybe<Order_By>;
+  paypal_subscription_id?: InputMaybe<Order_By>;
   plan?: InputMaybe<Order_By>;
   stripe_customer_id?: InputMaybe<Order_By>;
   stripe_subscription_id?: InputMaybe<Order_By>;
@@ -6420,6 +6436,10 @@ export enum User_Subscriptions_Select_Column {
   Id = 'id',
   /** column name */
   IsActive = 'is_active',
+  /** column name */
+  PaymentProvider = 'payment_provider',
+  /** column name */
+  PaypalSubscriptionId = 'paypal_subscription_id',
   /** column name */
   Plan = 'plan',
   /** column name */
@@ -6456,6 +6476,8 @@ export type User_Subscriptions_Set_Input = {
   current_period_start?: InputMaybe<Scalars['timestamp']['input']>;
   id?: InputMaybe<Scalars['Int']['input']>;
   is_active?: InputMaybe<Scalars['Boolean']['input']>;
+  payment_provider?: InputMaybe<Scalars['String']['input']>;
+  paypal_subscription_id?: InputMaybe<Scalars['String']['input']>;
   plan?: InputMaybe<Scalars['String']['input']>;
   stripe_customer_id?: InputMaybe<Scalars['String']['input']>;
   stripe_subscription_id?: InputMaybe<Scalars['String']['input']>;
@@ -6512,6 +6534,8 @@ export type User_Subscriptions_Stream_Cursor_Value_Input = {
   current_period_start?: InputMaybe<Scalars['timestamp']['input']>;
   id?: InputMaybe<Scalars['Int']['input']>;
   is_active?: InputMaybe<Scalars['Boolean']['input']>;
+  payment_provider?: InputMaybe<Scalars['String']['input']>;
+  paypal_subscription_id?: InputMaybe<Scalars['String']['input']>;
   plan?: InputMaybe<Scalars['String']['input']>;
   stripe_customer_id?: InputMaybe<Scalars['String']['input']>;
   stripe_subscription_id?: InputMaybe<Scalars['String']['input']>;
@@ -6544,6 +6568,10 @@ export enum User_Subscriptions_Update_Column {
   Id = 'id',
   /** column name */
   IsActive = 'is_active',
+  /** column name */
+  PaymentProvider = 'payment_provider',
+  /** column name */
+  PaypalSubscriptionId = 'paypal_subscription_id',
   /** column name */
   Plan = 'plan',
   /** column name */

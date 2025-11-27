@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayPal 支付测试 - 简化版</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .btn {
+            background: #0070ba;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #005ea6;
+        }
+        
+        .btn.cancel {
+            background: #dc3545;
+        }
+        
+        .btn.cancel:hover {
+            background: #c82333;
+        }
+        
+        .btn.check {
+            background: #28a745;
+        }
+        
+        .btn.check:hover {
+            background: #218838;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: monospace;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .result.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .tip {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+        
+        .paypal-link {
+            background: #0070ba;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+        
+        .paypal-link:hover {
+            background: #005ea6;
+            color: white;
+        }
+        
+        .step {
+            background: #e7f3ff;
+            border-left: 4px solid #0070ba;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .step-number {
+            background: #0070ba;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐟 PayPal 支付测试</h1>
+    
+    <!-- 快速测试区域 -->
+    <div class="card">
+        <h2>🚀 快速测试</h2>
+        <div class="tip">
+            <strong>测试流程：</strong> 创建订阅 → PayPal授权 → 同步状态 → 检查结果
+        </div>
+        
+        <div class="form-group">
+            <label>用户ID:</label>
+            <input type="text" id="userId" value="test-user-123" placeholder="输入测试用户ID">
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                💡 提示：如果用户不存在，系统会自动创建测试用户
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>订阅计划:</label>
+            <select id="planId">
+                <option value="plus">Plus - $9.99/月</option>
+                <option value="premium">Premium - $19.99/月</option>
+            </select>
+        </div>
+        
+        <button class="btn" onclick="quickTest()">🎯 开始测试订阅</button>
+        <div id="quickResult" class="result"></div>
+    </div>
+    
+    <!-- 手动同步区域 -->
+    <div class="card">
+        <h2>🔄 手动同步订阅</h2>
+        <div class="tip">
+            如果你已经在PayPal完成了授权，可以在这里手动同步订阅状态
+        </div>
+        
+        <div class="form-group">
+            <label>用户ID:</label>
+            <input type="text" id="syncUserId" value="test-user-123">
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                💡 提示：如果用户不存在，系统会自动创建测试用户
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>订阅ID (从PayPal返回的URL中获取):</label>
+            <input type="text" id="subscriptionId" placeholder="例如: I-AKDH1UETNSNA">
+            <button onclick="pasteFromClipboard()" style="margin-top: 5px; padding: 8px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">📋 从剪贴板粘贴</button>
+        </div>
+        
+        <button class="btn check" onclick="syncSubscription()">🔄 同步订阅状态</button>
+        <div id="syncResult" class="result"></div>
+    </div>
+    
+    <!-- 状态检查区域 -->
+    <div class="card">
+        <h2>📊 检查订阅状态</h2>
+        
+        <div class="form-group">
+            <label>用户ID:</label>
+            <input type="text" id="checkUserId" value="test-user-123">
+        </div>
+        
+        <button class="btn check" onclick="checkStatus()">📊 检查状态</button>
+        <button class="btn cancel" onclick="cancelSubscription()">❌ 取消订阅</button>
+        <div id="statusResult" class="result"></div>
+    </div>
+    
+    <!-- 测试步骤说明 -->
+    <div class="card">
+        <h2>📝 测试步骤</h2>
+        
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>创建订阅：</strong> 点击"开始测试订阅"按钮，系统会创建PayPal订阅并返回授权链接
+        </div>
+        
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>PayPal授权：</strong> 点击返回的PayPal链接，使用测试账号登录并授权
+        </div>
+        
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>同步状态：</strong> 授权完成后，从返回的URL中复制订阅ID，在"手动同步"区域粘贴并同步
+        </div>
+        
+        <div class="step">
+            <span class="step-number">4</span>
+            <strong>验证结果：</strong> 使用"检查状态"功能验证订阅是否成功激活
+        </div>
+        
+        <div class="tip">
+            <strong>PayPal测试账号：</strong><br>
+            • 买家账号：sb-buyer@personal.example.com<br>
+            • 密码：通常是随机生成的，请在PayPal开发者控制台查看<br>
+            • 或者创建新的测试账号：<a href="https://developer.paypal.com/developer/accounts/" target="_blank">PayPal开发者控制台</a>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载时检查URL参数
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const subscriptionId = urlParams.get('subscription_id');
+            
+            if (subscriptionId) {
+                document.getElementById('subscriptionId').value = subscriptionId;
+                showResult('syncResult', 'info', `✅ 检测到订阅ID: ${subscriptionId}\n\n请点击"同步订阅状态"按钮`);
+            }
+        });
+        
+        // 显示结果
+        function showResult(elementId, type, message) {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = message;
+        }
+        
+        // 从剪贴板粘贴
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                const urlMatch = text.match(/subscription_id=([^&]+)/);
+                
+                if (urlMatch) {
+                    document.getElementById('subscriptionId').value = urlMatch[1];
+                    alert('✅ 已粘贴订阅ID: ' + urlMatch[1]);
+                } else if (text.startsWith('I-')) {
+                    document.getElementById('subscriptionId').value = text.trim();
+                    alert('✅ 已粘贴订阅ID: ' + text.trim());
+                } else {
+                    alert('⚠️ 剪贴板内容不包含有效的订阅ID');
+                }
+            } catch (error) {
+                alert('❌ 无法读取剪贴板，请手动输入');
+            }
+        }
+        
+        // 快速测试
+        async function quickTest() {
+            const userId = document.getElementById('userId').value;
+            const planId = document.getElementById('planId').value;
+            
+            if (!userId) {
+                showResult('quickResult', 'error', '请输入用户ID');
+                return;
+            }
+            
+            showResult('quickResult', 'info', '⏳ 正在创建PayPal订阅...');
+            
+            try {
+                const response = await fetch('/api/payment?action=paypal-create-subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, planId, billingPeriod: 'monthly' })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    const message = `✅ 订阅创建成功！\n\n订阅ID: ${result.subscriptionId}\n\n👇 点击下面的链接完成PayPal授权：\n${result.url}`;
+                    showResult('quickResult', 'success', message);
+                    
+                    // 创建可点击的链接
+                    const resultDiv = document.getElementById('quickResult');
+                    resultDiv.innerHTML = `
+                        <div>✅ 订阅创建成功！</div>
+                        <div><strong>订阅ID:</strong> ${result.subscriptionId}</div>
+                        <div style="margin: 15px 0;">
+                            <a href="${result.url}" target="_blank" class="paypal-link">🚀 打开PayPal授权页面</a>
+                        </div>
+                        <div style="font-size: 12px; color: #666;">
+                            授权完成后，请复制返回URL中的subscription_id参数到下方"手动同步"区域
+                        </div>
+                    `;
+                    
+                    // 自动填充同步表单
+                    document.getElementById('syncUserId').value = userId;
+                    
+                } else {
+                    showResult('quickResult', 'error', `❌ 创建失败: ${result.error || result.message}`);
+                }
+            } catch (error) {
+                showResult('quickResult', 'error', `❌ 网络错误: ${error.message}`);
+            }
+        }
+        
+        // 同步订阅
+        async function syncSubscription() {
+            const userId = document.getElementById('syncUserId').value;
+            const subscriptionId = document.getElementById('subscriptionId').value;
+            
+            if (!userId || !subscriptionId) {
+                showResult('syncResult', 'error', '请输入用户ID和订阅ID');
+                return;
+            }
+            
+            showResult('syncResult', 'info', '⏳ 正在同步订阅状态...');
+            
+            try {
+                console.log('🔄 发送同步请求:', { userId, subscriptionId });
+                
+                const response = await fetch('/api/payment?action=paypal-sync-subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, subscriptionId })
+                });
+                
+                const result = await response.json();
+                console.log('📦 同步响应:', result);
+                
+                if (response.ok) {
+                    const message = `✅ 同步成功！\n\n用户: ${result.subscription.userId}\n计划: ${result.subscription.plan}\n状态: ${result.subscription.isActive ? '激活' : '未激活'}\nPayPal状态: ${result.paypalStatus}`;
+                    showResult('syncResult', 'success', message);
+                    
+                    // 自动填充检查表单
+                    document.getElementById('checkUserId').value = userId;
+                } else {
+                    let errorMsg = `❌ 同步失败 (${response.status}): ${result.error || result.message}`;
+                    if (result.available) {
+                        errorMsg += `\n\n可用的API端点: ${result.available.join(', ')}`;
+                    }
+                    if (result.details) {
+                        errorMsg += `\n\n详细信息: ${result.details}`;
+                    }
+                    showResult('syncResult', 'error', errorMsg);
+                }
+            } catch (error) {
+                showResult('syncResult', 'error', `❌ 网络错误: ${error.message}\n\n请检查:\n1. 开发服务器是否运行\n2. .env.local配置是否正确\n3. 浏览器控制台是否有更多错误信息`);
+            }
+        }
+        
+        // 检查状态
+        async function checkStatus() {
+            const userId = document.getElementById('checkUserId').value;
+            
+            if (!userId) {
+                showResult('statusResult', 'error', '请输入用户ID');
+                return;
+            }
+            
+            showResult('statusResult', 'info', '⏳ 正在检查订阅状态...');
+            
+            try {
+                const response = await fetch('/api/payment?action=manage-subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, action: 'status' })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult('statusResult', 'success', `✅ 订阅状态:\n\n${JSON.stringify(result, null, 2)}`);
+                } else {
+                    showResult('statusResult', 'error', `❌ 查询失败: ${result.error || result.message}`);
+                }
+            } catch (error) {
+                showResult('statusResult', 'error', `❌ 网络错误: ${error.message}`);
+            }
+        }
+        
+        // 取消订阅
+        async function cancelSubscription() {
+            const userId = document.getElementById('checkUserId').value;
+            
+            if (!userId) {
+                showResult('statusResult', 'error', '请输入用户ID');
+                return;
+            }
+            
+            if (!confirm('确定要取消订阅吗？')) {
+                return;
+            }
+            
+            showResult('statusResult', 'info', '⏳ 正在取消订阅...');
+            
+            try {
+                const response = await fetch('/api/payment?action=manage-subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, action: 'cancel' })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult('statusResult', 'success', `✅ 取消成功: ${result.message}`);
+                } else {
+                    showResult('statusResult', 'error', `❌ 取消失败: ${result.error || result.message}`);
+                }
+            } catch (error) {
+                showResult('statusResult', 'error', `❌ 网络错误: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>

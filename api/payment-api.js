@@ -50,6 +50,7 @@ module.exports = async function handler(req, res) {
             'webhook',
             'paypal-create-subscription',
             'paypal-webhook',
+            'paypal-sync-subscription',
             'manage-subscription'
           ]
         });

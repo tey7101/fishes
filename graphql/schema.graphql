@@ -7667,6 +7667,8 @@ type user_subscriptions {
 
   """An object relationship"""
   member_type: member_types!
+  payment_provider: String
+  paypal_subscription_id: String
   plan: String!
   stripe_customer_id: String
   stripe_subscription_id: String
@@ -7782,6 +7784,8 @@ input user_subscriptions_bool_exp {
   id: Int_comparison_exp
   is_active: Boolean_comparison_exp
   member_type: member_types_bool_exp
+  payment_provider: String_comparison_exp
+  paypal_subscription_id: String_comparison_exp
   plan: String_comparison_exp
   stripe_customer_id: String_comparison_exp
   stripe_subscription_id: String_comparison_exp
@@ -7818,6 +7822,8 @@ input user_subscriptions_insert_input {
   id: Int
   is_active: Boolean
   member_type: member_types_obj_rel_insert_input
+  payment_provider: String
+  paypal_subscription_id: String
   plan: String
   stripe_customer_id: String
   stripe_subscription_id: String
@@ -7832,6 +7838,8 @@ type user_subscriptions_max_fields {
   current_period_end: timestamp
   current_period_start: timestamp
   id: Int
+  payment_provider: String
+  paypal_subscription_id: String
   plan: String
   stripe_customer_id: String
   stripe_subscription_id: String
@@ -7847,6 +7855,8 @@ input user_subscriptions_max_order_by {
   current_period_end: order_by
   current_period_start: order_by
   id: order_by
+  payment_provider: order_by
+  paypal_subscription_id: order_by
   plan: order_by
   stripe_customer_id: order_by
   stripe_subscription_id: order_by
@@ -7860,6 +7870,8 @@ type user_subscriptions_min_fields {
   current_period_end: timestamp
   current_period_start: timestamp
   id: Int
+  payment_provider: String
+  paypal_subscription_id: String
   plan: String
   stripe_customer_id: String
   stripe_subscription_id: String
@@ -7875,6 +7887,8 @@ input user_subscriptions_min_order_by {
   current_period_end: order_by
   current_period_start: order_by
   id: order_by
+  payment_provider: order_by
+  paypal_subscription_id: order_by
   plan: order_by
   stripe_customer_id: order_by
   stripe_subscription_id: order_by
@@ -7911,6 +7925,8 @@ input user_subscriptions_order_by {
   id: order_by
   is_active: order_by
   member_type: member_types_order_by
+  payment_provider: order_by
+  paypal_subscription_id: order_by
   plan: order_by
   stripe_customer_id: order_by
   stripe_subscription_id: order_by
@@ -7945,6 +7961,12 @@ enum user_subscriptions_select_column {
 
   """column name"""
   is_active
+
+  """column name"""
+  payment_provider
+
+  """column name"""
+  paypal_subscription_id
 
   """column name"""
   plan
@@ -7994,6 +8016,8 @@ input user_subscriptions_set_input {
   current_period_start: timestamp
   id: Int
   is_active: Boolean
+  payment_provider: String
+  paypal_subscription_id: String
   plan: String
   stripe_customer_id: String
   stripe_subscription_id: String
@@ -8056,6 +8080,8 @@ input user_subscriptions_stream_cursor_value_input {
   current_period_start: timestamp
   id: Int
   is_active: Boolean
+  payment_provider: String
+  paypal_subscription_id: String
   plan: String
   stripe_customer_id: String
   stripe_subscription_id: String
@@ -8096,6 +8122,12 @@ enum user_subscriptions_update_column {
 
   """column name"""
   is_active
+
+  """column name"""
+  payment_provider
+
+  """column name"""
+  paypal_subscription_id
 
   """column name"""
   plan

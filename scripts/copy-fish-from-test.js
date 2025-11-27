@@ -90,6 +90,7 @@ async function main() {
               id: $userId,
               email: "${userId}@test.local",
               display_name: "测试用户",
+              user_language: "English",
               is_banned: false
             },
             on_conflict: {

@@ -490,31 +490,31 @@ async function handlePlanButtonClick(planId) {
             }
         } else {
             // Stripe支付流程
-            showLoading('Creating checkout session...');
-            
+        showLoading('Creating checkout session...');
+        
             const response = await fetch('/api/payment?action=create-checkout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    userId: currentUser.id,
-                    planId: planId,
-                    billingPeriod: billingPeriod
-                })
-            });
-            
-            const result = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(result.error || 'Failed to create checkout session');
-            }
-            
-            if (result.url) {
-                // 重定向到Stripe Checkout
-                window.location.href = result.url;
-            } else {
-                throw new Error('No checkout URL returned');
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                userId: currentUser.id,
+                planId: planId,
+                billingPeriod: billingPeriod
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(result.error || 'Failed to create checkout session');
+        }
+        
+        if (result.url) {
+            // 重定向到Stripe Checkout
+            window.location.href = result.url;
+        } else {
+            throw new Error('No checkout URL returned');
             }
         }
     } catch (error) {

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test PayPal Success - Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button {
+            background: #007AFF;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 PayPal Success Debug Tool</h1>
+        <p>测试PayPal支付成功后的订阅同步功能</p>
+        
+        <div class="form-group">
+            <label for="userId">用户ID:</label>
+            <input type="text" id="userId" value="test-user-123" placeholder="输入用户ID">
+        </div>
+        
+        <div class="form-group">
+            <label for="subscriptionId">PayPal订阅ID:</label>
+            <input type="text" id="subscriptionId" placeholder="输入PayPal订阅ID (例如: I-XXXXXXXXX)">
+        </div>
+        
+        <button onclick="testSync()">🔄 测试同步订阅</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testSync() {
+            const userId = document.getElementById('userId').value.trim();
+            const subscriptionId = document.getElementById('subscriptionId').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!userId || !subscriptionId) {
+                showResult('请填写用户ID和订阅ID', 'error');
+                return;
+            }
+            
+            try {
+                showResult('🔄 正在同步订阅...', 'info');
+                
+                console.log('📋 Request data:', {
+                    userId: userId,
+                    subscriptionId: subscriptionId
+                });
+                
+                const response = await fetch('/api/payment?action=paypal-sync-subscription', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        subscriptionId: subscriptionId
+                    })
+                });
+                
+                console.log('📡 Response status:', response.status);
+                const result = await response.json();
+                console.log('📦 Response data:', result);
+                
+                if (response.ok) {
+                    showResult(`✅ 同步成功!\n\n${JSON.stringify(result, null, 2)}`, 'success');
+                } else {
+                    showResult(`❌ 同步失败 (${response.status}):\n\n${JSON.stringify(result, null, 2)}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('❌ 请求失败:', error);
+                showResult(`❌ 请求失败: ${error.message}`, 'error');
+            }
+        }
+        
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = message;
+            resultDiv.className = `result ${type}`;
+        }
+        
+        // 从URL参数自动填充
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const subscriptionId = urlParams.get('subscription_id');
+            const userId = urlParams.get('user_id');
+            
+            if (subscriptionId) {
+                document.getElementById('subscriptionId').value = subscriptionId;
+            }
+            if (userId) {
+                document.getElementById('userId').value = userId;
+            }
+            
+            console.log('🔍 URL Parameters:', Object.fromEntries(urlParams));
+        });
+    </script>
+</body>
+</html>

@@ -403,15 +403,26 @@ function formatValue(value, column) {
 
   if (column.includes('_at') && value) {
     // 显示为北京时间 (UTC+8)
-    // 如果数据库存储的是UTC时间，我们需要正确转换
-    const date = new Date(value);
+    // 数据库存储的是UTC时间，但PostgreSQL返回的时间字符串没有Z后缀
+    // 需要手动添加Z来标记为UTC时间
+    let timeStr = value;
     
-    // 检查时间是否合理（避免显示错误的时间）
+    // 如果时间字符串没有Z后缀且不包含时区信息，添加Z
+    if (typeof timeStr === 'string' && 
+        !timeStr.endsWith('Z') && 
+        !timeStr.includes('+') && 
+        !timeStr.includes(' ')) {
+      timeStr = timeStr + 'Z';
+    }
+    
+    const date = new Date(timeStr);
+    
+    // 检查时间是否合理
     if (isNaN(date.getTime())) {
       return '<span class="null-badge">Invalid Date</span>';
     }
     
-    // 强制转换为北京时间显示
+    // 转换为北京时间显示
     return date.toLocaleString('zh-CN', {
       timeZone: 'Asia/Shanghai',
       year: 'numeric',

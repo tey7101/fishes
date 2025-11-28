@@ -124,6 +124,42 @@ type conversations {
   """过期时间（7天后，不主动检查）"""
   expires_at: timestamptz
 
+  """An array relationship"""
+  group_chats(
+    """distinct select on columns"""
+    distinct_on: [group_chat_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [group_chat_order_by!]
+
+    """filter the rows returned"""
+    where: group_chat_bool_exp
+  ): [group_chat!]!
+
+  """An aggregate relationship"""
+  group_chats_aggregate(
+    """distinct select on columns"""
+    distinct_on: [group_chat_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [group_chat_order_by!]
+
+    """filter the rows returned"""
+    where: group_chat_bool_exp
+  ): group_chat_aggregate!
+
   """主键UUID"""
   id: uuid!
 
@@ -145,6 +181,9 @@ type conversations {
   """最后更新时间"""
   updated_at: timestamptz
 
+  """An object relationship"""
+  user: users
+
   """发起对话的用户ID"""
   user_id: String
 }
@@ -155,6 +194,17 @@ aggregated selection of "conversations"
 type conversations_aggregate {
   aggregate: conversations_aggregate_fields
   nodes: [conversations!]!
+}
+
+input conversations_aggregate_bool_exp {
+  count: conversations_aggregate_bool_exp_count
+}
+
+input conversations_aggregate_bool_exp_count {
+  arguments: [conversations_select_column!]
+  distinct: Boolean
+  filter: conversations_bool_exp
+  predicate: Int_comparison_exp!
 }
 
 """
@@ -174,10 +224,45 @@ type conversations_aggregate_fields {
   variance: conversations_variance_fields
 }
 
+"""
+order by aggregate values of table "conversations"
+"""
+input conversations_aggregate_order_by {
+  avg: conversations_avg_order_by
+  count: order_by
+  max: conversations_max_order_by
+  min: conversations_min_order_by
+  stddev: conversations_stddev_order_by
+  stddev_pop: conversations_stddev_pop_order_by
+  stddev_samp: conversations_stddev_samp_order_by
+  sum: conversations_sum_order_by
+  var_pop: conversations_var_pop_order_by
+  var_samp: conversations_var_samp_order_by
+  variance: conversations_variance_order_by
+}
+
+"""
+input type for inserting array relation for remote table "conversations"
+"""
+input conversations_arr_rel_insert_input {
+  data: [conversations_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: conversations_on_conflict
+}
+
 """aggregate avg on columns"""
 type conversations_avg_fields {
   """消息计数"""
   message_count: Float
+}
+
+"""
+order by avg() on columns of table "conversations"
+"""
+input conversations_avg_order_by {
+  """消息计数"""
+  message_count: order_by
 }
 
 """
@@ -190,6 +275,8 @@ input conversations_bool_exp {
   coze_conversation_id: String_comparison_exp
   created_at: timestamptz_comparison_exp
   expires_at: timestamptz_comparison_exp
+  group_chats: group_chat_bool_exp
+  group_chats_aggregate: group_chat_aggregate_bool_exp
   id: uuid_comparison_exp
   last_message_at: timestamptz_comparison_exp
   message_count: Int_comparison_exp
@@ -197,6 +284,7 @@ input conversations_bool_exp {
   status: String_comparison_exp
   topic: String_comparison_exp
   updated_at: timestamptz_comparison_exp
+  user: users_bool_exp
   user_id: String_comparison_exp
 }
 
@@ -235,6 +323,7 @@ input conversations_insert_input {
 
   """过期时间（7天后，不主动检查）"""
   expires_at: timestamptz
+  group_chats: group_chat_arr_rel_insert_input
 
   """主键UUID"""
   id: uuid
@@ -256,6 +345,7 @@ input conversations_insert_input {
 
   """最后更新时间"""
   updated_at: timestamptz
+  user: users_obj_rel_insert_input
 
   """发起对话的用户ID"""
   user_id: String
@@ -297,6 +387,44 @@ type conversations_max_fields {
   user_id: String
 }
 
+"""
+order by max() on columns of table "conversations"
+"""
+input conversations_max_order_by {
+  """Coze API返回的conversation ID"""
+  coze_conversation_id: order_by
+
+  """创建时间"""
+  created_at: order_by
+
+  """过期时间（7天后，不主动检查）"""
+  expires_at: order_by
+
+  """主键UUID"""
+  id: order_by
+
+  """最后一条消息时间"""
+  last_message_at: order_by
+
+  """消息计数"""
+  message_count: order_by
+
+  """参与对话的鱼ID数组"""
+  participant_fish_ids: order_by
+
+  """状态：active-活跃, expired-已过期"""
+  status: order_by
+
+  """对话主题"""
+  topic: order_by
+
+  """最后更新时间"""
+  updated_at: order_by
+
+  """发起对话的用户ID"""
+  user_id: order_by
+}
+
 """aggregate min on columns"""
 type conversations_min_fields {
   """Coze API返回的conversation ID"""
@@ -334,6 +462,44 @@ type conversations_min_fields {
 }
 
 """
+order by min() on columns of table "conversations"
+"""
+input conversations_min_order_by {
+  """Coze API返回的conversation ID"""
+  coze_conversation_id: order_by
+
+  """创建时间"""
+  created_at: order_by
+
+  """过期时间（7天后，不主动检查）"""
+  expires_at: order_by
+
+  """主键UUID"""
+  id: order_by
+
+  """最后一条消息时间"""
+  last_message_at: order_by
+
+  """消息计数"""
+  message_count: order_by
+
+  """参与对话的鱼ID数组"""
+  participant_fish_ids: order_by
+
+  """状态：active-活跃, expired-已过期"""
+  status: order_by
+
+  """对话主题"""
+  topic: order_by
+
+  """最后更新时间"""
+  updated_at: order_by
+
+  """发起对话的用户ID"""
+  user_id: order_by
+}
+
+"""
 response of any mutation on the table "conversations"
 """
 type conversations_mutation_response {
@@ -342,6 +508,16 @@ type conversations_mutation_response {
 
   """data from the rows affected by the mutation"""
   returning: [conversations!]!
+}
+
+"""
+input type for inserting object relation for remote table "conversations"
+"""
+input conversations_obj_rel_insert_input {
+  data: conversations_insert_input!
+
+  """upsert condition"""
+  on_conflict: conversations_on_conflict
 }
 
 """
@@ -358,6 +534,7 @@ input conversations_order_by {
   coze_conversation_id: order_by
   created_at: order_by
   expires_at: order_by
+  group_chats_aggregate: group_chat_aggregate_order_by
   id: order_by
   last_message_at: order_by
   message_count: order_by
@@ -365,6 +542,7 @@ input conversations_order_by {
   status: order_by
   topic: order_by
   updated_at: order_by
+  user: users_order_by
   user_id: order_by
 }
 
@@ -456,16 +634,40 @@ type conversations_stddev_fields {
   message_count: Float
 }
 
+"""
+order by stddev() on columns of table "conversations"
+"""
+input conversations_stddev_order_by {
+  """消息计数"""
+  message_count: order_by
+}
+
 """aggregate stddev_pop on columns"""
 type conversations_stddev_pop_fields {
   """消息计数"""
   message_count: Float
 }
 
+"""
+order by stddev_pop() on columns of table "conversations"
+"""
+input conversations_stddev_pop_order_by {
+  """消息计数"""
+  message_count: order_by
+}
+
 """aggregate stddev_samp on columns"""
 type conversations_stddev_samp_fields {
   """消息计数"""
   message_count: Float
+}
+
+"""
+order by stddev_samp() on columns of table "conversations"
+"""
+input conversations_stddev_samp_order_by {
+  """消息计数"""
+  message_count: order_by
 }
 
 """
@@ -519,6 +721,14 @@ input conversations_stream_cursor_value_input {
 type conversations_sum_fields {
   """消息计数"""
   message_count: Int
+}
+
+"""
+order by sum() on columns of table "conversations"
+"""
+input conversations_sum_order_by {
+  """消息计数"""
+  message_count: order_by
 }
 
 """
@@ -576,16 +786,40 @@ type conversations_var_pop_fields {
   message_count: Float
 }
 
+"""
+order by var_pop() on columns of table "conversations"
+"""
+input conversations_var_pop_order_by {
+  """消息计数"""
+  message_count: order_by
+}
+
 """aggregate var_samp on columns"""
 type conversations_var_samp_fields {
   """消息计数"""
   message_count: Float
 }
 
+"""
+order by var_samp() on columns of table "conversations"
+"""
+input conversations_var_samp_order_by {
+  """消息计数"""
+  message_count: order_by
+}
+
 """aggregate variance on columns"""
 type conversations_variance_fields {
   """消息计数"""
   message_count: Float
+}
+
+"""
+order by variance() on columns of table "conversations"
+"""
+input conversations_variance_order_by {
+  """消息计数"""
+  message_count: order_by
 }
 
 """ordering argument of a cursor"""
@@ -2456,6 +2690,9 @@ input global_params_updates {
 
 """Stores batch dialogues generated by COZE AI for community chat"""
 type group_chat {
+  """An object relationship"""
+  conversation: conversations
+
   """关联的conversation ID（可选）"""
   conversation_id: uuid
   created_at: timestamp
@@ -2584,6 +2821,7 @@ input group_chat_bool_exp {
   _and: [group_chat_bool_exp!]
   _not: group_chat_bool_exp
   _or: [group_chat_bool_exp!]
+  conversation: conversations_bool_exp
   conversation_id: uuid_comparison_exp
   created_at: timestamp_comparison_exp
   dialogues: jsonb_comparison_exp
@@ -2650,6 +2888,8 @@ input group_chat_inc_input {
 input type for inserting data into table "group_chat"
 """
 input group_chat_insert_input {
+  conversation: conversations_obj_rel_insert_input
+
   """关联的conversation ID（可选）"""
   conversation_id: uuid
   created_at: timestamp
@@ -2815,6 +3055,7 @@ input group_chat_on_conflict {
 
 """Ordering options when selecting data from "group_chat"."""
 input group_chat_order_by {
+  conversation: conversations_order_by
   conversation_id: order_by
   created_at: order_by
   dialogues: order_by
@@ -4334,6 +4575,19 @@ type mutation_root {
   delete_messages_by_pk(id: uuid!): messages
 
   """
+  delete data from the table: "payment"
+  """
+  delete_payment(
+    """filter the rows which have to be deleted"""
+    where: payment_bool_exp!
+  ): payment_mutation_response
+
+  """
+  delete single row from the table: "payment"
+  """
+  delete_payment_by_pk(id: Int!): payment
+
+  """
   delete data from the table: "public_messages_view"
   """
   delete_public_messages_view(
@@ -4606,6 +4860,28 @@ type mutation_root {
     """upsert condition"""
     on_conflict: messages_on_conflict
   ): messages
+
+  """
+  insert data into the table: "payment"
+  """
+  insert_payment(
+    """the rows to be inserted"""
+    objects: [payment_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: payment_on_conflict
+  ): payment_mutation_response
+
+  """
+  insert a single row into the table: "payment"
+  """
+  insert_payment_one(
+    """the row to be inserted"""
+    object: payment_insert_input!
+
+    """upsert condition"""
+    on_conflict: payment_on_conflict
+  ): payment
 
   """
   insert data into the table: "public_messages_view"
@@ -5068,6 +5344,82 @@ type mutation_root {
   ): [messages_mutation_response]
 
   """
+  update data of the table: "payment"
+  """
+  update_payment(
+    """append existing jsonb value of filtered columns with new jsonb value"""
+    _append: payment_append_input
+
+    """
+    delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+    """
+    _delete_at_path: payment_delete_at_path_input
+
+    """
+    delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array
+    """
+    _delete_elem: payment_delete_elem_input
+
+    """
+    delete key/value pair or string element. key/value pairs are matched based on their key value
+    """
+    _delete_key: payment_delete_key_input
+
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: payment_inc_input
+
+    """prepend existing jsonb value of filtered columns with new jsonb value"""
+    _prepend: payment_prepend_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: payment_set_input
+
+    """filter the rows which have to be updated"""
+    where: payment_bool_exp!
+  ): payment_mutation_response
+
+  """
+  update single row of the table: "payment"
+  """
+  update_payment_by_pk(
+    """append existing jsonb value of filtered columns with new jsonb value"""
+    _append: payment_append_input
+
+    """
+    delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+    """
+    _delete_at_path: payment_delete_at_path_input
+
+    """
+    delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array
+    """
+    _delete_elem: payment_delete_elem_input
+
+    """
+    delete key/value pair or string element. key/value pairs are matched based on their key value
+    """
+    _delete_key: payment_delete_key_input
+
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: payment_inc_input
+
+    """prepend existing jsonb value of filtered columns with new jsonb value"""
+    _prepend: payment_prepend_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: payment_set_input
+    pk_columns: payment_pk_columns_input!
+  ): payment
+
+  """
+  update multiples rows of table: "payment"
+  """
+  update_payment_many(
+    """updates to execute, in order"""
+    updates: [payment_updates!]!
+  ): [payment_mutation_response]
+
+  """
   update data of the table: "public_messages_view"
   """
   update_public_messages_view(
@@ -5291,6 +5643,625 @@ enum order_by {
 }
 
 """
+columns and relationships of "payment"
+"""
+type payment {
+  amount: numeric!
+  billing_period: String
+  created_at: timestamp
+  currency: String
+  id: Int!
+  metadata(
+    """JSON select path"""
+    path: String
+  ): jsonb
+  payment_date: timestamp
+  payment_provider: String!
+  plan: String
+  provider_subscription_id: String
+  status: String!
+
+  """An object relationship"""
+  subscription: user_subscriptions
+  subscription_id: Int
+  transaction_id: String
+  updated_at: timestamp
+  user_id: String!
+}
+
+"""
+aggregated selection of "payment"
+"""
+type payment_aggregate {
+  aggregate: payment_aggregate_fields
+  nodes: [payment!]!
+}
+
+input payment_aggregate_bool_exp {
+  count: payment_aggregate_bool_exp_count
+}
+
+input payment_aggregate_bool_exp_count {
+  arguments: [payment_select_column!]
+  distinct: Boolean
+  filter: payment_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "payment"
+"""
+type payment_aggregate_fields {
+  avg: payment_avg_fields
+  count(columns: [payment_select_column!], distinct: Boolean): Int!
+  max: payment_max_fields
+  min: payment_min_fields
+  stddev: payment_stddev_fields
+  stddev_pop: payment_stddev_pop_fields
+  stddev_samp: payment_stddev_samp_fields
+  sum: payment_sum_fields
+  var_pop: payment_var_pop_fields
+  var_samp: payment_var_samp_fields
+  variance: payment_variance_fields
+}
+
+"""
+order by aggregate values of table "payment"
+"""
+input payment_aggregate_order_by {
+  avg: payment_avg_order_by
+  count: order_by
+  max: payment_max_order_by
+  min: payment_min_order_by
+  stddev: payment_stddev_order_by
+  stddev_pop: payment_stddev_pop_order_by
+  stddev_samp: payment_stddev_samp_order_by
+  sum: payment_sum_order_by
+  var_pop: payment_var_pop_order_by
+  var_samp: payment_var_samp_order_by
+  variance: payment_variance_order_by
+}
+
+"""append existing jsonb value of filtered columns with new jsonb value"""
+input payment_append_input {
+  metadata: jsonb
+}
+
+"""
+input type for inserting array relation for remote table "payment"
+"""
+input payment_arr_rel_insert_input {
+  data: [payment_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: payment_on_conflict
+}
+
+"""aggregate avg on columns"""
+type payment_avg_fields {
+  amount: Float
+  id: Float
+  subscription_id: Float
+}
+
+"""
+order by avg() on columns of table "payment"
+"""
+input payment_avg_order_by {
+  amount: order_by
+  id: order_by
+  subscription_id: order_by
+}
+
+"""
+Boolean expression to filter rows from the table "payment". All fields are combined with a logical 'AND'.
+"""
+input payment_bool_exp {
+  _and: [payment_bool_exp!]
+  _not: payment_bool_exp
+  _or: [payment_bool_exp!]
+  amount: numeric_comparison_exp
+  billing_period: String_comparison_exp
+  created_at: timestamp_comparison_exp
+  currency: String_comparison_exp
+  id: Int_comparison_exp
+  metadata: jsonb_comparison_exp
+  payment_date: timestamp_comparison_exp
+  payment_provider: String_comparison_exp
+  plan: String_comparison_exp
+  provider_subscription_id: String_comparison_exp
+  status: String_comparison_exp
+  subscription: user_subscriptions_bool_exp
+  subscription_id: Int_comparison_exp
+  transaction_id: String_comparison_exp
+  updated_at: timestamp_comparison_exp
+  user_id: String_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "payment"
+"""
+enum payment_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  payment_pkey
+}
+
+"""
+delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+"""
+input payment_delete_at_path_input {
+  metadata: [String!]
+}
+
+"""
+delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array
+"""
+input payment_delete_elem_input {
+  metadata: Int
+}
+
+"""
+delete key/value pair or string element. key/value pairs are matched based on their key value
+"""
+input payment_delete_key_input {
+  metadata: String
+}
+
+"""
+input type for incrementing numeric columns in table "payment"
+"""
+input payment_inc_input {
+  amount: numeric
+  id: Int
+  subscription_id: Int
+}
+
+"""
+input type for inserting data into table "payment"
+"""
+input payment_insert_input {
+  amount: numeric
+  billing_period: String
+  created_at: timestamp
+  currency: String
+  id: Int
+  metadata: jsonb
+  payment_date: timestamp
+  payment_provider: String
+  plan: String
+  provider_subscription_id: String
+  status: String
+  subscription: user_subscriptions_obj_rel_insert_input
+  subscription_id: Int
+  transaction_id: String
+  updated_at: timestamp
+  user_id: String
+}
+
+"""aggregate max on columns"""
+type payment_max_fields {
+  amount: numeric
+  billing_period: String
+  created_at: timestamp
+  currency: String
+  id: Int
+  payment_date: timestamp
+  payment_provider: String
+  plan: String
+  provider_subscription_id: String
+  status: String
+  subscription_id: Int
+  transaction_id: String
+  updated_at: timestamp
+  user_id: String
+}
+
+"""
+order by max() on columns of table "payment"
+"""
+input payment_max_order_by {
+  amount: order_by
+  billing_period: order_by
+  created_at: order_by
+  currency: order_by
+  id: order_by
+  payment_date: order_by
+  payment_provider: order_by
+  plan: order_by
+  provider_subscription_id: order_by
+  status: order_by
+  subscription_id: order_by
+  transaction_id: order_by
+  updated_at: order_by
+  user_id: order_by
+}
+
+"""aggregate min on columns"""
+type payment_min_fields {
+  amount: numeric
+  billing_period: String
+  created_at: timestamp
+  currency: String
+  id: Int
+  payment_date: timestamp
+  payment_provider: String
+  plan: String
+  provider_subscription_id: String
+  status: String
+  subscription_id: Int
+  transaction_id: String
+  updated_at: timestamp
+  user_id: String
+}
+
+"""
+order by min() on columns of table "payment"
+"""
+input payment_min_order_by {
+  amount: order_by
+  billing_period: order_by
+  created_at: order_by
+  currency: order_by
+  id: order_by
+  payment_date: order_by
+  payment_provider: order_by
+  plan: order_by
+  provider_subscription_id: order_by
+  status: order_by
+  subscription_id: order_by
+  transaction_id: order_by
+  updated_at: order_by
+  user_id: order_by
+}
+
+"""
+response of any mutation on the table "payment"
+"""
+type payment_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [payment!]!
+}
+
+"""
+on_conflict condition type for table "payment"
+"""
+input payment_on_conflict {
+  constraint: payment_constraint!
+  update_columns: [payment_update_column!]! = []
+  where: payment_bool_exp
+}
+
+"""Ordering options when selecting data from "payment"."""
+input payment_order_by {
+  amount: order_by
+  billing_period: order_by
+  created_at: order_by
+  currency: order_by
+  id: order_by
+  metadata: order_by
+  payment_date: order_by
+  payment_provider: order_by
+  plan: order_by
+  provider_subscription_id: order_by
+  status: order_by
+  subscription: user_subscriptions_order_by
+  subscription_id: order_by
+  transaction_id: order_by
+  updated_at: order_by
+  user_id: order_by
+}
+
+"""primary key columns input for table: payment"""
+input payment_pk_columns_input {
+  id: Int!
+}
+
+"""prepend existing jsonb value of filtered columns with new jsonb value"""
+input payment_prepend_input {
+  metadata: jsonb
+}
+
+"""
+select columns of table "payment"
+"""
+enum payment_select_column {
+  """column name"""
+  amount
+
+  """column name"""
+  billing_period
+
+  """column name"""
+  created_at
+
+  """column name"""
+  currency
+
+  """column name"""
+  id
+
+  """column name"""
+  metadata
+
+  """column name"""
+  payment_date
+
+  """column name"""
+  payment_provider
+
+  """column name"""
+  plan
+
+  """column name"""
+  provider_subscription_id
+
+  """column name"""
+  status
+
+  """column name"""
+  subscription_id
+
+  """column name"""
+  transaction_id
+
+  """column name"""
+  updated_at
+
+  """column name"""
+  user_id
+}
+
+"""
+input type for updating data in table "payment"
+"""
+input payment_set_input {
+  amount: numeric
+  billing_period: String
+  created_at: timestamp
+  currency: String
+  id: Int
+  metadata: jsonb
+  payment_date: timestamp
+  payment_provider: String
+  plan: String
+  provider_subscription_id: String
+  status: String
+  subscription_id: Int
+  transaction_id: String
+  updated_at: timestamp
+  user_id: String
+}
+
+"""aggregate stddev on columns"""
+type payment_stddev_fields {
+  amount: Float
+  id: Float
+  subscription_id: Float
+}
+
+"""
+order by stddev() on columns of table "payment"
+"""
+input payment_stddev_order_by {
+  amount: order_by
+  id: order_by
+  subscription_id: order_by
+}
+
+"""aggregate stddev_pop on columns"""
+type payment_stddev_pop_fields {
+  amount: Float
+  id: Float
+  subscription_id: Float
+}
+
+"""
+order by stddev_pop() on columns of table "payment"
+"""
+input payment_stddev_pop_order_by {
+  amount: order_by
+  id: order_by
+  subscription_id: order_by
+}
+
+"""aggregate stddev_samp on columns"""
+type payment_stddev_samp_fields {
+  amount: Float
+  id: Float
+  subscription_id: Float
+}
+
+"""
+order by stddev_samp() on columns of table "payment"
+"""
+input payment_stddev_samp_order_by {
+  amount: order_by
+  id: order_by
+  subscription_id: order_by
+}
+
+"""
+Streaming cursor of the table "payment"
+"""
+input payment_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: payment_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input payment_stream_cursor_value_input {
+  amount: numeric
+  billing_period: String
+  created_at: timestamp
+  currency: String
+  id: Int
+  metadata: jsonb
+  payment_date: timestamp
+  payment_provider: String
+  plan: String
+  provider_subscription_id: String
+  status: String
+  subscription_id: Int
+  transaction_id: String
+  updated_at: timestamp
+  user_id: String
+}
+
+"""aggregate sum on columns"""
+type payment_sum_fields {
+  amount: numeric
+  id: Int
+  subscription_id: Int
+}
+
+"""
+order by sum() on columns of table "payment"
+"""
+input payment_sum_order_by {
+  amount: order_by
+  id: order_by
+  subscription_id: order_by
+}
+
+"""
+update columns of table "payment"
+"""
+enum payment_update_column {
+  """column name"""
+  amount
+
+  """column name"""
+  billing_period
+
+  """column name"""
+  created_at
+
+  """column name"""
+  currency
+
+  """column name"""
+  id
+
+  """column name"""
+  metadata
+
+  """column name"""
+  payment_date
+
+  """column name"""
+  payment_provider
+
+  """column name"""
+  plan
+
+  """column name"""
+  provider_subscription_id
+
+  """column name"""
+  status
+
+  """column name"""
+  subscription_id
+
+  """column name"""
+  transaction_id
+
+  """column name"""
+  updated_at
+
+  """column name"""
+  user_id
+}
+
+input payment_updates {
+  """append existing jsonb value of filtered columns with new jsonb value"""
+  _append: payment_append_input
+
+  """
+  delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+  """
+  _delete_at_path: payment_delete_at_path_input
+
+  """
+  delete the array element with specified index (negative integers count from the end). throws an error if top level container is not an array
+  """
+  _delete_elem: payment_delete_elem_input
+
+  """
+  delete key/value pair or string element. key/value pairs are matched based on their key value
+  """
+  _delete_key: payment_delete_key_input
+
+  """increments the numeric columns with given value of the filtered values"""
+  _inc: payment_inc_input
+
+  """prepend existing jsonb value of filtered columns with new jsonb value"""
+  _prepend: payment_prepend_input
+
+  """sets the columns of the filtered rows to the given values"""
+  _set: payment_set_input
+
+  """filter the rows which have to be updated"""
+  where: payment_bool_exp!
+}
+
+"""aggregate var_pop on columns"""
+type payment_var_pop_fields {
+  amount: Float
+  id: Float
+  subscription_id: Float
+}
+
+"""
+order by var_pop() on columns of table "payment"
+"""
+input payment_var_pop_order_by {
+  amount: order_by
+  id: order_by
+  subscription_id: order_by
+}
+
+"""aggregate var_samp on columns"""
+type payment_var_samp_fields {
+  amount: Float
+  id: Float
+  subscription_id: Float
+}
+
+"""
+order by var_samp() on columns of table "payment"
+"""
+input payment_var_samp_order_by {
+  amount: order_by
+  id: order_by
+  subscription_id: order_by
+}
+
+"""aggregate variance on columns"""
+type payment_variance_fields {
+  amount: Float
+  id: Float
+  subscription_id: Float
+}
+
+"""
+order by variance() on columns of table "payment"
+"""
+input payment_variance_order_by {
+  amount: order_by
+  id: order_by
+  subscription_id: order_by
+}
+
+"""
 columns and relationships of "public_messages_view"
 """
 type public_messages_view {
@@ -5474,9 +6445,7 @@ input public_messages_view_updates {
 }
 
 type query_root {
-  """
-  fetch data from the table: "conversations"
-  """
+  """An array relationship"""
   conversations(
     """distinct select on columns"""
     distinct_on: [conversations_select_column!]
@@ -5494,9 +6463,7 @@ type query_root {
     where: conversations_bool_exp
   ): [conversations!]!
 
-  """
-  fetch aggregated fields from the table: "conversations"
-  """
+  """An aggregate relationship"""
   conversations_aggregate(
     """distinct select on columns"""
     distinct_on: [conversations_select_column!]
@@ -5855,6 +6822,49 @@ type query_root {
 
   """fetch data from the table: "messages" using primary key columns"""
   messages_by_pk(id: uuid!): messages
+
+  """
+  fetch data from the table: "payment"
+  """
+  payment(
+    """distinct select on columns"""
+    distinct_on: [payment_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [payment_order_by!]
+
+    """filter the rows returned"""
+    where: payment_bool_exp
+  ): [payment!]!
+
+  """
+  fetch aggregated fields from the table: "payment"
+  """
+  payment_aggregate(
+    """distinct select on columns"""
+    distinct_on: [payment_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [payment_order_by!]
+
+    """filter the rows returned"""
+    where: payment_bool_exp
+  ): payment_aggregate!
+
+  """fetch data from the table: "payment" using primary key columns"""
+  payment_by_pk(id: Int!): payment
 
   """
   fetch data from the table: "public_messages_view"
@@ -6731,9 +7741,7 @@ input reports_updates {
 }
 
 type subscription_root {
-  """
-  fetch data from the table: "conversations"
-  """
+  """An array relationship"""
   conversations(
     """distinct select on columns"""
     distinct_on: [conversations_select_column!]
@@ -6751,9 +7759,7 @@ type subscription_root {
     where: conversations_bool_exp
   ): [conversations!]!
 
-  """
-  fetch aggregated fields from the table: "conversations"
-  """
+  """An aggregate relationship"""
   conversations_aggregate(
     """distinct select on columns"""
     distinct_on: [conversations_select_column!]
@@ -7240,6 +8246,63 @@ type subscription_root {
   ): [messages!]!
 
   """
+  fetch data from the table: "payment"
+  """
+  payment(
+    """distinct select on columns"""
+    distinct_on: [payment_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [payment_order_by!]
+
+    """filter the rows returned"""
+    where: payment_bool_exp
+  ): [payment!]!
+
+  """
+  fetch aggregated fields from the table: "payment"
+  """
+  payment_aggregate(
+    """distinct select on columns"""
+    distinct_on: [payment_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [payment_order_by!]
+
+    """filter the rows returned"""
+    where: payment_bool_exp
+  ): payment_aggregate!
+
+  """fetch data from the table: "payment" using primary key columns"""
+  payment_by_pk(id: Int!): payment
+
+  """
+  fetch data from the table in a streaming manner: "payment"
+  """
+  payment_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [payment_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: payment_bool_exp
+  ): [payment!]!
+
+  """
   fetch data from the table: "public_messages_view"
   """
   public_messages_view(
@@ -7668,6 +8731,42 @@ type user_subscriptions {
   """An object relationship"""
   member_type: member_types!
   payment_provider: String
+
+  """An array relationship"""
+  payments(
+    """distinct select on columns"""
+    distinct_on: [payment_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [payment_order_by!]
+
+    """filter the rows returned"""
+    where: payment_bool_exp
+  ): [payment!]!
+
+  """An aggregate relationship"""
+  payments_aggregate(
+    """distinct select on columns"""
+    distinct_on: [payment_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [payment_order_by!]
+
+    """filter the rows returned"""
+    where: payment_bool_exp
+  ): payment_aggregate!
   paypal_subscription_id: String
   plan: String!
   stripe_customer_id: String
@@ -7785,6 +8884,8 @@ input user_subscriptions_bool_exp {
   is_active: Boolean_comparison_exp
   member_type: member_types_bool_exp
   payment_provider: String_comparison_exp
+  payments: payment_bool_exp
+  payments_aggregate: payment_aggregate_bool_exp
   paypal_subscription_id: String_comparison_exp
   plan: String_comparison_exp
   stripe_customer_id: String_comparison_exp
@@ -7823,6 +8924,7 @@ input user_subscriptions_insert_input {
   is_active: Boolean
   member_type: member_types_obj_rel_insert_input
   payment_provider: String
+  payments: payment_arr_rel_insert_input
   paypal_subscription_id: String
   plan: String
   stripe_customer_id: String
@@ -7908,6 +9010,16 @@ type user_subscriptions_mutation_response {
 }
 
 """
+input type for inserting object relation for remote table "user_subscriptions"
+"""
+input user_subscriptions_obj_rel_insert_input {
+  data: user_subscriptions_insert_input!
+
+  """upsert condition"""
+  on_conflict: user_subscriptions_on_conflict
+}
+
+"""
 on_conflict condition type for table "user_subscriptions"
 """
 input user_subscriptions_on_conflict {
@@ -7926,6 +9038,7 @@ input user_subscriptions_order_by {
   is_active: order_by
   member_type: member_types_order_by
   payment_provider: order_by
+  payments_aggregate: payment_aggregate_order_by
   paypal_subscription_id: order_by
   plan: order_by
   stripe_customer_id: order_by
@@ -8385,6 +9498,42 @@ type users {
   avatar_url: String
   ban_reason: String
   banned_until: timestamp
+
+  """An array relationship"""
+  conversations(
+    """distinct select on columns"""
+    distinct_on: [conversations_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [conversations_order_by!]
+
+    """filter the rows returned"""
+    where: conversations_bool_exp
+  ): [conversations!]!
+
+  """An aggregate relationship"""
+  conversations_aggregate(
+    """distinct select on columns"""
+    distinct_on: [conversations_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [conversations_order_by!]
+
+    """filter the rows returned"""
+    where: conversations_bool_exp
+  ): conversations_aggregate!
   created_at: timestamp
   email: String!
   fish_talk: Boolean
@@ -8698,6 +9847,8 @@ input users_bool_exp {
   avatar_url: String_comparison_exp
   ban_reason: String_comparison_exp
   banned_until: timestamp_comparison_exp
+  conversations: conversations_bool_exp
+  conversations_aggregate: conversations_aggregate_bool_exp
   created_at: timestamp_comparison_exp
   email: String_comparison_exp
   fish_talk: Boolean_comparison_exp
@@ -8758,6 +9909,7 @@ input users_insert_input {
   avatar_url: String
   ban_reason: String
   banned_until: timestamp
+  conversations: conversations_arr_rel_insert_input
   created_at: timestamp
   email: String
   fish_talk: Boolean
@@ -8863,6 +10015,7 @@ input users_order_by {
   avatar_url: order_by
   ban_reason: order_by
   banned_until: order_by
+  conversations_aggregate: conversations_aggregate_order_by
   created_at: order_by
   email: order_by
   fish_talk: order_by

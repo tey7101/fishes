@@ -348,9 +348,10 @@
 }
 
 .plan-button.upgrade {
-  background: linear-gradient(180deg, #FFB340 0%, #FF9500 50%, #E6850E 100%);
-  color: white;
-  border-bottom: 3px solid #CC6E00;
+  background: linear-gradient(180deg, #FFD700 0%, #FFA500 50%, #E6850E 100%);
+  color: #5D4E00;
+  border-bottom: 3px solid #BFA000;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .plan-button.upgrade.premium {
@@ -358,6 +359,36 @@
   color: #5D4E00;
   border-bottom: 3px solid #BFA000;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.plan-button.upgrade.plus {
+  background: linear-gradient(180deg, #FFD700 0%, #FFA500 50%, #E6850E 100%);
+  color: #5D4E00;
+  border-bottom: 3px solid #BFA000;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.plan-button.loading {
+  opacity: 0.8;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* ===== 功能对比表格 ===== */
@@ -568,6 +599,28 @@
   background: rgba(255, 255, 255, 0.6);
   border-radius: 16px;
   border: 2px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 1;
+}
+
+/* 确保每个计划的支付选择器独立 */
+.plan-card .payment-method-selector {
+  position: relative;
+  z-index: auto;
+  overflow: visible;
+}
+
+/* 防止支付选择器交叠 */
+.plan-card:nth-child(1) .payment-method-selector {
+  z-index: 3;
+}
+
+.plan-card:nth-child(2) .payment-method-selector {
+  z-index: 2;
+}
+
+.plan-card:nth-child(3) .payment-method-selector {
+  z-index: 1;
 }
 
 .payment-method-label {
@@ -581,13 +634,16 @@
 
 .payment-methods {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   justify-content: center;
+  flex-wrap: nowrap;
+  align-items: center;
 }
 
 .payment-method-option {
-  flex: 1;
-  max-width: 150px;
+  flex: 0 1 auto;
+  min-width: 90px;
+  max-width: 110px;
   position: relative;
 }
 
@@ -601,17 +657,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 4px;
   width: 100%;
-  padding: 12px 16px;
-  border: 3px solid #ddd;
-  border-radius: 12px;
+  padding: 8px 10px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
   background: white;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: #666;
+  white-space: nowrap;
 }
 
 .payment-method-button:hover {
@@ -628,8 +685,8 @@
 }
 
 .payment-method-icon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
 }
 
@@ -651,14 +708,47 @@
   opacity: 1;
 }
 
+/* Stripe支付选项暂时不可用的样式 */
+label[for*="stripe"].payment-method-button {
+  position: relative;
+  opacity: 0.7;
+}
+
+label[for*="stripe"].payment-method-button:after {
+  content: "Coming Soon";
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #FF9500;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 8px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
 /* 支付方式选择器响应式 */
 @media (max-width: 480px) {
   .payment-methods {
-    flex-direction: column;
+    gap: 6px;
   }
   
   .payment-method-option {
-    max-width: none;
+    min-width: 90px;
+    max-width: 120px;
+  }
+  
+  .payment-method-button {
+    padding: 6px 8px;
+    font-size: 11px;
+    gap: 3px;
+  }
+  
+  .payment-method-icon {
+    width: 18px;
+    height: 18px;
   }
 }
 

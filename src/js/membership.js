@@ -29,6 +29,13 @@ async function initMembershipPage() {
         // 渲染套餐卡片
         renderPlanCards();
         
+        // 🔧 检测是否从支付成功页面跳转来的
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('upgraded') === 'true' && currentUser) {
+            console.log('🔄 检测到刚完成升级，启动智能重载...');
+            await smartReloadMembership();
+        }
+        
         // 🔧 添加认证状态监听
         if (window.supabaseAuth && window.supabaseAuth.onAuthStateChange) {
             window.supabaseAuth.onAuthStateChange(async (event, session) => {
@@ -56,9 +63,15 @@ async function initMembershipPage() {
 
 // 加载当前会员信息
 async function loadCurrentMembership() {
-    if (!currentUser) return;
+    if (!currentUser) {
+        console.log('⚠️ No current user, setting plan to free');
+        currentPlan = 'free';
+        return;
+    }
     
     try {
+        console.log(`🔍 Loading membership for user: ${currentUser.id}`);
+        
         const query = `
             query GetUserMembership($userId: String!) {
                 users_by_pk(id: $userId) {
@@ -68,6 +81,8 @@ async function loadCurrentMembership() {
                         limit: 1
                     ) {
                         plan
+                        is_active
+                        id
                     }
                 }
             }
@@ -89,20 +104,169 @@ async function loadCurrentMembership() {
         }
         
         const result = await response.json();
+        
+        console.log('📦 GraphQL response:', JSON.stringify(result, null, 2));
+        
         if (result.errors) {
+            console.error('❌ GraphQL errors:', result.errors);
             throw new Error(result.errors[0].message);
         }
         
         if (result.data?.users_by_pk?.user_subscriptions?.[0]) {
-            currentPlan = result.data.users_by_pk.user_subscriptions[0].plan;
-            console.log('✅ Current plan loaded from database:', currentPlan);
+            const subscription = result.data.users_by_pk.user_subscriptions[0];
+            currentPlan = subscription.plan;
+            console.log(`✅ Current plan loaded from database: "${currentPlan}" (subscription ID: ${subscription.id}, active: ${subscription.is_active})`);
+            
+            // 验证 plan 值
+            if (!['free', 'plus', 'premium', 'admin'].includes(currentPlan)) {
+                console.error(`⚠️ Unexpected plan value: "${currentPlan}"`);
+            }
         } else {
             console.log('⚠️ No active subscription found, defaulting to free plan');
+            console.log('   Response data:', result.data);
             currentPlan = 'free';
         }
     } catch (error) {
         console.error('❌ Failed to load current membership:', error);
+        console.error('   Error details:', error.message);
+        // 失败时保持 free 计划
+        currentPlan = 'free';
     }
+}
+
+// 智能重载会员信息（用于刚完成支付后）
+async function smartReloadMembership() {
+    const initialPlan = currentPlan;
+    console.log(`🔄 初始套餐: "${initialPlan}"`);
+    
+    let attempts = 0;
+    const maxAttempts = 10; // 最多尝试 10 次
+    const intervalMs = 2000; // 每次间隔 2 秒
+    
+    while (attempts < maxAttempts) {
+        attempts++;
+        console.log(`🔄 尝试 ${attempts}/${maxAttempts} - 重新查询订阅状态...`);
+        
+        // 等待一段时间再查询
+        if (attempts > 1) {
+            await new Promise(resolve => setTimeout(resolve, intervalMs));
+        }
+        
+        // 重新加载会员信息
+        const previousPlan = currentPlan;
+        await loadCurrentMembership();
+        
+        // 检查是否有变化
+        if (currentPlan !== previousPlan) {
+            console.log(`✅ 检测到套餐变化: "${previousPlan}" → "${currentPlan}"`);
+            // 重新渲染页面
+            renderPlanCards();
+            
+            // 移除 URL 参数
+            const url = new URL(window.location);
+            url.searchParams.delete('upgraded');
+            window.history.replaceState({}, '', url);
+            
+            // 显示成功提示
+            showUpgradeSuccess(currentPlan);
+            break;
+        }
+        
+        // 如果已经不是 free，说明已成功
+        if (currentPlan !== 'free' && currentPlan !== initialPlan) {
+            console.log(`✅ 套餐已更新为: "${currentPlan}"`);
+            renderPlanCards();
+            
+            // 移除 URL 参数
+            const url = new URL(window.location);
+            url.searchParams.delete('upgraded');
+            window.history.replaceState({}, '', url);
+            
+            showUpgradeSuccess(currentPlan);
+            break;
+        }
+    }
+    
+    if (attempts >= maxAttempts && currentPlan === initialPlan) {
+        console.log('⚠️ 达到最大重试次数，订阅状态未更新');
+        console.log('   建议用户手动刷新页面或稍后查看');
+        
+        // 移除 URL 参数
+        const url = new URL(window.location);
+        url.searchParams.delete('upgraded');
+        window.history.replaceState({}, '', url);
+    }
+}
+
+// 显示升级成功提示
+function showUpgradeSuccess(plan) {
+    // 创建提示元素
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #4CD964 0%, #5DE87A 100%);
+        color: white;
+        padding: 20px 30px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(76, 217, 100, 0.3);
+        z-index: 10000;
+        font-size: 16px;
+        font-weight: 600;
+        animation: slideIn 0.5s ease-out;
+    `;
+    
+    const planName = plan.charAt(0).toUpperCase() + plan.slice(1);
+    toast.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 24px;">🎉</span>
+            <div>
+                <div>升级成功！</div>
+                <div style="font-size: 14px; opacity: 0.9; margin-top: 5px;">
+                    您现在是 ${planName} 会员
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 添加动画
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(toast);
+    
+    // 3 秒后自动消失
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.5s ease-out';
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 500);
+    }, 3000);
 }
 
 // 加载会员类型数据
@@ -259,12 +423,16 @@ function renderPlanCards() {
         return;
     }
     
+    console.log(`🎨 Rendering plan cards... currentUser: ${currentUser?.id || 'none'}, currentPlan: "${currentPlan}"`);
+    
     container.innerHTML = '';
     
     memberTypes.forEach(plan => {
         const card = createPlanCard(plan);
         container.appendChild(card);
     });
+    
+    console.log(`✅ Rendered ${memberTypes.length} plan cards`);
 }
 
 // 创建套餐卡片
@@ -277,7 +445,7 @@ function createPlanCard(plan) {
     const needsPayment = plan.id !== 'free';
     
     // 🔍 调试日志：检查当前计划状态
-    console.log(`🔍 Plan ${plan.id}: currentPlan=${currentPlan}, isCurrentPlan=${isCurrentPlan}, isUpgrade=${isUpgrade}`);
+    console.log(`🔍 创建卡片 "${plan.id}": currentUser=${!!currentUser}, currentPlan="${currentPlan}", isCurrentPlan=${isCurrentPlan}, isUpgrade=${isUpgrade}`);
     
     // 获取会员等级对应的钻石图标
     const iconData = typeof getMembershipIcon === 'function' ? getMembershipIcon(plan.id) : null;
@@ -369,10 +537,10 @@ function createPlanCard(plan) {
         ` : ''}
         
         <button 
-            class="plan-button ${isCurrentPlan ? 'current' : isUpgrade ? 'upgrade ' + plan.id : ''}" 
+            class="plan-button ${isCurrentPlan ? 'current' : (needsPayment ? 'upgrade ' + plan.id : '')}" 
             data-plan-id="${plan.id}"
             data-billing-period="monthly"
-            data-payment-method="stripe"
+            data-payment-method="${needsPayment ? 'paypal' : 'none'}"
             ${isCurrentPlan ? 'disabled' : ''}
             onclick="handlePlanButtonClick('${plan.id}')"
         >

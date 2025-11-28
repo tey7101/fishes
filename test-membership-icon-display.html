@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试会员图标显示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .icon-display {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        #console-output {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>会员图标显示测试</h1>
+    
+    <div class="test-section">
+        <h2>1. 输入用户ID测试</h2>
+        <input type="text" id="userId" placeholder="输入用户ID" style="width: 300px; padding: 5px;">
+        <button onclick="testUserTier()">查询会员等级</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 图标显示测试</h2>
+        <div>
+            <button onclick="showIcon('free')">显示 Free 图标</button>
+            <button onclick="showIcon('plus')">显示 Plus 图标</button>
+            <button onclick="showIcon('premium')">显示 Premium 图标</button>
+        </div>
+        <div id="icon-container" class="icon-display"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 控制台输出</h2>
+        <button onclick="clearConsole()">清除日志</button>
+        <div id="console-output"></div>
+    </div>
+
+    <script src="src/js/membership-icons.js"></script>
+    <script>
+        // 拦截 console.log
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        const consoleOutput = document.getElementById('console-output');
+        
+        function addToConsole(type, ...args) {
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            
+            const timestamp = new Date().toLocaleTimeString();
+            consoleOutput.textContent += `[${timestamp}] ${type}: ${message}\n`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        console.log = (...args) => {
+            originalLog(...args);
+            addToConsole('LOG', ...args);
+        };
+        
+        console.error = (...args) => {
+            originalError(...args);
+            addToConsole('ERROR', ...args);
+        };
+        
+        console.warn = (...args) => {
+            originalWarn(...args);
+            addToConsole('WARN', ...args);
+        };
+        
+        async function testUserTier() {
+            const userId = document.getElementById('userId').value.trim();
+            if (!userId) {
+                alert('请输入用户ID');
+                return;
+            }
+            
+            console.log('开始测试用户:', userId);
+            const tier = await getUserMembershipTier(userId);
+            console.log('测试结果 - 会员等级:', tier);
+            
+            // 显示图标
+            showIcon(tier);
+        }
+        
+        function showIcon(tier) {
+            const container = document.getElementById('icon-container');
+            container.innerHTML = '';
+            
+            console.log('显示图标:', tier);
+            
+            if (typeof createMembershipIcon === 'function') {
+                const icon = createMembershipIcon(tier);
+                container.appendChild(icon);
+                
+                const label = document.createElement('span');
+                label.textContent = `${tier} 会员`;
+                label.style.fontSize = '24px';
+                label.style.fontWeight = 'bold';
+                container.appendChild(label);
+            } else {
+                container.textContent = 'createMembershipIcon 函数未加载';
+            }
+        }
+        
+        function clearConsole() {
+            consoleOutput.textContent = '';
+        }
+        
+        console.log('测试页面已加载');
+        console.log('请输入用户ID进行测试');
+    </script>
+</body>
+</html>
+

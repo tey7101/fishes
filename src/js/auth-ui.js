@@ -1051,6 +1051,11 @@ class AuthUI {
    */
   showLoginButton() {
     if (this.loginBtn) {
+      // 🔧 修复：确保按钮内容始终正确显示
+      this.loginBtn.innerHTML = `
+        <span>👤</span>
+        <span>Sign In</span>
+      `;
       this.loginBtn.style.display = 'flex';
       // 移除隐藏类
       this.loginBtn.classList.remove('auth-hidden');

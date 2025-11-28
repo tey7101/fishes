@@ -205,7 +205,7 @@
             
             <div class="action-buttons">
                 <a href="index.html" class="btn btn-primary">Start Creating Fish 🐟</a>
-                <a href="profile.html" class="btn btn-secondary">View Profile</a>
+                <a href="membership.html?upgraded=true" class="btn btn-secondary">View Membership</a>
             </div>
         </div>
     </main>
@@ -327,6 +327,27 @@
                 planName.textContent = result.subscription.plan.charAt(0).toUpperCase() + result.subscription.plan.slice(1);
                 subscriptionDetails.style.display = 'block';
             }
+            
+            // 3 秒后自动跳转到会员页面（给 webhook 一点处理时间）
+            let countdown = 3;
+            syncStatus.innerHTML += `
+                <div style="margin-top: 15px; color: #666; font-size: 14px;">
+                    <span id="redirect-countdown">${countdown}</span> seconds...
+                </div>
+            `;
+            
+            const countdownTimer = setInterval(() => {
+                countdown--;
+                const countdownEl = document.getElementById('redirect-countdown');
+                if (countdownEl) {
+                    countdownEl.textContent = countdown;
+                }
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownTimer);
+                    window.location.href = 'membership.html?upgraded=true';
+                }
+            }, 1000);
         }
         
         // 显示错误状态

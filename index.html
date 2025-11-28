@@ -159,11 +159,11 @@
         <span>🧪</span>
         <span>Test</span>
       </a>
-      <!-- 登录按钮和用户菜单将由 auth-ui.js 动态插入 -->
+      <!-- 登录按钮和用户菜单将�?auth-ui.js 动态插�?-->
     </div>
   </nav>
 
-  <!-- 侧边栏菜单 -->
+  <!-- 侧边栏菜�?-->
   <div id="sidebar-menu" class="sidebar-menu">
     <div class="sidebar-header">
       <h3>🐟 Menu</h3>
@@ -179,7 +179,7 @@
         <span>Global Tank</span>
       </a>
       <a href="tank.html?view=my" class="sidebar-link">
-        <span class="sidebar-icon">⭐</span>
+        <span class="sidebar-icon">�?/span>
         <span>My Tank</span>
       </a>
       <a href="rank.html" class="sidebar-link">
@@ -201,7 +201,7 @@
     </nav>
   </div>
   
-  <!-- 侧边栏遮罩 -->
+  <!-- 侧边栏遮�?-->
   <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
   <!-- Coming Soon Banner - Removed (feature now live) -->
@@ -242,7 +242,7 @@
           <div id="drawing-particles"></div>
         </div>
         
-        <!-- ONNX 模型加载进度条 -->
+        <!-- ONNX 模型加载进度�?-->
         <div id="onnx-loading-progress" style="display: none; max-width: 600px; margin: 8px auto; padding: 8px 16px; background: rgba(0, 0, 0, 0.7); border-radius: 6px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
             <span style="color: white; font-size: 12px; font-weight: 500;">AI loading</span>
@@ -268,7 +268,7 @@
             <span>🐠</span> <span>Global Tank</span>
           </a>
           <a href="rank.html" class="game-btn game-btn-blue" title="Vote on fish drawings">
-            <span>⭐</span> <span>Rank</span>
+            <span>�?/span> <span>Rank</span>
           </a>
           <a href="tank.html?view=my" id="my-tanks-link" class="game-btn game-btn-blue" title="Create custom fish tanks">
             <span>🏆</span> <span>My Tank</span>
@@ -328,7 +328,7 @@
           script.src = src;
           script.onload = () => {
             loaded = true;
-            console.log('✅ ONNX Runtime loaded from:', src);
+            console.log('�?ONNX Runtime loaded from:', src);
             resolve();
           };
           script.onerror = () => {
@@ -347,7 +347,7 @@
           } catch (error) {
             currentIndex++;
             if (currentIndex >= onnxSources.length) {
-              console.error('❌ All ONNX CDN sources failed. Please check your network connection.');
+              console.error('�?All ONNX CDN sources failed. Please check your network connection.');
             }
           }
         }
@@ -376,7 +376,7 @@
           script.src = src;
           script.onload = () => {
             loaded = true;
-            console.log('✅ Supabase SDK loaded from:', src);
+            console.log('�?Supabase SDK loaded from:', src);
             resolve();
           };
           script.onerror = () => {
@@ -395,7 +395,7 @@
           } catch (error) {
             currentIndex++;
             if (currentIndex >= cdnSources.length) {
-              console.error('❌ All Supabase CDN sources failed. Please check your network connection.');
+              console.error('�?All Supabase CDN sources failed. Please check your network connection.');
               console.error('💡 You may need to:');
               console.error('   1. Check your internet connection');
               console.error('   2. Disable browser tracking prevention');
@@ -416,7 +416,7 @@
   <script src="src/js/fishtank-favorites.js"></script>
   <script src="src/js/social-config.js?v=2.1"></script>
   <script src="src/js/social-share.js?v=2.1"></script>
-  <script src="src/js/membership-icons.js?v=1.0"></script>
+  <script src="src/js/membership-icons.js?v=2.0"></script>
   <script src="src/js/auth-ui.js?v=2.5"></script>
   <script src="src/js/fish-info-modal.js?v=1.0"></script>
   <script src="src/js/hamburger-menu.js?v=1.0"></script>

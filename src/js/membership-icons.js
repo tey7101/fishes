@@ -209,7 +209,12 @@ function createMembershipIcon(tier) {
  * @returns {Promise<string>} 会员等级
  */
 async function getUserMembershipTier(userId) {
-    if (!userId) return 'free';
+    if (!userId) {
+        console.log('⚠️ getUserMembershipTier: 没有提供用户ID，返回 free');
+        return 'free';
+    }
+    
+    console.log(`🔍 getUserMembershipTier: 查询用户 ${userId} 的会员等级...`);
     
     // 使用API代理而不是直接访问Hasura，避免CORS问题
     const query = `
@@ -224,6 +229,7 @@ async function getUserMembershipTier(userId) {
             ) {
                 plan
                 is_active
+                id
             }
         }
     `;
@@ -242,25 +248,32 @@ async function getUserMembershipTier(userId) {
         });
 
         if (!response.ok) {
+            console.error(`❌ getUserMembershipTier: HTTP ${response.status}: ${response.statusText}`);
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
 
         const result = await response.json();
         
+        console.log('📦 getUserMembershipTier: GraphQL 响应:', JSON.stringify(result, null, 2));
+        
         if (result.errors) {
-            console.error('GraphQL errors:', result.errors);
+            console.error('❌ getUserMembershipTier: GraphQL错误:', result.errors);
             return 'free';
         }
 
         const subscriptions = result.data?.user_subscriptions;
         
         if (!subscriptions || subscriptions.length === 0) {
+            console.log(`⚠️ getUserMembershipTier: 用户 ${userId} 没有活跃订阅，返回 free`);
             return 'free';
         }
 
-        return (subscriptions[0].plan || 'free').toLowerCase();
+        const tier = (subscriptions[0].plan || 'free').toLowerCase();
+        console.log(`✅ getUserMembershipTier: 用户 ${userId} 的会员等级是 "${tier}" (订阅ID: ${subscriptions[0].id})`);
+        
+        return tier;
     } catch (error) {
-        console.error('查询会员等级失败:', error);
+        console.error('❌ getUserMembershipTier: 查询会员等级失败:', error);
         return 'free';
     }
 }

@@ -269,53 +269,21 @@ function showUpgradeSuccess(plan) {
     }, 3000);
 }
 
-// 检查用户是否是管理员
-async function checkIfUserIsAdmin() {
+// 检查用户是否可以看到测试套餐
+// 测试套餐仅对特定测试用户可见
+function checkIfTestUser() {
     if (!currentUser) return false;
     
-    try {
-        // 检查用户当前的活跃订阅是否是 admin 计划
-        const query = `
-            query CheckAdminStatus($userId: String!) {
-                user_subscriptions(
-                    where: { 
-                        user_id: { _eq: $userId }
-                        is_active: { _eq: true }
-                        plan: { _eq: "admin" }
-                    }
-                    limit: 1
-                ) {
-                    id
-                    plan
-                }
-            }
-        `;
-        
-        const response = await fetch(`${BACKEND_URL}/api/graphql`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                query,
-                variables: { userId: currentUser.id }
-            })
-        });
-        
-        if (!response.ok) return false;
-        
-        const result = await response.json();
-        const isAdmin = result.data?.user_subscriptions?.length > 0;
-        
-        if (isAdmin) {
-            console.log('👑 当前用户是管理员，显示测试套餐');
-        }
-        
-        return isAdmin;
-    } catch (error) {
-        console.error('❌ 检查管理员状态失败:', error);
-        return false;
+    // 允许看到测试套餐的用户ID
+    const TEST_USER_ID = '11312701-f1d2-43f8-a13d-260eac812b7a';
+    
+    const isTestUser = currentUser.id === TEST_USER_ID;
+    
+    if (isTestUser) {
+        console.log('🧪 当前用户是测试用户，显示测试套餐');
     }
+    
+    return isTestUser;
 }
 
 // 加载会员类型数据
@@ -359,16 +327,16 @@ async function loadMemberTypes() {
         
         memberTypes = result.data.member_types || [];
         
-        // 检查当前用户是否是管理员
-        const isAdmin = await checkIfUserIsAdmin();
+        // 检查当前用户是否是测试用户
+        const isTestUser = checkIfTestUser();
         
         // 过滤套餐：
         // 1. 始终过滤掉 admin 计划
-        // 2. 如果不是管理员，过滤掉测试套餐（test_plus, test_premium）
+        // 2. 如果不是测试用户，过滤掉测试套餐（test_plus, test_premium）
         memberTypes = memberTypes.filter(type => {
             if (type.id === 'admin') return false;
-            if (!isAdmin && type.id.startsWith('test_')) {
-                console.log(`🔒 隐藏测试套餐: ${type.id}（仅管理员可见）`);
+            if (!isTestUser && type.id.startsWith('test_')) {
+                console.log(`🔒 隐藏测试套餐: ${type.id}（仅测试用户可见）`);
                 return false;
             }
             return true;
@@ -496,11 +464,11 @@ function renderPlanCards() {
         const notice = document.createElement('div');
         notice.className = 'test-plan-notice';
         notice.innerHTML = `
-            <div class="test-plan-notice-title">🧪 管理员测试套餐</div>
+            <div class="test-plan-notice-title">🧪 测试套餐</div>
             <div class="test-plan-notice-text">
-                以下橙色边框的测试套餐仅供管理员在生产环境中测试真实支付流程。<br>
+                以下橙色边框的测试套餐用于在生产环境中测试真实支付流程。<br>
                 价格仅 $0.01，支付成功后会创建真实的订阅和支付记录。<br>
-                测试完成后请在 Stripe Dashboard 中取消订阅。
+                测试完成后请在 Stripe/PayPal Dashboard 中取消订阅。
             </div>
         `;
         container.parentElement.insertBefore(notice, container);

@@ -1,0 +1,28 @@
+请在 Hasura Console 的 SQL 编辑器中执行以下 SQL：
+
+========================================
+1. 打开 Hasura Console
+2. 进入 "Data" → "SQL" 标签
+3. 粘贴以下 SQL 并点击 "Run!"
+========================================
+
+-- 更新 user_subscriptions 表的 plan 字段约束，添加 test_plus 和 test_premium
+
+-- 1. 删除旧的 check constraint
+ALTER TABLE user_subscriptions 
+DROP CONSTRAINT IF EXISTS subscription_plan_check;
+
+-- 2. 添加新的 check constraint，包含测试计划
+ALTER TABLE user_subscriptions 
+ADD CONSTRAINT subscription_plan_check 
+CHECK (plan IN ('free', 'plus', 'premium', 'admin', 'test_plus', 'test_premium'));
+
+-- 验证约束已更新
+SELECT conname, pg_get_constraintdef(oid) 
+FROM pg_constraint 
+WHERE conname = 'subscription_plan_check';
+
+========================================
+执行完成后，回复 "已执行"
+========================================
+

@@ -793,9 +793,10 @@ label[for*="stripe"].payment-method-button:after {
   border: 2px solid #FF9500;
   border-radius: 12px;
   padding: 16px;
-  margin: 20px auto;
+  margin: 20px auto 40px auto;
   max-width: 800px;
   text-align: center;
+  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.15);
 }
 
 .test-plan-notice-title {

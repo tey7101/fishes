@@ -32,6 +32,25 @@ let currentPage = 1;
 let pageSize = 50;
 let totalCount = 0;
 
+// 获取当前用户ID
+function getCurrentUserId() {
+  // 尝试从多个来源获取用户ID
+  const userId = localStorage.getItem('userId');
+  if (userId) return userId;
+  
+  const userData = localStorage.getItem('userData');
+  if (userData) {
+    try {
+      const parsed = JSON.parse(userData);
+      return parsed.id || parsed.uid || parsed.userId;
+    } catch (e) {
+      // ignore
+    }
+  }
+  
+  return null;
+}
+
 // 获取只读字段列表
 function getReadOnlyColumns(columns) {
   const readOnly = ['created_at', 'updated_at'];
@@ -218,12 +237,16 @@ async function loadTableData(clearCache = false) {
     // 如果还没有设置排序字段，先获取表结构来确定默认排序字段
     if (!sortColumn) {
       // 先获取一次数据来确定列结构
+      const userId = getCurrentUserId();
       const tempParams = new URLSearchParams({
         limit: '1',
         offset: '0'
       });
       if (clearCache) {
         tempParams.append('clearCache', 'true');
+      }
+      if (userId) {
+        tempParams.append('userId', userId);
       }
       const tempResponse = await fetch(`/api/admin/tables/${currentTable}?${tempParams}`);
       const tempResult = await tempResponse.json();
@@ -235,6 +258,7 @@ async function loadTableData(clearCache = false) {
       }
     }
     
+    const userId = getCurrentUserId();
     const offset = (currentPage - 1) * pageSize;
     const params = new URLSearchParams({
       limit: pageSize.toString(),
@@ -245,6 +269,10 @@ async function loadTableData(clearCache = false) {
     
     if (clearCache) {
       params.append('clearCache', 'true');
+    }
+    
+    if (userId) {
+      params.append('userId', userId);
     }
 
     const response = await fetch(`/api/admin/tables/${currentTable}?${params}`);
@@ -754,10 +782,16 @@ async function handleSave() {
 
   try {
     const saveBtn = document.getElementById('save-btn');
+    const userId = getCurrentUserId();
+    if (!userId) {
+      alert('无法获取用户身份，请重新登录');
+      return;
+    }
+
     saveBtn.disabled = true;
     saveBtn.textContent = '保存中...';
 
-    const response = await fetch(`/api/admin/tables/${currentTable}`, {
+    const response = await fetch(`/api/admin/tables/${currentTable}?userId=${userId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -841,8 +875,14 @@ async function handleBatchDelete() {
   }
 
   try {
+    const userId = getCurrentUserId();
+    if (!userId) {
+      alert('无法获取用户身份，请重新登录');
+      return;
+    }
+
     const ids = Array.from(selectedRows).join(',');
-    const response = await fetch(`/api/admin/tables/${currentTable}?ids=${ids}`, {
+    const response = await fetch(`/api/admin/tables/${currentTable}?ids=${ids}&userId=${userId}`, {
       method: 'DELETE',
     });
 

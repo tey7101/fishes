@@ -40,25 +40,46 @@
 
 #### Endpoint URL（本地测试）
 ```
-http://localhost:3000/api/payment/webhook
+http://localhost:3000/api/payment?action=webhook
 ```
 
-**注意**：本地开发需要使用 Stripe CLI 转发（见下方"本地测试"部分）
+**注意**：
+- 本地开发需要使用 Stripe CLI 转发（见下方"本地测试"部分）
+- `?action=webhook` 参数是必需的
 
 #### Endpoint URL（生产环境）
 ```
-https://yourdomain.com/api/payment/webhook
+https://yourdomain.com/api/payment?action=webhook
 ```
-将 `yourdomain.com` 替换为您的实际域名
+- 将 `yourdomain.com` 替换为您的实际域名（例如：`fishart.online`）
+- 必须使用 HTTPS（HTTP 不支持）
+- `?action=webhook` 参数是必需的
 
 ### 2.2 选择监听事件
 
 在 **"选择要监听的事件"** 部分，添加以下事件：
 
-- ✅ `checkout.session.completed` - 结账完成
-- ✅ `invoice.payment_succeeded` - 发票支付成功
-- ✅ `customer.subscription.updated` - 订阅更新
-- ✅ `customer.subscription.deleted` - 订阅取消
+#### 必需事件（核心功能）
+
+- ✅ `checkout.session.completed` - **最重要**：首次支付完成，创建订阅和支付记录
+- ✅ `invoice.payment_succeeded` - 续费支付成功，记录续费交易
+- ✅ `customer.subscription.updated` - 订阅状态变更（升级、降级等）
+- ✅ `customer.subscription.deleted` - 订阅取消，将用户降级为 free
+
+#### 推荐事件（用于监控和调试）
+
+- ☑️ `invoice.payment_failed` - 支付失败提醒
+- ☑️ `customer.created` - 客户创建（用于跟踪）
+- ☑️ `customer.updated` - 客户信息更新
+- ☑️ `payment_intent.succeeded` - 支付成功确认
+- ☑️ `payment_intent.payment_failed` - 支付失败详情
+
+#### 配置说明
+
+1. 点击 **"Listen to"**，选择 `Events on your account`
+2. 点击 **"Select events to listen to"**
+3. 搜索并勾选上述事件（至少选择前 4 个必需事件）
+4. 其他事件会被接收但标记为 `Unhandled event type`，不会影响系统运行
 
 ### 2.3 获取 Webhook Signing Secret
 
@@ -122,15 +143,20 @@ stripe login
 启动服务器后，在新终端运行：
 
 ```bash
-stripe listen --forward-to localhost:3000/api/payment/webhook
+stripe listen --forward-to "localhost:3000/api/payment?action=webhook"
 ```
+
+**注意**：URL 中的 `?action=webhook` 参数是必需的，用于路由到正确的处理器。
 
 您会看到类似输出：
 ```
 > Ready! Your webhook signing secret is whsec_xxx (^C to quit)
 ```
 
-**重要**：复制这个 `whsec_xxx` 并更新到 `.env.local` 的 `STRIPE_WEBHOOK_SECRET`
+**重要**：
+1. 复制这个 `whsec_xxx` 并更新到 `.env.local` 的 `STRIPE_TEST_WEBHOOK_SECRET`
+2. 保持这个终端窗口打开，否则 webhook 无法转发
+3. 每次重启 `stripe listen` 可能会生成新的 webhook secret
 
 ### 4.4 测试 Webhook
 
@@ -189,7 +215,11 @@ Stripe 提供了一系列测试卡号，不会产生真实费用：
 
 2. 启动 Stripe CLI（新终端）：
    ```bash
-   stripe listen --forward-to localhost:3000/api/payment/webhook
+   stripe listen --forward-to "localhost:3000/api/payment?action=webhook"
+   ```
+   或使用快捷脚本：
+   ```bash
+   .\START_STRIPE_WEBHOOK.bat
    ```
 
 3. 访问会员页面：
@@ -212,26 +242,73 @@ Stripe 提供了一系列测试卡号，不会产生真实费用：
    - `payment` 表应有新记录
    - `stripe_customer_id` 和 `stripe_subscription_id` 字段已填充
 
-## 步骤 7：生产环境部署
+## 步骤 7：测试套餐（可选）
 
-### 7.1 切换到生产模式
+### 7.1 关于测试套餐
 
-1. 在 Stripe Dashboard 切换到 **"生产模式"**
-2. 获取生产环境的 API 密钥（`pk_live_...` 和 `sk_live_...`）
+系统提供了两个特殊的测试套餐（`test_plus` 和 `test_premium`），用于在生产环境中测试真实支付流程：
+
+- **价格**：仅 $0.01/月
+- **可见性**：仅特定测试用户可见
+- **功能**：与正式套餐相同
+- **记录**：创建真实的订阅和支付记录
+
+### 7.2 使用测试套餐
+
+1. 使用测试用户账户登录
+2. 访问会员页面，可以看到带橙色边框的测试套餐
+3. 选择 Test Plus 或 Test Premium
+4. 使用真实信用卡支付 $0.01
+5. 验证整个支付流程和数据库记录
+6. 测试完成后在 Stripe Dashboard 中取消订阅
+
+**优点**：
+- ✅ 测试真实的 Stripe API 调用
+- ✅ 验证生产环境配置
+- ✅ 成本极低（每次仅 $0.01 + Stripe 手续费）
+- ✅ 不影响正式用户
+
+## 步骤 8：生产环境部署
+
+### 8.1 切换到生产模式
+
+1. 在 Stripe Dashboard 切换到 **"生产模式"**（右上角开关）
+2. 获取生产环境的 API 密钥：
+   - 访问：https://dashboard.stripe.com/apikeys
+   - 复制 Publishable key（`pk_live_...`）
+   - 复制 Secret key（`sk_live_...`）
 3. 配置生产环境 Webhook：
-   - URL: `https://yourdomain.com/api/payment/webhook`
-   - 选择相同的 4 个事件
-4. 获取生产环境的 Webhook Secret（`whsec_...`）
+   - 访问：https://dashboard.stripe.com/webhooks
+   - 点击 **"添加端点"**
+   - Endpoint URL: `https://yourdomain.com/api/payment?action=webhook`
+   - 选择必需的 4 个事件（见上文 2.2 节）
+4. 获取生产环境的 Webhook Secret：
+   - 创建 endpoint 后点击进入详情页
+   - 复制 Signing Secret（`whsec_...`）
 
-### 7.2 更新生产环境变量
+### 8.2 更新生产环境变量
 
 在服务器上更新 `.env.local`（或使用环境变量管理工具）：
 
 ```bash
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_YOUR_LIVE_KEY
-STRIPE_SECRET_KEY=sk_live_YOUR_LIVE_KEY
-STRIPE_WEBHOOK_SECRET=whsec_YOUR_LIVE_SECRET
+# Stripe 模式切换
+STRIPE_MODE=live
+
+# 生产模式密钥
+STRIPE_LIVE_PUBLISHABLE_KEY=pk_live_YOUR_LIVE_KEY
+STRIPE_LIVE_SECRET_KEY=sk_live_YOUR_LIVE_KEY
+STRIPE_LIVE_WEBHOOK_SECRET=whsec_YOUR_LIVE_SECRET
+
+# 测试模式密钥（保留，便于故障排查）
+STRIPE_TEST_PUBLISHABLE_KEY=pk_test_YOUR_TEST_KEY
+STRIPE_TEST_SECRET_KEY=sk_test_YOUR_TEST_KEY
+STRIPE_TEST_WEBHOOK_SECRET=whsec_YOUR_TEST_SECRET
 ```
+
+**重要**：
+- 设置 `STRIPE_MODE=live` 切换到生产模式
+- 设置 `STRIPE_MODE=test` 切换回测试模式（用于故障排查）
+- 重启服务器使更改生效
 
 ### 7.3 测试生产环境
 

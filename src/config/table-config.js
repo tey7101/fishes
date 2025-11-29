@@ -19,6 +19,7 @@ const tableDisplayNames = {
   'member_types': '会员类型表',
   'group_chat': '群聊记录表',
   'global_params': '全局参数表',
+  'user_subscriptions': '用户订阅表',
 };
 
 // 字段名到中文名的映射
@@ -105,6 +106,7 @@ const tablePermissionsConfig = {
   'member_types': { update: true, delete: false },
   'group_chat': { update: true, delete: true },
   'global_params': { update: true, delete: true },
+  'user_subscriptions': { update: true, delete: true },
 };
 
 function getTableDisplayName(tableName) {

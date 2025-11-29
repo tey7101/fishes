@@ -269,6 +269,55 @@ function showUpgradeSuccess(plan) {
     }, 3000);
 }
 
+// 检查用户是否是管理员
+async function checkIfUserIsAdmin() {
+    if (!currentUser) return false;
+    
+    try {
+        // 检查用户当前的活跃订阅是否是 admin 计划
+        const query = `
+            query CheckAdminStatus($userId: String!) {
+                user_subscriptions(
+                    where: { 
+                        user_id: { _eq: $userId }
+                        is_active: { _eq: true }
+                        plan: { _eq: "admin" }
+                    }
+                    limit: 1
+                ) {
+                    id
+                    plan
+                }
+            }
+        `;
+        
+        const response = await fetch(`${BACKEND_URL}/api/graphql`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                query,
+                variables: { userId: currentUser.id }
+            })
+        });
+        
+        if (!response.ok) return false;
+        
+        const result = await response.json();
+        const isAdmin = result.data?.user_subscriptions?.length > 0;
+        
+        if (isAdmin) {
+            console.log('👑 当前用户是管理员，显示测试套餐');
+        }
+        
+        return isAdmin;
+    } catch (error) {
+        console.error('❌ 检查管理员状态失败:', error);
+        return false;
+    }
+}
+
 // 加载会员类型数据
 async function loadMemberTypes() {
     try {
@@ -310,8 +359,20 @@ async function loadMemberTypes() {
         
         memberTypes = result.data.member_types || [];
         
-        // 过滤掉管理员计划
-        memberTypes = memberTypes.filter(type => type.id !== 'admin');
+        // 检查当前用户是否是管理员
+        const isAdmin = await checkIfUserIsAdmin();
+        
+        // 过滤套餐：
+        // 1. 始终过滤掉 admin 计划
+        // 2. 如果不是管理员，过滤掉测试套餐（test_plus, test_premium）
+        memberTypes = memberTypes.filter(type => {
+            if (type.id === 'admin') return false;
+            if (!isAdmin && type.id.startsWith('test_')) {
+                console.log(`🔒 隐藏测试套餐: ${type.id}（仅管理员可见）`);
+                return false;
+            }
+            return true;
+        });
         
         console.log('✅ Loaded member types:', memberTypes);
         console.log('🔍 Raw values:', memberTypes.map(t => ({ 
@@ -427,6 +488,24 @@ function renderPlanCards() {
     
     container.innerHTML = '';
     
+    // 检查是否有测试套餐
+    const hasTestPlans = memberTypes.some(plan => plan.id.startsWith('test_'));
+    
+    // 如果有测试套餐，在顶部添加提示
+    if (hasTestPlans) {
+        const notice = document.createElement('div');
+        notice.className = 'test-plan-notice';
+        notice.innerHTML = `
+            <div class="test-plan-notice-title">🧪 管理员测试套餐</div>
+            <div class="test-plan-notice-text">
+                以下橙色边框的测试套餐仅供管理员在生产环境中测试真实支付流程。<br>
+                价格仅 $0.01，支付成功后会创建真实的订阅和支付记录。<br>
+                测试完成后请在 Stripe Dashboard 中取消订阅。
+            </div>
+        `;
+        container.parentElement.insertBefore(notice, container);
+    }
+    
     memberTypes.forEach(plan => {
         const card = createPlanCard(plan);
         container.appendChild(card);
@@ -507,6 +586,14 @@ function createPlanCard(plan) {
                 <span class="feature-icon">✅</span>
                 <span class="feature-text">Join fish chat${plan.group_chat_daily_limit && plan.group_chat_daily_limit !== 'unlimited' ? ` (${plan.group_chat_daily_limit} per day)` : plan.group_chat_daily_limit === 'unlimited' ? ' (unlimited)' : ''}</span>
             </li>
+            ${plan.id.startsWith('test_') ? `
+                <li style="margin-top: 16px; padding-top: 16px; border-top: 2px dashed #FF9500;">
+                    <span class="feature-icon" style="font-size: 18px;">⚠️</span>
+                    <span class="feature-text" style="color: #FF6F00; font-weight: 600;">
+                        测试套餐：仅用于在生产环境测试真实支付流程
+                    </span>
+                </li>
+            ` : ''}
         </ul>
         
         ${needsPayment && !isCurrentPlan ? `
@@ -710,10 +797,32 @@ async function handlePlanButtonClick(planId) {
                 throw new Error('No PayPal URL returned');
             }
         } else {
-            // Stripe支付流程 - 暂时不可用
-            setButtonLoading(planButton, false);
-            showError('Credit Card payment is not available yet. Please use PayPal for now.');
-            return;
+            // Stripe支付流程
+            const response = await fetch('/api/payment?action=create-checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: currentUser.id,
+                    planId: planId,
+                    billingPeriod: billingPeriod
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to create Stripe checkout');
+            }
+            
+            if (result.url) {
+                // 重定向到Stripe Checkout
+                console.log('🔄 Redirecting to Stripe Checkout:', result.url);
+                window.location.href = result.url;
+            } else {
+                throw new Error('No checkout URL returned');
+            }
         }
     } catch (error) {
         console.error('❌ Payment error:', error);

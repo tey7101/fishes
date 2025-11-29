@@ -62,16 +62,27 @@ const server = http.createServer(async (req, res) => {
       // 添加 query 到 req 对象
       req.query = parsedUrl.query;
       
-      // 解析请求体（跳过 multipart/form-data，让 formidable 处理）
+      // 解析请求体（跳过 multipart/form-data 和 Stripe webhook，让它们自己处理）
       const contentType = req.headers['content-type'] || '';
       const isMultipart = contentType.includes('multipart/form-data');
+      const isStripeWebhook = pathname.includes('/api/payment') && parsedUrl.query.action === 'webhook';
       
-      if ((req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') && !isMultipart) {
+      if ((req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') && !isMultipart && !isStripeWebhook) {
         req.body = await parseBody(req);
       } else if (isMultipart) {
         // multipart请求不解析body，保留原始流给formidable处理
         console.log('[Server] 跳过multipart请求的body解析，保留给formidable处理');
         req.body = {}; // 设置空对象避免undefined
+      } else if (isStripeWebhook) {
+        // Stripe webhook 需要原始 Buffer 数据进行签名验证
+        console.log('[Server] 为Stripe webhook读取原始Buffer数据');
+        // 读取原始数据但不解析为JSON
+        req.body = await new Promise((resolve, reject) => {
+          const chunks = [];
+          req.on('data', chunk => chunks.push(chunk));
+          req.on('end', () => resolve(Buffer.concat(chunks)));
+          req.on('error', reject);
+        });
       }
       
       // 动态加载 API handler

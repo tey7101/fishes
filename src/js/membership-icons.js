@@ -8,6 +8,9 @@
  * @returns {Object} 包含图标、颜色、徽章等信息
  */
 function getMembershipIcon(tier) {
+    // 测试套餐映射：test_plus → plus, test_premium → premium
+    const normalizedTier = tier.replace(/^test_/, '');
+    
     const icons = {
         free: {
             icon: '🐟',
@@ -44,7 +47,7 @@ function getMembershipIcon(tier) {
         }
     };
     
-    return icons[tier] || icons.free;
+    return icons[normalizedTier] || icons.free;
 }
 
 /**

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - FishTalk.app</title>
+    <meta name="description" content="Your Stripe payment was successful! Your membership is being activated.">
+    
+    <link rel="stylesheet" href="src/css/animations.css?v=2.0">
+    <link rel="stylesheet" href="src/css/cute-game-style.css?v=1.0">
+    <link rel="stylesheet" href="src/css/style.css?v=2.0">
+    <link rel="stylesheet" href="src/css/auth-ui.css?v=2.3">
+    <link rel="stylesheet" href="src/css/hamburger-menu.css?v=1.0">
+    <link rel="icon" type="image/png" href="/fish_logo.png">
+    
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 40px 20px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .success-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        .success-title {
+            color: #4CD964;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .success-message {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .sync-status {
+            margin: 30px 0;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+        }
+        
+        .sync-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #007AFF;
+        }
+        
+        .sync-success {
+            color: #4CD964;
+            font-weight: 600;
+        }
+        
+        .sync-error {
+            color: #FF3B30;
+            font-weight: 600;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e3f2fd;
+            border-top: 2px solid #007AFF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .action-buttons {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #007AFF;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056CC;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-2px);
+        }
+        
+        .subscription-details {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f5e8;
+            border-radius: 8px;
+            border-left: 4px solid #4CD964;
+            text-align: left;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .detail-value {
+            color: #666;
+        }
+    </style>
+</head>
+<body class="game-style">
+    <!-- 海洋风格背景气泡 -->
+    <div class="background-bubbles"></div>
+
+    <!-- Top Navigation Bar -->
+    <nav class="game-nav">
+        <div class="game-logo">
+            <a href="index.html" style="color: inherit; text-decoration: none;">FishTalk.app</a>
+        </div>
+        <div class="game-nav-links">
+            <!-- 登录按钮和用户菜单将由 auth-ui.js 动态插入 -->
+        </div>
+    </nav>
+
+    <main role="main">
+        <div class="success-container">
+            <div class="success-icon">🎉</div>
+            <h1 class="success-title">Payment Successful!</h1>
+            <p class="success-message">
+                Thank you for upgrading your membership! We're now activating your subscription.
+            </p>
+            
+            <div class="sync-status" id="sync-status">
+                <div class="sync-loading">
+                    <div class="spinner"></div>
+                    <span>Verifying your payment...</span>
+                </div>
+            </div>
+            
+            <div id="subscription-details" class="subscription-details" style="display: none;">
+                <h3 style="margin-top: 0; color: #4CD964;">✅ Subscription Activated</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Plan:</span>
+                    <span class="detail-value" id="plan-name">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value" id="plan-status">Active</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Payment Method:</span>
+                    <span class="detail-value">Credit Card</span>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="index.html" class="btn btn-primary">Start Creating Fish 🐟</a>
+                <a href="membership.html?upgraded=true" class="btn btn-secondary">View Membership</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="public/supabase-config.js?v=2.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="src/js/supabase-init.js?v=2.3"></script>
+    <script src="src/js/auth-ui.js?v=2.5"></script>
+    
+    <script>
+        let currentUser = null;
+        
+        // 初始化页面
+        async function initSuccessPage() {
+            try {
+                console.log('🎉 Initializing Stripe success page...');
+                
+                // 获取URL参数
+                const urlParams = new URLSearchParams(window.location.search);
+                const sessionId = urlParams.get('session_id');
+                
+                console.log('🔍 URL Parameters:', Object.fromEntries(urlParams));
+                
+                if (!sessionId) {
+                    console.error('❌ No session ID found in URL parameters');
+                    showError('Missing session ID. Please contact support.');
+                    return;
+                }
+                
+                console.log('📋 Session ID:', sessionId);
+                
+                // 等待用户认证
+                await waitForAuth();
+                
+                if (!currentUser) {
+                    showError('Please log in to continue.');
+                    return;
+                }
+                
+                // 验证 Stripe Session
+                await verifySession(sessionId);
+                
+            } catch (error) {
+                console.error('❌ Initialization failed:', error);
+                showError('Failed to process payment: ' + error.message);
+            }
+        }
+        
+        // 等待用户认证
+        async function waitForAuth() {
+            let attempts = 0;
+            const maxAttempts = 10;
+            
+            while (attempts < maxAttempts) {
+                if (window.supabaseAuth && window.supabaseAuth.getCurrentUser) {
+                    currentUser = await window.supabaseAuth.getCurrentUser();
+                    if (currentUser) {
+                        console.log('✅ User authenticated:', currentUser.id);
+                        return;
+                    }
+                }
+                
+                attempts++;
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            throw new Error('Authentication timeout');
+        }
+        
+        // 验证 Stripe Session
+        async function verifySession(sessionId) {
+            try {
+                console.log('🔄 Verifying Stripe session...');
+                console.log('📋 Request data:', {
+                    userId: currentUser.id,
+                    sessionId: sessionId
+                });
+                
+                const response = await fetch('/api/payment?action=stripe-verify-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: currentUser.id,
+                        sessionId: sessionId
+                    })
+                });
+                
+                console.log('📡 Response status:', response.status);
+                const result = await response.json();
+                console.log('📦 Response data:', result);
+                
+                if (!response.ok) {
+                    const errorMessage = result.error || result.message || 'Failed to verify session';
+                    throw new Error(errorMessage);
+                }
+                
+                console.log('✅ Session verified successfully:', result);
+                showSuccess(result);
+                
+            } catch (error) {
+                console.error('❌ Verification failed:', error);
+                showError('Failed to verify payment: ' + error.message);
+            }
+        }
+        
+        // 显示成功状态
+        function showSuccess(result) {
+            const syncStatus = document.getElementById('sync-status');
+            const subscriptionDetails = document.getElementById('subscription-details');
+            const planName = document.getElementById('plan-name');
+            
+            syncStatus.innerHTML = '<div class="sync-success">✅ Payment verified successfully!</div>';
+            
+            // 从 result.plan 或 result.subscription.plan 获取套餐名称
+            const plan = result.plan || (result.subscription && result.subscription.plan);
+            
+            if (plan) {
+                planName.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
+                subscriptionDetails.style.display = 'block';
+            }
+            
+            // 3 秒后自动跳转到会员页面（给 webhook 一点处理时间）
+            let countdown = 3;
+            syncStatus.innerHTML += `
+                <div style="margin-top: 15px; color: #666; font-size: 14px;">
+                    Redirecting in <span id="redirect-countdown">${countdown}</span> seconds...
+                </div>
+            `;
+            
+            const countdownTimer = setInterval(() => {
+                countdown--;
+                const countdownEl = document.getElementById('redirect-countdown');
+                if (countdownEl) {
+                    countdownEl.textContent = countdown;
+                }
+                
+                if (countdown <= 0) {
+                    clearInterval(countdownTimer);
+                    window.location.href = 'membership.html?upgraded=true';
+                }
+            }, 1000);
+        }
+        
+        // 显示错误状态
+        function showError(message) {
+            const syncStatus = document.getElementById('sync-status');
+            syncStatus.innerHTML = `
+                <div class="sync-error">
+                    ❌ ${message}
+                    <br><br>
+                    <small>Please contact support if this issue persists.</small>
+                </div>
+            `;
+        }
+        
+        // 页面加载完成后初始化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSuccessPage);
+        } else {
+            initSuccessPage();
+        }
+    </script>
+</body>
+</html>
+

@@ -14,6 +14,7 @@
 
 const createCheckoutHandler = require('../lib/api_handlers/payment/create-checkout.js');
 const webhookHandler = require('../lib/api_handlers/payment/webhook.js');
+const stripeVerifySessionHandler = require('../lib/api_handlers/payment/stripe-verify-session.js');
 const paypalCreateSubscriptionHandler = require('../lib/api_handlers/payment/paypal-create-subscription.js');
 const paypalWebhookHandler = require('../lib/api_handlers/payment/paypal-webhook.js');
 const paypalSyncSubscriptionHandler = require('../lib/api_handlers/payment/paypal-sync-subscription.js');
@@ -29,6 +30,8 @@ module.exports = async function handler(req, res) {
         return await createCheckoutHandler(req, res);
       case 'webhook':
         return await webhookHandler(req, res);
+      case 'stripe-verify-session':
+        return await stripeVerifySessionHandler(req, res);
       
       // PayPal
       case 'paypal-create-subscription':
@@ -48,6 +51,7 @@ module.exports = async function handler(req, res) {
           available: [
             'create-checkout',
             'webhook',
+            'stripe-verify-session',
             'paypal-create-subscription',
             'paypal-webhook',
             'paypal-sync-subscription',

@@ -708,8 +708,8 @@
   opacity: 1;
 }
 
-/* Stripe支付选项暂时不可用的样式 */
-label[for*="stripe"].payment-method-button {
+/* Stripe支付选项已启用 - Coming Soon 角标已移除 */
+/* label[for*="stripe"].payment-method-button {
   position: relative;
   opacity: 0.7;
 }
@@ -727,7 +727,7 @@ label[for*="stripe"].payment-method-button:after {
   border-radius: 8px;
   white-space: nowrap;
   z-index: 10;
-}
+} */
 
 /* 支付方式选择器响应式 */
 @media (max-width: 480px) {
@@ -750,5 +750,64 @@ label[for*="stripe"].payment-method-button:after {
     width: 18px;
     height: 18px;
   }
+}
+
+/* ===== 测试套餐样式（仅管理员可见）===== */
+.plan-card.test_plus,
+.plan-card.test_premium {
+  position: relative;
+  border: 3px solid #FF9500;
+  background: linear-gradient(180deg, #FFF8E1 0%, #FFE082 100%);
+}
+
+.plan-card.test_plus::before,
+.plan-card.test_premium::before {
+  content: "🧪 TEST";
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #FF9500;
+  color: white;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 12px;
+  border-radius: 16px;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+  letter-spacing: 1px;
+  z-index: 10;
+}
+
+.plan-card.test_plus .plan-name,
+.plan-card.test_premium .plan-name {
+  color: #FF6F00;
+}
+
+.plan-card.test_plus .price-amount,
+.plan-card.test_premium .price-amount {
+  color: #FF9500;
+}
+
+/* 测试套餐提示信息 */
+.test-plan-notice {
+  background: #FFF3E0;
+  border: 2px solid #FF9500;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 20px auto;
+  max-width: 800px;
+  text-align: center;
+}
+
+.test-plan-notice-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #FF6F00;
+  margin-bottom: 8px;
+}
+
+.test-plan-notice-text {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
 }
 

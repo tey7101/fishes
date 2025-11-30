@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CDN加载测试</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #00ff00;
+    }
+    .log {
+      margin: 5px 0;
+      padding: 5px;
+      background: #2a2a2a;
+      border-left: 3px solid #00ff00;
+    }
+    .error {
+      border-left-color: #ff0000;
+      color: #ff6666;
+    }
+    .success {
+      border-left-color: #00ff00;
+      color: #00ff00;
+    }
+    .warning {
+      border-left-color: #ffaa00;
+      color: #ffaa00;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 CDN加载诊断工具</h1>
+  <p>测试各个CDN源的连通性...</p>
+  <div id="logs"></div>
+
+  <script>
+    const logs = document.getElementById('logs');
+    
+    function log(message, type = 'log') {
+      const div = document.createElement('div');
+      div.className = 'log ' + type;
+      div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logs.appendChild(div);
+      console.log(message);
+    }
+
+    const cdnSources = [
+      { name: 'jsDelivr (国际)', url: 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js' },
+      { name: 'npmmirror (国内)', url: 'https://registry.npmmirror.com/@supabase/supabase-js/2.39.0/files/dist/umd/supabase.min.js' },
+      { name: 'BootCDN (国内)', url: 'https://cdn.bootcdn.net/ajax/libs/supabase-js/2.39.0/umd/supabase.min.js' },
+      { name: 'unpkg (国际)', url: 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js' },
+      { name: 'Fastly jsDelivr', url: 'https://fastly.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js' }
+    ];
+
+    function testCDN(source, timeout = 8000) {
+      return new Promise((resolve) => {
+        const startTime = Date.now();
+        const script = document.createElement('script');
+        script.src = source.url;
+        
+        const timer = setTimeout(() => {
+          script.remove();
+          const duration = Date.now() - startTime;
+          log(`❌ ${source.name} - 超时 (${duration}ms)`, 'error');
+          resolve({ success: false, duration, error: 'timeout' });
+        }, timeout);
+        
+        script.onload = () => {
+          clearTimeout(timer);
+          const duration = Date.now() - startTime;
+          log(`✅ ${source.name} - 成功! (${duration}ms)`, 'success');
+          script.remove();
+          resolve({ success: true, duration });
+        };
+        
+        script.onerror = () => {
+          clearTimeout(timer);
+          const duration = Date.now() - startTime;
+          log(`❌ ${source.name} - 加载失败 (${duration}ms)`, 'error');
+          script.remove();
+          resolve({ success: false, duration, error: 'load_error' });
+        };
+        
+        log(`⏳ 测试 ${source.name}...`, 'warning');
+        document.head.appendChild(script);
+      });
+    }
+
+    async function runTests() {
+      log('开始CDN连通性测试...', 'log');
+      log('VPN状态: ' + (navigator.onLine ? '在线' : '离线'), 'log');
+      log('User Agent: ' + navigator.userAgent, 'log');
+      log('', 'log');
+      
+      const results = [];
+      
+      for (const source of cdnSources) {
+        const result = await testCDN(source);
+        results.push({ ...source, ...result });
+        await new Promise(r => setTimeout(r, 500)); // 间隔500ms
+      }
+      
+      log('', 'log');
+      log('📊 测试结果汇总:', 'log');
+      const successCount = results.filter(r => r.success).length;
+      log(`成功: ${successCount}/${results.length}`, successCount > 0 ? 'success' : 'error');
+      
+      if (successCount === 0) {
+        log('', 'log');
+        log('⚠️ 所有CDN都无法访问，可能的原因:', 'warning');
+        log('  1. 浏览器扩展阻止了脚本加载（广告拦截器）', 'warning');
+        log('  2. 浏览器安全设置过严格', 'warning');
+        log('  3. 本地防火墙或安全软件阻止', 'warning');
+        log('  4. VPN配置问题导致DNS解析失败', 'warning');
+        log('', 'log');
+        log('💡 建议操作:', 'warning');
+        log('  1. 打开浏览器开发者工具(F12) -> Network标签', 'warning');
+        log('  2. 刷新页面，查看具体错误信息', 'warning');
+        log('  3. 临时禁用所有浏览器扩展后重试', 'warning');
+        log('  4. 尝试更换VPN节点或暂时关闭VPN', 'warning');
+      } else {
+        const fastest = results.filter(r => r.success).sort((a, b) => a.duration - b.duration)[0];
+        log(`⚡ 最快CDN: ${fastest.name} (${fastest.duration}ms)`, 'success');
+      }
+    }
+
+    // 等待页面加载完成后开始测试
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', runTests);
+    } else {
+      runTests();
+    }
+  </script>
+</body>
+</html>
+

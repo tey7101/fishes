@@ -53,7 +53,7 @@ function getCurrentUserId() {
 
 // 获取只读字段列表
 function getReadOnlyColumns(columns) {
-  const readOnly = ['created_at', 'updated_at'];
+  const readOnly = ['created_at', 'updated_at', 'current_period_start', 'current_period_end'];
   
   // 主键字段应该是只读的
   const pkField = getPrimaryKeyField(columns);
@@ -429,7 +429,12 @@ function formatValue(value, column) {
     </span>`;
   }
 
-  if (column.includes('_at') && value) {
+  // 时间字段：包括 _at 结尾的字段，以及特定的时间戳字段
+  const isTimeField = column.includes('_at') || 
+                      column === 'current_period_start' || 
+                      column === 'current_period_end';
+  
+  if (isTimeField && value) {
     // 显示为北京时间 (UTC+8)
     // 数据库存储的是UTC时间，但PostgreSQL返回的时间字符串没有Z后缀
     // 需要手动添加Z来标记为UTC时间
@@ -517,6 +522,16 @@ function formatColumnName(col) {
     'participant_fish_ids': '参与鱼ID列表',
     'time_of_day': '时间段',
     'topic': '话题',
+    // user_subscriptions 表字段
+    'plan': '订阅计划',
+    'is_active': '是否激活',
+    'payment_provider': '支付提供商',
+    'stripe_customer_id': 'Stripe客户ID',
+    'stripe_subscription_id': 'Stripe订阅ID',
+    'paypal_subscription_id': 'PayPal订阅ID',
+    'current_period_start': '当前周期开始',
+    'current_period_end': '当前周期结束',
+    'member_type_id': '会员类型ID',
   };
   
   return names[col] || col;

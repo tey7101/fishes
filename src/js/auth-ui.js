@@ -118,7 +118,7 @@ class AuthUI {
   /**
    * 等待Supabase初始化完成
    */
-  async waitForSupabase(maxWaitMs = 3000) {
+  async waitForSupabase(maxWaitMs = 10000) {
     const startTime = Date.now();
     
     while (Date.now() - startTime < maxWaitMs) {
@@ -128,6 +128,12 @@ class AuthUI {
       }
       
       await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // 每2秒输出一次等待状态
+      const elapsed = Date.now() - startTime;
+      if (elapsed % 2000 < 50) {
+        console.log(`⏳ 等待Supabase初始化... (${(elapsed / 1000).toFixed(1)}秒)`);
+      }
     }
     
     console.warn(`⚠️ Supabase initialization timeout after ${maxWaitMs}ms`);

@@ -135,6 +135,19 @@
     </script>
 </head>
 <body class="game-style">
+  <!-- 加载状态提示 -->
+  <div id="loading-indicator" style="position: fixed; top: 20px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 10px 15px; border-radius: 8px; font-size: 14px; z-index: 10000; display: none;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <div style="width: 16px; height: 16px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+      <span id="loading-text">加载中...</span>
+    </div>
+  </div>
+  <style>
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+  
   <!-- 海洋风格背景气泡 -->
   <div class="background-bubbles"></div>
 
@@ -159,11 +172,11 @@
         <span>🧪</span>
         <span>Test</span>
       </a>
-      <!-- 登录按钮和用户菜单将�?auth-ui.js 动态插�?-->
+      <!-- 登录按钮和用户菜单将�?auth-ui.js 动态插�?-->
     </div>
   </nav>
 
-  <!-- 侧边栏菜�?-->
+  <!-- 侧边栏菜�?-->
   <div id="sidebar-menu" class="sidebar-menu">
     <div class="sidebar-header">
       <h3>🐟 Menu</h3>
@@ -179,7 +192,7 @@
         <span>Global Tank</span>
       </a>
       <a href="tank.html?view=my" class="sidebar-link">
-        <span class="sidebar-icon">�?/span>
+        <span class="sidebar-icon">�?/span>
         <span>My Tank</span>
       </a>
       <a href="rank.html" class="sidebar-link">
@@ -201,7 +214,7 @@
     </nav>
   </div>
   
-  <!-- 侧边栏遮�?-->
+  <!-- 侧边栏遮�?-->
   <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
   <!-- Coming Soon Banner - Removed (feature now live) -->
@@ -242,7 +255,7 @@
           <div id="drawing-particles"></div>
         </div>
         
-        <!-- ONNX 模型加载进度�?-->
+        <!-- ONNX 模型加载进度�?-->
         <div id="onnx-loading-progress" style="display: none; max-width: 600px; margin: 8px auto; padding: 8px 16px; background: rgba(0, 0, 0, 0.7); border-radius: 6px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
             <span style="color: white; font-size: 12px; font-weight: 500;">AI loading</span>
@@ -268,7 +281,7 @@
             <span>🐠</span> <span>Global Tank</span>
           </a>
           <a href="rank.html" class="game-btn game-btn-blue" title="Vote on fish drawings">
-            <span>�?/span> <span>Rank</span>
+            <span>🏆</span> <span>Rank</span>
           </a>
           <a href="tank.html?view=my" id="my-tanks-link" class="game-btn game-btn-blue" title="Create custom fish tanks">
             <span>🏆</span> <span>My Tank</span>
@@ -315,41 +328,78 @@
     (function() {
       const onnxSources = [
         'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.min.js',
+        'https://registry.npmmirror.com/onnxruntime-web/1.14.0/files/dist/ort.min.js',
         'https://unpkg.com/onnxruntime-web@1.14.0/dist/ort.min.js',
-        'https://cdn.skypack.dev/onnxruntime-web@1.14.0/dist/ort.min.js'
+        'https://fastly.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.min.js'
       ];
       
       let loaded = false;
       let currentIndex = 0;
+      const LOAD_TIMEOUT = 8000;
       
-      function loadScript(src) {
+      function loadScript(src, timeout = LOAD_TIMEOUT) {
         return new Promise((resolve, reject) => {
           const script = document.createElement('script');
           script.src = src;
+          
+          const timer = setTimeout(() => {
+            console.warn('Timeout loading ONNX from: ' + src);
+            script.remove();
+            reject(new Error('Timeout'));
+          }, timeout);
+          
           script.onload = () => {
+            clearTimeout(timer);
             loaded = true;
-            console.log('�?ONNX Runtime loaded from:', src);
+            console.log('ONNX Runtime loaded from: ' + src);
             resolve();
           };
           script.onerror = () => {
-            console.warn('⚠️ Failed to load ONNX from:', src);
+            clearTimeout(timer);
+            console.warn('Failed to load ONNX from: ' + src);
+            script.remove();
             reject();
           };
           document.head.appendChild(script);
         });
       }
       
+      function showLoading(text) {
+        const indicator = document.getElementById('loading-indicator');
+        const textEl = document.getElementById('loading-text');
+        if (indicator && textEl) {
+          indicator.style.display = 'block';
+          textEl.textContent = text;
+        }
+      }
+      
+      function hideLoading() {
+        const indicator = document.getElementById('loading-indicator');
+        if (indicator) {
+          indicator.style.display = 'none';
+        }
+      }
+      
       async function tryLoadONNX() {
+        console.log('开始加载ONNX Runtime...');
+        showLoading('加载AI组件...');
+        
         while (currentIndex < onnxSources.length && !loaded) {
           try {
+            console.log('尝试CDN ' + (currentIndex + 1) + '/' + onnxSources.length);
             await loadScript(onnxSources[currentIndex]);
             break;
           } catch (error) {
             currentIndex++;
             if (currentIndex >= onnxSources.length) {
-              console.error('�?All ONNX CDN sources failed. Please check your network connection.');
+              console.error('所有ONNX CDN源都加载失败');
+              hideLoading();
             }
           }
+        }
+        if (loaded) {
+          console.log('ONNX Runtime加载完成');
+          hideLoading();
         }
       }
       
@@ -362,46 +412,105 @@
   <script>
     (function() {
       const cdnSources = [
+        // 主CDN源（国际）
         'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js',
+        // 国内CDN源
+        'https://registry.npmmirror.com/@supabase/supabase-js/2.39.0/files/dist/umd/supabase.min.js',
+        'https://cdn.bootcdn.net/ajax/libs/supabase-js/2.39.0/umd/supabase.min.js',
+        // 备用国际CDN
         'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js',
-        'https://cdn.skypack.dev/@supabase/supabase-js@2'
+        'https://cdn.skypack.dev/@supabase/supabase-js@2',
+        // jsDelivr备用链接
+        'https://fastly.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'
       ];
       
       let loaded = false;
       let currentIndex = 0;
+      const LOAD_TIMEOUT = 8000; // 每个CDN源超时时间：8秒
       
-      function loadScript(src) {
+      function loadScript(src, timeout = LOAD_TIMEOUT) {
         return new Promise((resolve, reject) => {
           const script = document.createElement('script');
           script.src = src;
+          
+          // 超时处理
+          const timer = setTimeout(() => {
+            console.warn('Timeout loading from: ' + src);
+            script.remove();
+            reject(new Error('Timeout'));
+          }, timeout);
+          
           script.onload = () => {
+            clearTimeout(timer);
             loaded = true;
-            console.log('�?Supabase SDK loaded from:', src);
+            console.log('Supabase SDK loaded from: ' + src);
             resolve();
           };
+          
           script.onerror = () => {
-            console.warn('⚠️ Failed to load Supabase from:', src);
-            reject();
+            clearTimeout(timer);
+            console.warn('Failed to load Supabase from: ' + src);
+            script.remove();
+            reject(new Error('Load failed'));
           };
+          
           document.head.appendChild(script);
         });
       }
       
+      function showLoading(text) {
+        const indicator = document.getElementById('loading-indicator');
+        const textEl = document.getElementById('loading-text');
+        if (indicator && textEl) {
+          indicator.style.display = 'block';
+          textEl.textContent = text;
+        }
+      }
+      
+      function hideLoading() {
+        const indicator = document.getElementById('loading-indicator');
+        if (indicator) {
+          indicator.style.display = 'none';
+        }
+      }
+      
       async function tryLoadSupabase() {
+        console.log('开始加载Supabase SDK...');
+        showLoading('加载登录组件...');
+        
         while (currentIndex < cdnSources.length && !loaded) {
+          const source = cdnSources[currentIndex];
+          console.log('尝试CDN ' + (currentIndex + 1) + '/' + cdnSources.length + ': ' + source);
+          
           try {
-            await loadScript(cdnSources[currentIndex]);
+            await loadScript(source);
             break;
           } catch (error) {
             currentIndex++;
             if (currentIndex >= cdnSources.length) {
-              console.error('�?All Supabase CDN sources failed. Please check your network connection.');
-              console.error('💡 You may need to:');
-              console.error('   1. Check your internet connection');
-              console.error('   2. Disable browser tracking prevention');
-              console.error('   3. Use a VPN if CDN is blocked in your region');
+              console.error('所有Supabase CDN源都加载失败');
+              console.error('可能的解决方案:');
+              console.error('   1. 检查网络连接');
+              console.error('   2. 禁用浏览器追踪阻止（Edge/Safari）');
+              console.error('   3. 尝试使用VPN');
+              console.error('   4. 刷新页面重试');
+              
+              hideLoading();
+              
+              // 显示用户友好的错误提示
+              if (window.showError) {
+                window.showError('网络连接问题：无法加载必要的组件。请检查网络连接后刷新页面。');
+              }
+            } else {
+              console.log('切换到下一个CDN源...');
+              showLoading('重试加载组件 ' + (currentIndex + 1) + '/' + cdnSources.length);
             }
           }
+        }
+        
+        if (loaded) {
+          console.log('Supabase SDK加载完成');
+          hideLoading();
         }
       }
       

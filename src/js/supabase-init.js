@@ -18,19 +18,24 @@ async function initializeSupabaseClient() {
     });
   }
   
-  // 等待Supabase SDK加载（最多等待3秒）
+  // 等待Supabase SDK加载（最多等待10秒）
   let retries = 0;
-  const maxRetries = 60; // 3秒 (60 * 50ms)
+  const maxRetries = 200; // 10秒 (200 * 50ms)
   while (!window.supabase?.createClient && retries < maxRetries) {
     await new Promise(resolve => setTimeout(resolve, 50));
     retries++;
+    
+    // 每2秒输出一次加载状态
+    if (retries % 40 === 0) {
+      console.log(`⏳ 等待Supabase SDK加载... (${retries * 50 / 1000}秒)`);
+    }
   }
   
   const SUPABASE_URL = window.SUPABASE_URL || 'YOUR_SUPABASE_URL';
   const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
   
   if (!window.supabase?.createClient) {
-    console.error('⚠️ Supabase SDK not loaded after 3 seconds');
+    console.error('⚠️ Supabase SDK not loaded after 10 seconds');
     console.error('💡 Possible solutions:');
     console.error('   1. Check your internet connection');
     console.error('   2. Disable browser tracking prevention (Edge/Safari)');

@@ -118,7 +118,7 @@ async function loadCurrentMembership() {
             console.log(`✅ Current plan loaded from database: "${currentPlan}" (subscription ID: ${subscription.id}, active: ${subscription.is_active})`);
             
             // 验证 plan 值
-            if (!['free', 'plus', 'premium', 'admin'].includes(currentPlan)) {
+            if (!['free', 'plus', 'premium', 'admin', 'test_plus', 'test_premium'].includes(currentPlan)) {
                 console.error(`⚠️ Unexpected plan value: "${currentPlan}"`);
             }
         } else {

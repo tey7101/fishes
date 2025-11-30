@@ -1,4 +1,5 @@
-// Profile page functionality
+// Profile page functionality v2.4
+console.log('📄 Profile.js v2.4 已加载');
 
 // Get user profile data from Hasura
 async function getUserProfileFromHasura(userId) {
@@ -17,8 +18,9 @@ async function getUserProfileFromHasura(userId) {
                     about_me
                     fish_talk
                     user_subscriptions(
+                        where: { is_active: { _eq: true } }
                         order_by: { created_at: desc }
-                        limit: 5
+                        limit: 1
                     ) {
                         plan
                         is_active
@@ -77,83 +79,52 @@ async function getUserProfileFromHasura(userId) {
         const favoriteCount = result.data.fish_favorites_aggregate?.aggregate?.count || 0;
         
         // Get membership info
-        // Get all subscriptions and find the active one or latest one
+        // Query already filtered for is_active = true and sorted by created_at desc, limit 1
         const subscriptions = user.user_subscriptions || [];
+        const activeSubscription = subscriptions.length > 0 ? subscriptions[0] : null;
         
-        // Debug: 输出所有订阅信息
-        console.log('🔍 All subscriptions:', subscriptions.map(sub => ({
-            plan: sub.plan,
-            is_active: sub.is_active,
-            created_at: sub.created_at,
-            member_type_id: sub.member_type?.id,
-            member_type_name: sub.member_type?.name
-        })));
-        
-        // Find active subscription (is_active = true or null)
-        // Also check if plan is not 'free'
-        let activeSubscription = subscriptions.find(sub => 
-            (sub.is_active === true || sub.is_active === null) && 
-            sub.plan && 
-            sub.plan.toLowerCase() !== 'free'
-        );
-        
-        // If no active non-free subscription, try to find any active subscription
-        if (!activeSubscription) {
-            activeSubscription = subscriptions.find(sub => 
-                sub.is_active === true || sub.is_active === null
-            );
-        }
-        
-        // If still no active subscription found, use the latest one (already sorted by created_at desc)
-        const latestSubscription = activeSubscription || (subscriptions.length > 0 ? subscriptions[0] : null);
-        
-        // Debug logging for subscription data
-        console.log('🔍 Subscription selection:', {
-            userId: user.id,
-            subscriptionsCount: subscriptions.length,
-            activeSubscription: activeSubscription ? {
-                plan: activeSubscription.plan,
-                is_active: activeSubscription.is_active,
-                member_type_id: activeSubscription.member_type?.id
-            } : null,
-            latestSubscription: latestSubscription ? {
-                plan: latestSubscription.plan,
-                is_active: latestSubscription.is_active,
-                member_type_id: latestSubscription.member_type?.id
-            } : null
-        });
+        // Debug: 输出订阅信息
+        console.log('🔍 Active subscription:', activeSubscription ? {
+            plan: activeSubscription.plan,
+            is_active: activeSubscription.is_active,
+            created_at: activeSubscription.created_at,
+            member_type_id: activeSubscription.member_type?.id,
+            member_type_name: activeSubscription.member_type?.name
+        } : 'No active subscription found');
         
         // Determine membership tier
         // Priority: plan field > member_type.id > default to 'free'
         let membershipTier = 'free';
         let membershipName = 'Free';
         
-        if (latestSubscription) {
+        if (activeSubscription) {
             // Use plan field if available (most reliable)
-            if (latestSubscription.plan) {
-                membershipTier = latestSubscription.plan.toLowerCase().trim();
+            if (activeSubscription.plan) {
+                membershipTier = activeSubscription.plan.toLowerCase().trim();
                 console.log('✅ Using plan field for tier:', membershipTier);
             } 
             // Fallback to member_type.id
-            else if (latestSubscription.member_type?.id) {
-                membershipTier = latestSubscription.member_type.id.toLowerCase().trim();
+            else if (activeSubscription.member_type?.id) {
+                membershipTier = activeSubscription.member_type.id.toLowerCase().trim();
                 console.log('✅ Using member_type.id for tier:', membershipTier);
             }
             
             // Get membership name
-            if (latestSubscription.member_type?.name) {
-                membershipName = latestSubscription.member_type.name;
+            if (activeSubscription.member_type?.name) {
+                membershipName = activeSubscription.member_type.name;
             } else {
                 // Fallback name based on tier
                 const tierNames = {
                     'free': 'Free',
                     'plus': 'Plus',
-                    'premium': 'Premium'
+                    'premium': 'Premium',
+                    'test_plus': 'Test Plus',
+                    'test_premium': 'Test Premium'
                 };
                 membershipName = tierNames[membershipTier] || 'Free';
             }
         } else {
-            console.log('⚠️ No subscription found, defaulting to free');
+            console.log('⚠️ No active subscription found, using free tier');
         }
         
         // Debug logging
@@ -163,8 +134,8 @@ async function getUserProfileFromHasura(userId) {
             favoriteCount: favoriteCount,
             membershipTier: membershipTier,
             membershipName: membershipName,
-            subscriptionPlan: latestSubscription?.plan,
-            subscriptionIsActive: latestSubscription?.is_active
+            subscriptionPlan: activeSubscription?.plan,
+            subscriptionIsActive: activeSubscription?.is_active
         });
         
         // Transform to match expected profile format
@@ -291,7 +262,20 @@ function displayProfile(profile, searchedUserId = null) {
 
     // Update profile display - use membership icon instead of initial
     const membershipTier = profile.membershipTier || 'free';
-    const membershipName = profile.membershipName || (membershipTier === 'free' ? 'Free' : membershipTier === 'plus' ? 'Plus' : 'Premium');
+    
+    // Get membership name with proper fallback
+    let membershipName = profile.membershipName;
+    if (!membershipName) {
+        const tierNames = {
+            'free': 'Free',
+            'plus': 'Plus',
+            'premium': 'Premium',
+            'admin': 'Admin',
+            'test_plus': 'Test Plus',
+            'test_premium': 'Test Premium'
+        };
+        membershipName = tierNames[membershipTier] || 'Free';
+    }
     
     // Debug: 输出会员等级信息
     console.log('🎯 Displaying profile with membership:', {
@@ -368,7 +352,11 @@ function displayProfile(profile, searchedUserId = null) {
     }
     
     if (membershipTextElement) {
+        console.log('🔧 Setting membership text to:', membershipName);
         membershipTextElement.textContent = membershipName;
+        console.log('✅ Membership text element now shows:', membershipTextElement.textContent);
+    } else {
+        console.error('❌ membership-text element not found!');
     }
     
     // Show upgrade button for free and plus members (only for current user)
@@ -462,6 +450,8 @@ function showError(message) {
 
 // Add enter key support for search
 document.addEventListener('DOMContentLoaded', function () {
+    console.log('🚀 Profile.js DOMContentLoaded 事件触发');
+    
     // 检查网络连接状态
     const isOnline = navigator.onLine;
     if (!isOnline) {
@@ -472,7 +462,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const searchedUserId = urlParams.get('userId');
     
+    console.log('🔍 URL 参数检查:', {
+        searchedUserId: searchedUserId || '无',
+        fullUrl: window.location.href
+    });
+    
     if (searchedUserId) {
+        console.log('📋 从 URL 加载用户 profile:', searchedUserId);
         // Load specific user's profile from URL
         getUserProfile(searchedUserId).then(profile => {
             displayProfile(profile, searchedUserId);
@@ -483,10 +479,14 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
     
+    console.log('👤 准备加载当前登录用户的 profile...');
+    
     // Check authentication state for current user - 优先使用Supabase
     async function checkAndLoadProfile() {
         let userId = null;
         let userData = null;
+        
+        console.log('🔍 开始检查用户登录状态...');
         
         // 优先使用Supabase检查登录状态
         if (window.supabaseAuth && typeof window.supabaseAuth.getCurrentUser === 'function') {
@@ -502,17 +502,27 @@ document.addEventListener('DOMContentLoaded', function () {
                         created_at: user.created_at
                     };
                     console.log('✅ 使用Supabase获取用户信息:', userId);
+                } else {
+                    console.log('⚠️ Supabase getCurrentUser 返回空或无效用户');
                 }
             } catch (error) {
                 console.warn('⚠️ Supabase获取用户信息失败:', error);
             }
+        } else {
+            console.log('⚠️ window.supabaseAuth 未定义或 getCurrentUser 不可用');
         }
         
         // 如果Supabase没有用户，回退到localStorage
         if (!userId) {
+            console.log('🔄 尝试从 localStorage 获取用户信息...');
             const token = localStorage.getItem('userToken');
             const userDataStr = localStorage.getItem('userData');
             const userIdFromStorage = localStorage.getItem('userId');
+            
+            console.log('   localStorage 检查:');
+            console.log('   - userToken:', token ? '存在' : '不存在');
+            console.log('   - userData:', userDataStr ? '存在' : '不存在');
+            console.log('   - userId:', userIdFromStorage ? userIdFromStorage : '不存在');
             
             if (token && userDataStr) {
                 try {
@@ -523,26 +533,33 @@ document.addEventListener('DOMContentLoaded', function () {
                              parsedUserData.id || 
                              parsedUserData.email;
                     userData = parsedUserData;
-                    console.log('📦 使用localStorage获取用户信息:', userId);
+                    console.log('✅ 使用localStorage获取用户信息:', userId);
                 } catch (error) {
-                    console.error('Error parsing user data:', error);
+                    console.error('❌ 解析 userData 失败:', error);
                 }
             } else if (userIdFromStorage) {
                 userId = userIdFromStorage;
+                console.log('📦 仅找到 userId:', userId);
             }
         }
         
+        console.log('📊 最终用户检查结果:');
+        console.log('   userId:', userId || '无');
+        console.log('   userData:', userData ? '存在' : '无');
+        
         // 加载用户profile
         if (userId) {
+            console.log('✅ 找到用户ID，开始加载 profile...');
             try {
                 // 尝试从API加载
                 const profile = await getUserProfile(userId);
+                console.log('✅ 成功获取 profile，准备显示...');
                 displayProfile(profile, userId);
             } catch (error) {
-                console.error('Error loading current user profile:', error);
+                console.error('❌ 加载 profile 失败:', error);
                 // 回退到显示基本信息
                 if (userData) {
-                    console.log('📦 Falling back to cached user data');
+                    console.log('📦 回退到使用缓存的用户数据');
                     const fallbackProfile = {
                         userId: userId,
                         displayName: userData.name || userData.nick_name || userData.display_name || userData.email?.split('@')[0] || 'User',
@@ -556,6 +573,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         membershipTier: userData.membershipTier || 'free',
                         membershipName: userData.membershipName || 'Free'
                     };
+                    console.log('📦 回退 profile 数据:', fallbackProfile);
                     displayProfile(fallbackProfile, userId);
                     
                     // 显示网络提示
@@ -570,12 +588,36 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     }
                 } else {
-                    // 如果连缓存数据都没有，显示空状态
-                    document.getElementById('profile-empty').style.display = 'block';
+                    console.error('❌ 没有缓存数据，但有 userId，显示空状态');
+                    // 即使没有缓存数据，也显示一个最小的 profile
+                    const minimalProfile = {
+                        userId: userId,
+                        displayName: userId.split('-')[0] || 'User',
+                        email: '',
+                        avatarUrl: '',
+                        createdAt: new Date().toISOString(),
+                        fishCount: 0,
+                        totalUpvotes: 0,
+                        reputationScore: 0,
+                        favoriteCount: 0,
+                        membershipTier: 'free',
+                        membershipName: 'Free'
+                    };
+                    displayProfile(minimalProfile, userId);
+                    
+                    const errorDiv = document.getElementById('error');
+                    if (errorDiv) {
+                        errorDiv.textContent = '⚠️ Could not load full profile. Some information may be missing.';
+                        errorDiv.style.display = 'block';
+                        errorDiv.style.background = '#fff3cd';
+                        errorDiv.style.color = '#856404';
+                        errorDiv.style.border = '1px solid #ffc107';
+                    }
                 }
             }
         } else {
             // 没有用户ID，显示空状态
+            console.log('❌ 没有找到用户ID，显示空状态');
             document.getElementById('profile-empty').style.display = 'block';
         }
     }

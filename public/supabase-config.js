@@ -31,13 +31,14 @@ window.supabaseConfigReady = false;
       throw new Error('Failed to load config from API');
     }
   } catch (error) {
-    // 如果API加载失败，使用占位符（需要手动配置）
+    // 如果API加载失败，禁用Supabase认证
     console.warn('⚠️ Unable to load Supabase config:', error.message);
-    console.warn('📝 Please configure environment variables or manually set window.SUPABASE_URL and window.SUPABASE_ANON_KEY');
+    console.warn('📝 Supabase authentication disabled - app will work in limited mode');
     
-    // 占位符
-    window.SUPABASE_URL = window.SUPABASE_URL || 'YOUR_SUPABASE_URL';
-    window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+    // 设置为 null 表示禁用（不使用无效的占位符）
+    window.SUPABASE_URL = null;
+    window.SUPABASE_ANON_KEY = null;
+    window.SUPABASE_DISABLED = true;
     window.supabaseConfigReady = true;
     window.dispatchEvent(new Event('supabaseConfigReady'));
   }

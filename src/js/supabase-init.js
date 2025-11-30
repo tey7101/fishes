@@ -31,8 +31,15 @@ async function initializeSupabaseClient() {
     }
   }
   
-  const SUPABASE_URL = window.SUPABASE_URL || 'YOUR_SUPABASE_URL';
-  const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+  const SUPABASE_URL = window.SUPABASE_URL;
+  const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
+  
+  // 如果Supabase被禁用，跳过初始化
+  if (window.SUPABASE_DISABLED) {
+    console.warn('⚠️ Supabase is disabled - authentication features unavailable');
+    console.warn('💡 To enable: configure SUPABASE_URL and SUPABASE_ANON_KEY in .env file');
+    return null;
+  }
   
   if (!window.supabase?.createClient) {
     console.error('⚠️ Supabase SDK not loaded after 10 seconds');

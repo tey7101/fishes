@@ -9,7 +9,7 @@
         <loc>https://fishtalk.app/</loc>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
-        <lastmod>2025-10-30</lastmod>
+        <lastmod>2025-11-30</lastmod>
     </url>
     
     <!-- Fish tank page -->
@@ -17,7 +17,23 @@
         <loc>https://fishtalk.app/tank.html</loc>
         <changefreq>hourly</changefreq>
         <priority>0.9</priority>
-        <lastmod>2025-10-30</lastmod>
+        <lastmod>2025-11-30</lastmod>
+    </url>
+    
+    <!-- Talking Fish Page - NEW -->
+    <url>
+        <loc>https://fishtalk.app/talking-fish.html</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+        <lastmod>2025-11-30</lastmod>
+    </url>
+    
+    <!-- AI Fish Page - NEW -->
+    <url>
+        <loc>https://fishtalk.app/ai-fish.html</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+        <lastmod>2025-11-30</lastmod>
     </url>
     
     <!-- Rankings page -->
@@ -25,7 +41,7 @@
         <loc>https://fishtalk.app/rank.html</loc>
         <changefreq>hourly</changefreq>
         <priority>0.9</priority>
-        <lastmod>2025-10-30</lastmod>
+        <lastmod>2025-11-30</lastmod>
     </url>
     
     <!-- Private Tank (unified with tank.html) -->
@@ -52,28 +68,28 @@
         <loc>https://fishtalk.app/how-to-draw-a-fish.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
-        <lastmod>2025-10-30</lastmod>
+        <lastmod>2025-11-30</lastmod>
     </url>
     
     <url>
         <loc>https://fishtalk.app/fish-drawing-game.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
-        <lastmod>2025-10-30</lastmod>
+        <lastmod>2025-11-30</lastmod>
     </url>
     
     <url>
         <loc>https://fishtalk.app/about.html</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
-        <lastmod>2025-10-30</lastmod>
+        <lastmod>2025-11-30</lastmod>
     </url>
     
     <url>
         <loc>https://fishtalk.app/faq.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-        <lastmod>2025-10-30</lastmod>
+        <lastmod>2025-11-30</lastmod>
     </url>
     
     <!-- Social Feature Pages -->
@@ -81,21 +97,21 @@
         <loc>https://fishtalk.app/fish-doodle-community.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
-        <lastmod>2025-10-30</lastmod>
+        <lastmod>2025-11-30</lastmod>
     </url>
     
     <url>
         <loc>https://fishtalk.app/share-fish-doodle.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-        <lastmod>2025-10-30</lastmod>
+        <lastmod>2025-11-30</lastmod>
     </url>
     
     <url>
         <loc>https://fishtalk.app/weird-fish-drawings.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
-        <lastmod>2025-10-30</lastmod>
+        <lastmod>2025-11-30</lastmod>
     </url>
     
     <!-- Tutorial Pages -->
@@ -103,7 +119,7 @@
         <loc>https://fishtalk.app/tutorials/easy-fish-drawing-ideas.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
-        <lastmod>2025-10-30</lastmod>
+        <lastmod>2025-11-30</lastmod>
     </url>
 
 </urlset>

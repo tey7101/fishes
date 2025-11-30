@@ -1520,3 +1520,12 @@ button.game-btn {
     right: 12px;
   }
 }
+
+/* ===== 管理员专用按钮 - 默认隐藏，防止闪现 ===== */
+/* Test按钮仅在管理员权限确认后通过JavaScript显示 */
+#nav-test-btn,
+a[href="test-center.html"].game-btn-white {
+  display: none !important;
+}
+
+/* 当JavaScript确认为管理员后，会通过内联样式覆盖此规则 */

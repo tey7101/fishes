@@ -318,7 +318,7 @@
             }
         }
         
-        /* 游戏风格选择�?*/
+        /* 游戏风格选择�?*/
         .game-select {
             transition: all 0.2s ease;
         }
@@ -356,12 +356,12 @@
                 0 0 12px rgba(255, 255, 255, 0.5);
         }
         
-        /* 选择器内的图�?*/
+        /* 选择器内的图�?*/
         .game-select option {
             font-weight: 600;
         }
         
-        /* 控制栏内的图�?- 3D立体风格，无边框 */
+        /* 控制栏内的图�?- 3D立体风格，无边框 */
         .game-control-icon {
             display: inline-flex;
             align-items: center;
@@ -417,7 +417,7 @@
                 0 0 8px rgba(255, 255, 255, 0.3);
         }
         
-        /* 鱼数量图�?- 3D立体风格，无边框 */
+        /* 鱼数量图�?- 3D立体风格，无边框 */
         .game-fish-icon {
             display: inline-flex;
             align-items: center;
@@ -441,7 +441,7 @@
             position: relative;
         }
         
-        /* 鱼图标顶部高光效�?*/
+        /* 鱼图标顶部高光效�?*/
         .game-fish-icon::before {
             content: '';
             position: absolute;
@@ -658,7 +658,7 @@
     </button>
   </nav>
 
-  <!-- 侧边栏菜�?-->
+  <!-- 侧边栏菜�?-->
   <div id="sidebar-menu" class="sidebar-menu">
     <div class="sidebar-header">
       <h3>🐟 Menu</h3>
@@ -674,7 +674,7 @@
         <span>Global Tank</span>
       </a>
       <a href="tank.html?view=my" class="sidebar-link">
-        <span class="sidebar-icon">�?/span>
+        <span class="sidebar-icon">🏠</span>
         <span>My Tank</span>
       </a>
       <a href="rank.html" class="sidebar-link">
@@ -721,7 +721,7 @@
           <option value="English" style="background: #333; color: white;">English</option>
           <option value="French" style="background: #333; color: white;">French</option>
           <option value="Spanish" style="background: #333; color: white;">Spanish</option>
-          <option value="简体中�? style="background: #333; color: white;">简体中�?/option>
+          <option value="简体中�? style="background: #333; color: white;">简体中�?/option>
           <option value="繁體中文" style="background: #333; color: white;">繁體中文</option>
           <option value="Japanese" style="background: #333; color: white;">Japanese</option>
           <option value="Korean" style="background: #333; color: white;">Korean</option>
@@ -734,7 +734,7 @@
         <div style="padding: 8px 16px; margin-bottom: 8px;">
           <select id="tank-sort-sidebar" class="game-select" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 12px; cursor: pointer; background: linear-gradient(180deg, rgba(74, 144, 226, 0.9) 0%, rgba(53, 122, 189, 0.9) 100%); color: white; font-weight: 700; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 12 12\'><path fill=\'%23ffffff\' d=\'M6 9L1 4h10z\'/></svg>'); background-repeat: no-repeat; background-position: right 8px center; padding-right: 32px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">
             <option value="recent" style="background: rgba(74, 144, 226, 0.95); color: white;">🆕 Most Recent</option>
-            <option value="popular" style="background: rgba(74, 144, 226, 0.95); color: white;">�?Most Popular</option>
+            <option value="popular" style="background: rgba(74, 144, 226, 0.95); color: white;">�?Most Popular</option>
             <option value="random" style="background: rgba(74, 144, 226, 0.95); color: white;">🎲 Random</option>
           </select>
         </div>
@@ -753,7 +753,7 @@
     </nav>
   </div>
   
-  <!-- 侧边栏遮�?-->
+  <!-- 侧边栏遮�?-->
   <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
   <!-- 海洋风格背景气泡 -->
@@ -763,14 +763,14 @@
   <div style="position: relative; width: 100%;">
     <!-- 鱼缸容器 -->
     <div class="tank-wrapper" id="tank-wrapper-main" style="transition: margin-right 0.3s ease;">
-      <!-- 装饰�?-->
+      <!-- 装饰�?-->
       <div class="tank-decorations">
         <!-- 水草 -->
         <div class="seaweed seaweed-left"></div>
         <div class="seaweed seaweed-right"></div>
         <!-- 底部沙地 -->
         <div class="sand-layer"></div>
-        <!-- 装饰�?-->
+        <!-- 装饰�?-->
         <div class="decoration shell"></div>
         <div class="decoration starfish"></div>
         <div class="decoration rock"></div>
@@ -787,9 +787,9 @@
       </div>
     </div>
     
-    <!-- 聊天面板 (右下角位�? -->
+    <!-- 聊天面板 (右下角位�? -->
     <div class="chat-panel" id="chat-panel" style="position: fixed; right: -420px; bottom: 20px; width: 400px; max-height: 70vh; background: linear-gradient(#FFF9E6 0%, #FFF4D6 100%); border-radius: 16px; padding: 0; box-shadow: 0 8px 0 rgba(0, 0, 0, 0.2), 0 16px 40px rgba(0, 0, 0, 0.4); border: 3px solid #A5B4FC; display: none; flex-direction: column; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 999; visibility: hidden; overflow: hidden;">
-      <!-- 深色标题�?-->
+      <!-- 深色标题�?-->
       <div style="background: linear-gradient(#1A1A1D 0%, #0F0F0F 50%, #050505 100%); padding: 8px 16px; border-bottom: 2px solid #000; position: relative; box-shadow: 0 2px 4px inset rgba(0, 0, 0, 0.5), 0 2px 0 rgba(255, 255, 255, 0.1); display: flex; align-items: center; gap: 8px;">
         <div style="font-size: 20px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));"><img src="icons/chat.svg" alt="Chat" style="width: 20px; height: 20px; object-fit: contain;"></div>
         <h3 style="margin: 0; color: #FFFFFF; font-size: 16px; font-weight: 900; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, 0.2); letter-spacing: 1px; flex: 1;">Fish Group Chat</h3>
@@ -818,7 +818,7 @@
               onmouseup="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 0 rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15)';"
               onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 0 rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15)';"
               title="Clear all messages">
-              🗑�?Clear
+              🗑�?Clear
             </button>
             <input 
               type="text" 
@@ -838,7 +838,7 @@
               onmouseup="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 0 rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.15)';"
               onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 0 rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.15)';"
             >
-              SEND �?            </button>
+              SEND �?            </button>
           </div>
           <div id="user-chat-error" style="color: #C0392B; font-size: 12px; font-weight: 600; margin-top: 10px; padding: 12px 16px; background: rgba(252, 92, 101, 0.1); border-radius: 12px; border: 2px solid rgba(192, 57, 43, 0.3); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1); display: none;"></div>
         </div>
@@ -859,7 +859,7 @@
     </div>
   </div>
   
-  <!-- 加载指示�?-->
+  <!-- 加载指示�?-->
   <div id="loading-indicator" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; z-index: 1000; background: rgba(255, 255, 255, 0.95); padding: 20px 40px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);">
     <div style="text-align: center; color: #6366F1; font-weight: 600;">Loading...</div>
   </div>
@@ -1305,7 +1305,7 @@
           sortSelectSidebar.addEventListener('change', () => {
             const selectedSort = sortSelectSidebar.value;
             
-            // 🆕 保存排序选择�?localStorage
+            // 🆕 保存排序选择�?localStorage
             localStorage.setItem('tankSortPreference', selectedSort);
             
             if (typeof loadFishIntoTank === 'function') {
@@ -1377,7 +1377,7 @@
                     } else {
                       // 如果获取失败，设置默认语言为English
                       userLanguageSelect.value = 'English';
-                      console.log('🔄 设置默认语言为English（API调用失败�?);
+                      console.log('🔄 设置默认语言为English（API调用失败�?);
                     }
                   } else {
                     // 用户未登录，设置默认语言为English
@@ -1395,7 +1395,7 @@
                 console.log('🔄 getCurrentUser函数不存在，设置默认语言为English');
               }
             } catch (error) {
-              console.error('初始化用户语言时出�?', error);
+              console.error('初始化用户语言时出�?', error);
               // 出错时也设置默认语言为English
               userLanguageSelect.value = 'English';
               console.log('🔄 设置默认语言为English（出现错误）');
@@ -1434,14 +1434,14 @@
                   });
                   
                   if (response.ok) {
-                    console.log('�?用户语言已保存到数据�?', newLanguage);
+                    console.log('�?用户语言已保存到数据�?', newLanguage);
                   } else {
-                    console.error('�?保存用户语言失败:', response.status);
+                    console.error('�?保存用户语言失败:', response.status);
                   }
                 }
               }
             } catch (error) {
-              console.error('保存用户语言时出�?', error);
+              console.error('保存用户语言时出�?', error);
             }
           });
         }
@@ -1488,9 +1488,9 @@
             return;
           }
           
-          // Find user's fish in the global tank - 支持多种用户ID字段�?          console.log('🔍 [tank.html] 当前用户:', user);
-          console.log('🔍 [tank.html] 鱼缸中的鱼数�?', window.fishes.length);
-          console.log('🔍 [tank.html] 鱼缸中的�?', window.fishes.map(f => ({
+          // Find user's fish in the global tank - 支持多种用户ID字段�?          console.log('🔍 [tank.html] 当前用户:', user);
+          console.log('🔍 [tank.html] 鱼缸中的鱼数�?', window.fishes.length);
+          console.log('🔍 [tank.html] 鱼缸中的�?', window.fishes.map(f => ({
             id: f.docId || f.id,
             artist: f.artist,
             userId: f.userId,
@@ -1501,8 +1501,8 @@
           })));
           
           const userFish = window.fishes.filter(fish => {
-            // 尝试所有可能的用户ID字段�?            const fishUserId = fish.user_id || fish.UserId || fish.userId || fish.owner_id || fish.ownerId;
-            console.log(`🔍 [tank.html] 比较: �?${fish.docId || fish.id} 的userId=${fishUserId}, 当前用户=${user.id}`);
+            // 尝试所有可能的用户ID字段�?            const fishUserId = fish.user_id || fish.UserId || fish.userId || fish.owner_id || fish.ownerId;
+            console.log(`🔍 [tank.html] 比较: �?${fish.docId || fish.id} 的userId=${fishUserId}, 当前用户=${user.id}`);
             return fishUserId === user.id;
           });
           
@@ -1522,7 +1522,7 @@
           
           // Show loading state
           const originalText = tankBattleBtn.innerHTML;
-          tankBattleBtn.innerHTML = '�?Entering...';
+          tankBattleBtn.innerHTML = '�?Entering...';
           tankBattleBtn.disabled = true;
           
           // Check if BattleClient is loaded
@@ -1537,34 +1537,34 @@
           const result = await BattleClient.enterBattleMode(user.id, fishId);
           
           if (result.success) {
-            console.log('�?成功进入战斗模式API');
+            console.log('�?成功进入战斗模式API');
             
-            // 设置战斗模式标志 - 开始碰撞检�?            window.isBattleMode = true;
-            console.log('🎮 战斗模式已启用，开始碰撞检�?);
+            // 设置战斗模式标志 - 开始碰撞检�?            window.isBattleMode = true;
+            console.log('🎮 战斗模式已启用，开始碰撞检�?);
             
-            // 重新加载鱼缸为战斗模�?            if (typeof window.reloadTankForBattleMode === 'function') {
+            // 重新加载鱼缸为战斗模�?            if (typeof window.reloadTankForBattleMode === 'function') {
               await window.reloadTankForBattleMode(20); // 加载20条战斗鱼
             }
             
-            alert(`�?Successfully entered battle mode!\n\nCurrent online: ${result.currentUsers}/${result.maxUsers}\nFish: ${selectedFish.Artist || selectedFish.artist || 'Anonymous'}\n\n⚔️ Battles will automatically occur in the tank!\nWhen your fish collides with others, battle animations will trigger.`);
-            tankBattleBtn.innerHTML = '�?In Battle';
+            alert(`�?Successfully entered battle mode!\n\nCurrent online: ${result.currentUsers}/${result.maxUsers}\nFish: ${selectedFish.Artist || selectedFish.artist || 'Anonymous'}\n\n⚔️ Battles will automatically occur in the tank!\nWhen your fish collides with others, battle animations will trigger.`);
+            tankBattleBtn.innerHTML = '�?In Battle';
             tankBattleBtn.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
             tankBattleBtn.disabled = false;
             
             // 战斗在当前鱼缸页面内实时进行，无需跳转
           } else if (result.inQueue) {
-            alert(`�?Battle mode is full!\n\nJoined queue: Position ${result.position}\nEstimated wait: ${result.estimatedWait} seconds`);
+            alert(`�?Battle mode is full!\n\nJoined queue: Position ${result.position}\nEstimated wait: ${result.estimatedWait} seconds`);
             tankBattleBtn.innerHTML = originalText;
             tankBattleBtn.disabled = false;
           } else {
-            alert(`�?Failed to enter: ${result.error || result.message}`);
+            alert(`�?Failed to enter: ${result.error || result.message}`);
             tankBattleBtn.innerHTML = originalText;
             tankBattleBtn.disabled = false;
           }
           
         } catch (error) {
           console.error('进入战斗模式错误:', error);
-          alert(`�?Error: ${error.message}`);
+          alert(`�?Error: ${error.message}`);
           
           if (tankBattleBtn) {
             tankBattleBtn.innerHTML = '⚔️ Battle';
@@ -1622,7 +1622,7 @@
                 if (element) {
                   const rect = element.getBoundingClientRect();
                   const isVisible = rect.width > 0 && rect.height > 0;
-                  console.log(`  ${name}: �?Found, visible: ${isVisible}, position: (${rect.left}, ${rect.top}), size: ${rect.width}x${rect.height}`);
+                  console.log(`  ${name}: �?Found, visible: ${isVisible}, position: (${rect.left}, ${rect.top}), size: ${rect.width}x${rect.height}`);
                   
                    // Force visibility with correct styles
                    if (element.id === 'tank-share-btn-sidebar' || element.id === 'refresh-tank-sidebar') {
@@ -1642,7 +1642,7 @@
                      element.style.opacity = '1';
                    }
                 } else {
-                  console.error(`  ${name}: �?Missing!`);
+                  console.error(`  ${name}: �?Missing!`);
                 }
               }
             }
@@ -1654,16 +1654,16 @@
           });
         }
         
-        // 根据fish_talk字段直接控制聊天面板的显�?        window.updateChatPanelVisibility = async function() {
-          console.log('🔍 updateChatPanelVisibility 被调�?);
+        // 根据fish_talk字段直接控制聊天面板的显�?        window.updateChatPanelVisibility = async function() {
+          console.log('🔍 updateChatPanelVisibility 被调�?);
           const chatPanel = document.getElementById('chat-panel');
           const chatReopenBtn = document.getElementById('chat-reopen-btn');
           
           if (!chatPanel) {
-            console.error('�?找不到聊天面板元�?chat-panel');
+            console.error('�?找不到聊天面板元�?chat-panel');
             return;
           }
-          console.log('�?找到聊天面板元素');
+          console.log('�?找到聊天面板元素');
           
           let fishTalkEnabled = false;
           
@@ -1672,7 +1672,7 @@
             if (window.supabaseAuth && typeof window.supabaseAuth.getCurrentUser === 'function') {
               const user = await window.supabaseAuth.getCurrentUser();
               if (user) {
-                // 从数据库获取fish_talk状�?                const backendUrl = window.BACKEND_URL || '';
+                // 从数据库获取fish_talk状�?                const backendUrl = window.BACKEND_URL || '';
                 const token = localStorage.getItem('userToken');
                 if (token) {
                   const profileResponse = await fetch(`${backendUrl}/api/profile/${encodeURIComponent(user.id)}`, {
@@ -1685,7 +1685,7 @@
                   if (profileResponse.ok) {
                     const profileData = await profileResponse.json();
                     fishTalkEnabled = profileData.user?.fish_talk || false;
-                    console.log('🔄 从数据库加载Fish Talk状态用于聊天面板显�?', fishTalkEnabled);
+                    console.log('🔄 从数据库加载Fish Talk状态用于聊天面板显�?', fishTalkEnabled);
                   }
                 }
               }
@@ -1695,7 +1695,7 @@
             // 回退到localStorage
             const savedPreference = localStorage.getItem('groupChatEnabled');
             fishTalkEnabled = savedPreference === 'true';
-            console.log('🔄 回退到localStorage，Fish Talk状�?', fishTalkEnabled, '(savedPreference:', savedPreference, ')');
+            console.log('🔄 回退到localStorage，Fish Talk状�?', fishTalkEnabled, '(savedPreference:', savedPreference, ')');
           }
           
           // 根据fish_talk状态显示或隐藏聊天面板
@@ -1708,19 +1708,19 @@
               // 显示聊天面板
               chatPanel.style.display = 'flex';
               chatPanel.style.visibility = 'visible';
-              // 使用setTimeout确保display先生�?              setTimeout(() => {
+              // 使用setTimeout确保display先生�?              setTimeout(() => {
                 chatPanel.style.right = '0';
               }, 10);
               // 隐藏重新打开按钮
               if (chatReopenBtn) {
                 chatReopenBtn.style.display = 'none';
               }
-              // 同步更新全局状态变�?              if (window.isChatPanelOpen !== undefined) {
+              // 同步更新全局状态变�?              if (window.isChatPanelOpen !== undefined) {
                 window.isChatPanelOpen = true;
               }
-              console.log('�?聊天面板已显示（Fish Talk已启用，用户之前打开�?);
+              console.log('�?聊天面板已显示（Fish Talk已启用，用户之前打开�?);
               
-              // 滚动到底�?              setTimeout(() => {
+              // 滚动到底�?              setTimeout(() => {
                 if (typeof scrollChatToBottom === 'function') {
                   scrollChatToBottom();
                 }
@@ -1733,10 +1733,10 @@
               if (chatReopenBtn) {
                 chatReopenBtn.style.display = 'flex';
               }
-              // 同步更新全局状态变�?              if (window.isChatPanelOpen !== undefined) {
+              // 同步更新全局状态变�?              if (window.isChatPanelOpen !== undefined) {
                 window.isChatPanelOpen = false;
               }
-              console.log('�?聊天面板已隐藏（Fish Talk已启用，但用户之前关闭）');
+              console.log('�?聊天面板已隐藏（Fish Talk已启用，但用户之前关闭）');
             }
           } else {
             // Fish Talk禁用时，隐藏聊天面板和重新打开按钮
@@ -1744,32 +1744,32 @@
             if (chatReopenBtn) {
               chatReopenBtn.style.display = 'none';
             }
-            // 延迟隐藏，等待动画完�?            setTimeout(() => {
+            // 延迟隐藏，等待动画完�?            setTimeout(() => {
               chatPanel.style.display = 'none';
               chatPanel.style.visibility = 'hidden';
             }, 400);
-            // 同步更新全局状态变�?            if (window.isChatPanelOpen !== undefined) {
+            // 同步更新全局状态变�?            if (window.isChatPanelOpen !== undefined) {
               window.isChatPanelOpen = false;
             }
-            console.log('�?聊天面板已隐藏（Fish Talk未启用）');
+            console.log('�?聊天面板已隐藏（Fish Talk未启用）');
           }
         };
         
-        // 页面加载完成后检查fish_talk状�?        document.addEventListener('DOMContentLoaded', function() {
-          // 延迟执行，确保所有相关脚本都已加�?          setTimeout(() => {
-            console.log('🔄 页面加载完成，开始检查聊天面板显示状�?);
+        // 页面加载完成后检查fish_talk状�?        document.addEventListener('DOMContentLoaded', function() {
+          // 延迟执行，确保所有相关脚本都已加�?          setTimeout(() => {
+            console.log('🔄 页面加载完成，开始检查聊天面板显示状�?);
             window.updateChatPanelVisibility();
           }, 1000);
         });
         
-        // 也在window.onload时检查，确保所有资源都已加�?        window.addEventListener('load', function() {
+        // 也在window.onload时检查，确保所有资源都已加�?        window.addEventListener('load', function() {
           setTimeout(() => {
-            console.log('🔄 所有资源加载完成，再次检查聊天面板显示状�?);
+            console.log('🔄 所有资源加载完成，再次检查聊天面板显示状�?);
             window.updateChatPanelVisibility();
           }, 1500);
         });
         
-        // 监听Fish Talk状态变化事�?        window.addEventListener('groupChatEnabledChanged', function(event) {
+        // 监听Fish Talk状态变化事�?        window.addEventListener('groupChatEnabledChanged', function(event) {
           console.log('🔄 检测到Fish Talk状态变化，更新聊天面板显示:', event.detail?.enabled);
           setTimeout(() => {
             window.updateChatPanelVisibility();
@@ -1778,7 +1778,7 @@
         
         // 提供手动触发函数用于调试
         window.debugChatPanel = function() {
-          console.log('🔧 手动触发聊天面板显示检�?);
+          console.log('🔧 手动触发聊天面板显示检�?);
           const chatPanel = document.getElementById('chat-panel');
           if (chatPanel) {
             console.log('当前聊天面板样式:', {

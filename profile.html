@@ -65,15 +65,15 @@
         <span>ℹ️</span>
         <span>About</span>
       </a>
-      <a href="test-center.html" class="game-btn game-btn-white">
+      <a href="test-center.html" class="game-btn game-btn-white" id="nav-test-btn" style="display: none;">
         <span>🧪</span>
         <span>Test</span>
       </a>
-      <!-- 登录按钮和用户菜单将�?auth-ui.js 动态插�?-->
+      <!-- 登录按钮和用户菜单将由 auth-ui.js 动态插入 -->
     </div>
   </nav>
 
-  <!-- 侧边栏菜�?-->
+  <!-- 侧边栏菜单 -->
   <div id="sidebar-menu" class="sidebar-menu">
     <div class="sidebar-header">
       <h3>🐟 Menu</h3>
@@ -89,7 +89,7 @@
         <span>Global Tank</span>
       </a>
       <a href="tank.html?view=my" class="sidebar-link">
-        <span class="sidebar-icon">�?/span>
+        <span class="sidebar-icon">🏠</span>
         <span>My Tank</span>
       </a>
       <a href="rank.html" class="sidebar-link">
@@ -111,7 +111,7 @@
     </nav>
   </div>
   
-  <!-- 侧边栏遮�?-->
+  <!-- 侧边栏遮罩 -->
   <div id="sidebar-overlay" class="sidebar-overlay"></div>
     
     <div class="profile-container" style="padding-top: 70px;">
@@ -199,7 +199,7 @@
           script.src = src;
           script.onload = () => {
             loaded = true;
-            console.log('�?Supabase SDK loaded from:', src);
+            console.log('✓ Supabase SDK loaded from:', src);
             resolve();
           };
           script.onerror = () => {
@@ -218,7 +218,7 @@
           } catch (error) {
             currentIndex++;
             if (currentIndex >= cdnSources.length) {
-              console.error('�?All CDN sources failed. Please check your network connection.');
+              console.error('✗ All CDN sources failed. Please check your network connection.');
               console.error('💡 You may need to:');
               console.error('   1. Check your internet connection');
               console.error('   2. Disable browser tracking prevention');

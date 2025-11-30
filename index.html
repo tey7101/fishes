@@ -172,11 +172,11 @@
         <span>🧪</span>
         <span>Test</span>
       </a>
-      <!-- 登录按钮和用户菜单将�?auth-ui.js 动态插�?-->
+      <!-- 登录按钮和用户菜单将由 auth-ui.js 动态插入 -->
     </div>
   </nav>
 
-  <!-- 侧边栏菜�?-->
+  <!-- 侧边栏菜单 -->
   <div id="sidebar-menu" class="sidebar-menu">
     <div class="sidebar-header">
       <h3>🐟 Menu</h3>
@@ -192,7 +192,7 @@
         <span>Global Tank</span>
       </a>
       <a href="tank.html?view=my" class="sidebar-link">
-        <span class="sidebar-icon">�?/span>
+        <span class="sidebar-icon">🏠</span>
         <span>My Tank</span>
       </a>
       <a href="rank.html" class="sidebar-link">
@@ -214,7 +214,7 @@
     </nav>
   </div>
   
-  <!-- 侧边栏遮�?-->
+  <!-- 侧边栏遮罩 -->
   <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
   <!-- Coming Soon Banner - Removed (feature now live) -->
@@ -255,7 +255,7 @@
           <div id="drawing-particles"></div>
         </div>
         
-        <!-- ONNX 模型加载进度�?-->
+        <!-- ONNX 模型加载进度条 -->
         <div id="onnx-loading-progress" style="display: none; max-width: 600px; margin: 8px auto; padding: 8px 16px; background: rgba(0, 0, 0, 0.7); border-radius: 6px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
             <span style="color: white; font-size: 12px; font-weight: 500;">AI loading</span>
@@ -278,16 +278,16 @@
         <!-- 导航链接 -->
         <nav role="navigation" aria-label="Action buttons" class="game-btn-group">
           <a href="tank.html" class="game-btn game-btn-blue" title="View Community Fish Tank">
-            <span>🐠</span> <span>Global Tank</span>
+            <span class="sidebar-icon">🐠</span> <span>Global Tank</span>
           </a>
           <a href="rank.html" class="game-btn game-btn-blue" title="Vote on fish drawings">
-            <span>🏆</span> <span>Rank</span>
+            <span class="sidebar-icon">🏆</span> <span>Rank</span>
           </a>
           <a href="tank.html?view=my" id="my-tanks-link" class="game-btn game-btn-blue" title="Create custom fish tanks">
-            <span>🏆</span> <span>My Tank</span>
+            <span class="sidebar-icon">🏠</span> <span>My Tank</span>
           </a>
           <button id="main-share-btn" class="game-btn game-btn-blue" title="Share this tool">
-            <span>📤</span> <span>Share</span>
+            <span class="sidebar-icon">📤</span> <span>Share</span>
           </button>
         </nav>
       </section>
@@ -382,7 +382,7 @@
       
       async function tryLoadONNX() {
         console.log('开始加载ONNX Runtime...');
-        showLoading('加载AI组件...');
+        // showLoading('加载AI组件...');
         
         while (currentIndex < onnxSources.length && !loaded) {
           try {
@@ -476,7 +476,7 @@
       
       async function tryLoadSupabase() {
         console.log('开始加载Supabase SDK...');
-        showLoading('加载登录组件...');
+        // showLoading('加载登录组件...');
         
         while (currentIndex < cdnSources.length && !loaded) {
           const source = cdnSources[currentIndex];

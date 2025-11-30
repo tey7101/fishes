@@ -457,23 +457,6 @@ function renderPlanCards() {
     container.innerHTML = '';
     
     // 检查是否有测试套餐
-    const hasTestPlans = memberTypes.some(plan => plan.id.startsWith('test_'));
-    
-    // 如果有测试套餐，在顶部添加提示
-    if (hasTestPlans) {
-        const notice = document.createElement('div');
-        notice.className = 'test-plan-notice';
-        notice.innerHTML = `
-            <div class="test-plan-notice-title">🧪 测试套餐</div>
-            <div class="test-plan-notice-text">
-                以下橙色边框的测试套餐用于在生产环境中测试真实支付流程。<br>
-                价格仅 $0.01，支付成功后会创建真实的订阅和支付记录。<br>
-                测试完成后请在 Stripe/PayPal Dashboard 中取消订阅。
-            </div>
-        `;
-        container.parentElement.insertBefore(notice, container);
-    }
-    
     memberTypes.forEach(plan => {
         const card = createPlanCard(plan);
         container.appendChild(card);

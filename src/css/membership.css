@@ -787,28 +787,4 @@ label[for*="stripe"].payment-method-button:after {
   color: #FF9500;
 }
 
-/* 测试套餐提示信息 */
-.test-plan-notice {
-  background: #FFF3E0;
-  border: 2px solid #FF9500;
-  border-radius: 12px;
-  padding: 16px;
-  margin: 20px auto 40px auto;
-  max-width: 800px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.15);
-}
-
-.test-plan-notice-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #FF6F00;
-  margin-bottom: 8px;
-}
-
-.test-plan-notice-text {
-  font-size: 14px;
-  color: #666;
-  line-height: 1.6;
-}
 

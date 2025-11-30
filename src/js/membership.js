@@ -20,10 +20,13 @@ async function initMembershipPage() {
             if (currentUser) {
                 console.log('✅ Current user:', currentUser.id);
                 await loadCurrentMembership();
+            } else {
+                console.log('⚠️ No user logged in');
             }
         }
         
-        // 加载会员套餐数据
+        // 🔧 确保用户信息加载完成后再加载会员套餐数据
+        console.log('📊 Loading member types, currentUser:', currentUser?.id || 'null');
         await loadMemberTypes();
         
         // 渲染套餐卡片
@@ -45,11 +48,15 @@ async function initMembershipPage() {
                     // 用户登录
                     currentUser = session.user;
                     await loadCurrentMembership();
+                    // 🔧 重新加载会员类型以显示测试套餐
+                    await loadMemberTypes();
                     renderPlanCards(); // 重新渲染以更新按钮状态
                 } else if (event === 'SIGNED_OUT') {
                     // 用户登出
                     currentUser = null;
                     currentPlan = 'free';
+                    // 🔧 重新加载会员类型以隐藏测试套餐
+                    await loadMemberTypes();
                     renderPlanCards(); // 重新渲染以更新按钮状态
                 }
             });
@@ -272,15 +279,27 @@ function showUpgradeSuccess(plan) {
 // 检查用户是否可以看到测试套餐
 // 测试套餐仅对特定测试用户可见
 function checkIfTestUser() {
-    if (!currentUser) return false;
-    
     // 允许看到测试套餐的用户ID
     const TEST_USER_ID = '11312701-f1d2-43f8-a13d-260eac812b7a';
+    
+    console.log('🔍 检查测试用户权限:', {
+        hasCurrentUser: !!currentUser,
+        currentUserId: currentUser?.id || 'null',
+        testUserId: TEST_USER_ID,
+        isMatch: currentUser?.id === TEST_USER_ID
+    });
+    
+    if (!currentUser) {
+        console.log('❌ 无当前用户，不显示测试套餐');
+        return false;
+    }
     
     const isTestUser = currentUser.id === TEST_USER_ID;
     
     if (isTestUser) {
-        console.log('🧪 当前用户是测试用户，显示测试套餐');
+        console.log('✅ 当前用户是测试用户，显示测试套餐');
+    } else {
+        console.log('❌ 当前用户不是测试用户，隐藏测试套餐');
     }
     
     return isTestUser;

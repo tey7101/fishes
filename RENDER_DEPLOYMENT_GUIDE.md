@@ -17,14 +17,14 @@
 #### Stripe 配置
 ```bash
 STRIPE_MODE=live
-STRIPE_LIVE_PUBLISHABLE_KEY=pk_live_51SWCbxPDwAHJE8Mhk3BXmMvhsFzb0BFNYllqJwG4cfDSzigCEqTIWkKusNHl7L7mCfBeV6onO7s8LHLfgvLWe61S00ZW0qf18d
-STRIPE_LIVE_SECRET_KEY=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
-STRIPE_LIVE_WEBHOOK_SECRET=稍后从Dashboard获取
+STRIPE_LIVE_PUBLISHABLE_KEY=从本地.env.local复制（pk_live_开头）
+STRIPE_LIVE_SECRET_KEY=从本地.env.local复制（sk_live_开头）
+STRIPE_LIVE_WEBHOOK_SECRET=稍后从Dashboard获取（whsec_开头）
 
 # 测试模式密钥（保留，便于切换）
-STRIPE_TEST_PUBLISHABLE_KEY=pk_test_51SWCbxPDwAHJE8MhS3I0H13WdezsbhlRIXUGW2EBIO7QV0pLiS9l4dJP40wlzlKNOxKwEeBEMYAoF6ZyHatrlV0T004Fy18RFg
-STRIPE_TEST_SECRET_KEY=sk_test_51SWCbxPDwAHJE8Mhv2wNhZfhnp1x88eEAdS3pJsHYh6jNpfEYM9xhFUFuNUJszxq3Yiq4qDwLXuJy26cMC65teJT00eCh5HGun
-STRIPE_TEST_WEBHOOK_SECRET=whsec_e6015e9986944eb6299277564656d53c60d2ca32191c3b02fdb974bbe228e49b
+STRIPE_TEST_PUBLISHABLE_KEY=从本地.env.local复制（pk_test_开头）
+STRIPE_TEST_SECRET_KEY=从本地.env.local复制（sk_test_开头）
+STRIPE_TEST_WEBHOOK_SECRET=从本地.env.local复制（whsec_开头）
 ```
 
 #### PayPal 配置
@@ -35,20 +35,20 @@ PAYPAL_PRODUCTION_CLIENT_SECRET=从本地.env.local复制
 PAYPAL_PRODUCTION_WEBHOOK_ID=稍后配置webhook后获取
 
 # Sandbox 配置（保留，便于切换）
-PAYPAL_CLIENT_ID=AbpmAMHy2abby1Wk-Ppygb87fgjIPzcCbVK5wWbDUA6q4fBGWUDJ2rCF7H5n0wzcODdskdCh4dzwi1JR
-PAYPAL_CLIENT_SECRET=EKkiEy3tgTrpFw0xZUV1Az5YMjvmB58BmjkHfDuwYFpZxyo53lvS5UyK9ki8pga1wpluRi2cZQA7Oeti
-PAYPAL_WEBHOOK_ID=3GD2049514067263H
+PAYPAL_CLIENT_ID=从本地.env.local复制（sandbox）
+PAYPAL_CLIENT_SECRET=从本地.env.local复制（sandbox）
+PAYPAL_WEBHOOK_ID=从本地.env.local复制（sandbox）
 ```
 
 #### Hasura 配置
 ```bash
-HASURA_GRAPHQL_ENDPOINT=http://hasura-fishart-1.weweknow.com/v1/graphql
-HASURA_ADMIN_SECRET=admin_secret
+HASURA_GRAPHQL_ENDPOINT=从本地.env.local复制
+HASURA_ADMIN_SECRET=从本地.env.local复制
 ```
 
 #### Supabase 配置
 ```bash
-SUPABASE_URL=https://xxeplxorhecwwhtrakzw.supabase.co
+SUPABASE_URL=从本地.env.local复制
 SUPABASE_ANON_KEY=从本地.env.local复制
 SUPABASE_SERVICE_ROLE_KEY=从本地.env.local复制
 ```

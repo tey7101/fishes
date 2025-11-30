@@ -1,7 +1,8 @@
-# 告诉 Cursor 不要忽略 .env 文件
-!.env.local
-!.env
-!.env.*
+# 环境变量文件（本地保留，不提交到 Git）
+.env.local
+.env
+.env.*
+!.env.example
 
 # Node modules
 node_modules/

@@ -207,14 +207,14 @@ class CommunityChatManager {
       
       // Call backend API for group chat (using Coze AI)
       // Pass current tank fish IDs to ensure only fish in the tank are selected
-      // Backend will determine language from database based on userId
+      // Backend will query user language from database
       const requestBody = {
         prompt: `Generate a "${topic}" conversation`,
         tankFishIds: currentTankFishIds, // Pass current tank fish IDs
         userId: currentUserId // Pass current user ID for initiator_user_id and language lookup
       };
       
-      console.log('🌐 [Community Chat] Backend will determine language from database for user:', currentUserId);
+      console.log('🌐 [Community Chat] Backend will query user language from database for user:', currentUserId);
       
       const response = await fetch('/api/fish-api?action=group-chat', {
         method: 'POST',

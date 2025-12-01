@@ -1404,9 +1404,11 @@ class AuthUI {
    */
   async updateTestButtonVisibility(user) {
     try {
-      // 等待 admin-auth.js 加载（最多等待2秒）
+      console.log('🔍 [Test Button] 开始检查管理员权限，用户:', user?.email || user?.id || '未提供');
+      
+      // 等待 admin-auth.js 加载（最多等待5秒）
       let attempts = 0;
-      const maxAttempts = 20;
+      const maxAttempts = 50;
       while (!window.adminAuth && attempts < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, 100));
         attempts++;
@@ -1414,23 +1416,34 @@ class AuthUI {
 
       // 检查 admin-auth.js 是否已加载
       if (!window.adminAuth) {
-        console.warn('⚠️ admin-auth.js not loaded, hiding test button');
+        console.warn('⚠️ [Test Button] admin-auth.js not loaded after 5 seconds, hiding test button');
         this.hideTestButton();
+        // 延迟重试一次
+        setTimeout(() => {
+          if (window.adminAuth) {
+            console.log('🔄 [Test Button] admin-auth.js 已加载，重试检查');
+            this.updateTestButtonVisibility(user);
+          }
+        }, 1000);
         return;
       }
 
+      console.log('✅ [Test Button] admin-auth.js 已加载，开始检查管理员权限');
+      
       // 检查管理员权限
-      const isAdmin = await window.adminAuth.checkAdminAccess();
+      const isAdmin = await window.adminAuth.checkAdminAccess(user);
+      
+      console.log('🔐 [Test Button] 管理员权限检查结果:', isAdmin);
       
       if (isAdmin) {
         this.showTestButton();
-        console.log('✅ Admin detected, showing test button');
+        console.log('✅ [Test Button] 管理员已确认，显示Test按钮');
       } else {
         this.hideTestButton();
-        console.log('ℹ️ Not admin, hiding test button');
+        console.log('ℹ️ [Test Button] 非管理员，隐藏Test按钮');
       }
     } catch (error) {
-      console.error('❌ Failed to update test button visibility:', error);
+      console.error('❌ [Test Button] 更新Test按钮显示状态失败:', error);
       // 出错时默认隐藏
       this.hideTestButton();
     }
@@ -1442,8 +1455,11 @@ class AuthUI {
   showTestButton() {
     const testBtns = document.querySelectorAll('a[href="test-center.html"].game-btn-white, #nav-test-btn');
     testBtns.forEach(btn => {
-      btn.style.display = 'flex';
+      // 使用!important覆盖CSS规则
+      btn.style.setProperty('display', 'flex', 'important');
+      console.log('✅ [Test Button] 按钮已显示:', btn.id || btn.href);
     });
+    console.log('✅ [Test Button] 找到', testBtns.length, '个Test按钮');
   }
 
   /**
@@ -1452,8 +1468,10 @@ class AuthUI {
   hideTestButton() {
     const testBtns = document.querySelectorAll('a[href="test-center.html"].game-btn-white, #nav-test-btn');
     testBtns.forEach(btn => {
-      btn.style.display = 'none';
+      // 使用!important覆盖CSS规则
+      btn.style.setProperty('display', 'none', 'important');
     });
+    console.log('ℹ️ [Test Button] Test按钮已隐藏');
   }
 
   /**
@@ -1518,9 +1536,25 @@ window.authUI = new AuthUI();
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     window.authUI.init();
+    // 延迟检查Test按钮显示（确保admin-auth.js已加载）
+    setTimeout(async () => {
+      const user = await window.supabaseAuth?.getCurrentUser();
+      if (user && window.authUI) {
+        console.log('🔄 [Test Button] 页面加载完成后重新检查Test按钮');
+        await window.authUI.updateTestButtonVisibility(user);
+      }
+    }, 2000);
   });
 } else {
   window.authUI.init();
+  // 延迟检查Test按钮显示（确保admin-auth.js已加载）
+  setTimeout(async () => {
+    const user = await window.supabaseAuth?.getCurrentUser();
+    if (user && window.authUI) {
+      console.log('🔄 [Test Button] 页面加载完成后重新检查Test按钮');
+      await window.authUI.updateTestButtonVisibility(user);
+    }
+  }, 2000);
 }
 
 // 导出全局函数，方便在 HTML 中直接调用

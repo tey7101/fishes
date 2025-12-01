@@ -721,7 +721,7 @@
           <option value="English" style="background: #333; color: white;">English</option>
           <option value="French" style="background: #333; color: white;">French</option>
           <option value="Spanish" style="background: #333; color: white;">Spanish</option>
-          <option value="简体中�? style="background: #333; color: white;">简体中�?/option>
+          <option value="简体中文" style="background: #333; color: white;">简体中文</option>
           <option value="繁體中文" style="background: #333; color: white;">繁體中文</option>
           <option value="Japanese" style="background: #333; color: white;">Japanese</option>
           <option value="Korean" style="background: #333; color: white;">Korean</option>
@@ -734,7 +734,7 @@
         <div style="padding: 8px 16px; margin-bottom: 8px;">
           <select id="tank-sort-sidebar" class="game-select" style="width: 100%; padding: 8px 12px; font-size: 13px; border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 12px; cursor: pointer; background: linear-gradient(180deg, rgba(74, 144, 226, 0.9) 0%, rgba(53, 122, 189, 0.9) 100%); color: white; font-weight: 700; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 12 12\'><path fill=\'%23ffffff\' d=\'M6 9L1 4h10z\'/></svg>'); background-repeat: no-repeat; background-position: right 8px center; padding-right: 32px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">
             <option value="recent" style="background: rgba(74, 144, 226, 0.95); color: white;">🆕 Most Recent</option>
-            <option value="popular" style="background: rgba(74, 144, 226, 0.95); color: white;">�?Most Popular</option>
+            <option value="popular" style="background: rgba(74, 144, 226, 0.95); color: white;">🔥 Most Popular</option>
             <option value="random" style="background: rgba(74, 144, 226, 0.95); color: white;">🎲 Random</option>
           </select>
         </div>
@@ -818,7 +818,7 @@
               onmouseup="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 0 rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15)';"
               onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 0 rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15)';"
               title="Clear all messages">
-              🗑�?Clear
+              🗑️ Clear
             </button>
             <input 
               type="text" 
@@ -838,7 +838,8 @@
               onmouseup="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 0 rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.15)';"
               onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 0 rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.15)';"
             >
-              SEND �?            </button>
+              SEND →
+            </button>
           </div>
           <div id="user-chat-error" style="color: #C0392B; font-size: 12px; font-weight: 600; margin-top: 10px; padding: 12px 16px; background: rgba(252, 92, 101, 0.1); border-radius: 12px; border: 2px solid rgba(192, 57, 43, 0.3); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1); display: none;"></div>
         </div>
@@ -885,6 +886,7 @@
   <!-- Community Chat System (New) -->
   <script src="src/js/tank-layout-manager.js?v=1.3"></script>
   <script src="src/js/community-chat-manager.js?v=2.7"></script>
+  <script src="src/js/tank-chat-panel-manager.js?v=1.0"></script>
     <script src="src/js/tank.js?v=5.2"></script>
     <script>
       // Initialize navigation authentication
@@ -1356,49 +1358,72 @@
           // Initialize language selection from database
           (async () => {
             try {
+              console.log('🔄 [Language] 开始加载用户语言设置...');
+              
               if (window.supabaseAuth && typeof window.supabaseAuth.getCurrentUser === 'function') {
                 const user = await window.supabaseAuth.getCurrentUser();
+                
                 if (user) {
+                  console.log('🔄 [Language] 检测到用户登录:', user.id);
+                  
                   const backendUrl = window.BACKEND_URL || '';
                   const token = localStorage.getItem('userToken');
-                  if (token) {
+                  
+                  // 🔧 修复：即使没有 token 也尝试调用 API（Profile API 支持公开访问）
+                  const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                  
+                  console.log('🔄 [Language] 调用 Profile API:', {
+                    url: `${backendUrl}/api/profile/${user.id}`,
+                    hasToken: !!token
+                  });
+                  
+                  try {
                     const profileResponse = await fetch(`${backendUrl}/api/profile/${encodeURIComponent(user.id)}`, {
                       method: 'GET',
-                      headers: {
-                        'Authorization': `Bearer ${token}`
-                      }
+                      headers
                     });
+                    
+                    console.log('🔄 [Language] API 响应状态:', profileResponse.status, profileResponse.statusText);
                     
                     if (profileResponse.ok) {
                       const profileData = await profileResponse.json();
                       const userLanguage = profileData.user?.user_language || 'English';
+                      
+                      console.log('🔄 [Language] API 返回数据:', {
+                        hasUser: !!profileData.user,
+                        language: userLanguage
+                      });
+                      
                       userLanguageSelect.value = userLanguage;
-                      console.log('🔄 从数据库加载用户语言:', userLanguage);
+                      console.log('✅ [Language] 成功加载用户语言:', userLanguage);
                     } else {
-                      // 如果获取失败，设置默认语言为English
+                      const errorText = await profileResponse.text();
+                      console.error('❌ [Language] API 调用失败:', profileResponse.status, errorText);
+                      // API 失败时设置默认语言
                       userLanguageSelect.value = 'English';
-                      console.log('🔄 设置默认语言为English（API调用失败�?);
+                      console.log('🔄 [Language] 设置默认语言为 English（API 调用失败）');
                     }
-                  } else {
-                    // 用户未登录，设置默认语言为English
+                  } catch (apiError) {
+                    console.error('❌ [Language] API 请求异常:', apiError);
+                    // API 异常时设置默认语言
                     userLanguageSelect.value = 'English';
-                    console.log('🔄 用户未登录，设置默认语言为English');
+                    console.log('🔄 [Language] 设置默认语言为 English（API 异常）');
                   }
                 } else {
-                  // supabaseAuth不可用，设置默认语言为English
+                  // 用户未登录，使用默认语言
+                  console.log('ℹ️ [Language] 用户未登录，使用默认语言 English');
                   userLanguageSelect.value = 'English';
-                  console.log('🔄 supabaseAuth不可用，设置默认语言为English');
                 }
               } else {
-                // getCurrentUser函数不存在，设置默认语言为English
+                // supabaseAuth 不可用
+                console.warn('⚠️ [Language] supabaseAuth 不可用，使用默认语言 English');
                 userLanguageSelect.value = 'English';
-                console.log('🔄 getCurrentUser函数不存在，设置默认语言为English');
               }
             } catch (error) {
-              console.error('初始化用户语言时出�?', error);
-              // 出错时也设置默认语言为English
+              console.error('❌ [Language] 初始化用户语言时出错:', error);
+              // 出错时设置默认语言
               userLanguageSelect.value = 'English';
-              console.log('🔄 设置默认语言为English（出现错误）');
+              console.log('🔄 [Language] 设置默认语言为 English（出现错误）');
             }
           })();
           
@@ -1522,7 +1547,7 @@
           
           // Show loading state
           const originalText = tankBattleBtn.innerHTML;
-          tankBattleBtn.innerHTML = '�?Entering...';
+          tankBattleBtn.innerHTML = '⏳ Entering...';
           tankBattleBtn.disabled = true;
           
           // Check if BattleClient is loaded
@@ -1546,25 +1571,25 @@
               await window.reloadTankForBattleMode(20); // 加载20条战斗鱼
             }
             
-            alert(`�?Successfully entered battle mode!\n\nCurrent online: ${result.currentUsers}/${result.maxUsers}\nFish: ${selectedFish.Artist || selectedFish.artist || 'Anonymous'}\n\n⚔️ Battles will automatically occur in the tank!\nWhen your fish collides with others, battle animations will trigger.`);
-            tankBattleBtn.innerHTML = '�?In Battle';
+            alert(`✅ Successfully entered battle mode!\n\nCurrent online: ${result.currentUsers}/${result.maxUsers}\nFish: ${selectedFish.Artist || selectedFish.artist || 'Anonymous'}\n\n⚔️ Battles will automatically occur in the tank!\nWhen your fish collides with others, battle animations will trigger.`);
+            tankBattleBtn.innerHTML = '⚔️ In Battle';
             tankBattleBtn.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
             tankBattleBtn.disabled = false;
             
             // 战斗在当前鱼缸页面内实时进行，无需跳转
           } else if (result.inQueue) {
-            alert(`�?Battle mode is full!\n\nJoined queue: Position ${result.position}\nEstimated wait: ${result.estimatedWait} seconds`);
+            alert(`⏳ Battle mode is full!\n\nJoined queue: Position ${result.position}\nEstimated wait: ${result.estimatedWait} seconds`);
             tankBattleBtn.innerHTML = originalText;
             tankBattleBtn.disabled = false;
           } else {
-            alert(`�?Failed to enter: ${result.error || result.message}`);
+            alert(`❌ Failed to enter: ${result.error || result.message}`);
             tankBattleBtn.innerHTML = originalText;
             tankBattleBtn.disabled = false;
           }
           
         } catch (error) {
           console.error('进入战斗模式错误:', error);
-          alert(`�?Error: ${error.message}`);
+          alert(`❌ Error: ${error.message}`);
           
           if (tankBattleBtn) {
             tankBattleBtn.innerHTML = '⚔️ Battle';
@@ -1791,6 +1816,34 @@
           window.updateChatPanelVisibility();
         };
       });
+    </script>
+    <script>
+      // 强制重新初始化聊天面板显示状态（修复版本）
+      (function() {
+        let attempts = 0;
+        const maxAttempts = 20;
+        
+        const ensureChatPanelInit = () => {
+          attempts++;
+          if (typeof window.updateChatPanelVisibility === 'function') {
+            console.log('✅ [修复] updateChatPanelVisibility 已就绪，执行初始化');
+            setTimeout(() => {
+              window.updateChatPanelVisibility();
+            }, 500);
+          } else if (attempts < maxAttempts) {
+            console.log('⏳ [修复] 等待 updateChatPanelVisibility 就绪... (' + attempts + '/' + maxAttempts + ')');
+            setTimeout(ensureChatPanelInit, 200);
+          } else {
+            console.error('❌ [修复] updateChatPanelVisibility 未就绪，超时');
+          }
+        };
+        
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', ensureChatPanelInit);
+        } else {
+          ensureChatPanelInit();
+        }
+      })();
     </script>
 </body>
 </html>

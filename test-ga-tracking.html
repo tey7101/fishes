@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Analytics 测试页面</title>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6FDEBZYFLT"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-6FDEBZYFLT');
+      
+      // 添加调试信息
+      console.log('✅ Google Analytics 已加载');
+      console.log('📊 Measurement ID: G-6FDEBZYFLT');
+      console.log('📡 DataLayer:', window.dataLayer);
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .info-box h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .info-box p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        .code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .button:active {
+            transform: translateY(0);
+        }
+        #test-result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        #test-result.show {
+            display: block;
+        }
+        .success-result {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .steps {
+            margin-top: 20px;
+        }
+        .step {
+            display: flex;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .step-content {
+            flex: 1;
+        }
+        .step-content h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .step-content p {
+            color: #666;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Google Analytics 测试</h1>
+        <p class="subtitle">检查 GA 跟踪代码是否正常工作</p>
+        
+        <div class="info-box">
+            <h3>📊 当前配置</h3>
+            <p><strong>Measurement ID:</strong> <code>G-6FDEBZYFLT</code></p>
+            <p><strong>网站:</strong> fishtalk.app</p>
+            <div class="status success" id="ga-status">✅ GA 脚本已加载</div>
+        </div>
+        
+        <div class="info-box">
+            <h3>🧪 测试结果</h3>
+            <button class="button" onclick="runTest()">运行测试</button>
+            <div id="test-result"></div>
+        </div>
+        
+        <div class="info-box">
+            <h3>📋 如何在 GA 后台查看数据</h3>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>打开实时报告</h4>
+                        <p>登录 <a href="https://analytics.google.com" target="_blank">Google Analytics</a> → 左侧菜单 <strong>报告 (Reports)</strong> → <strong>实时 (Realtime)</strong></p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>查看当前页面</h4>
+                        <p>保持此页面打开，应该能在实时报告中看到 1 个活跃用户</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>触发测试事件</h4>
+                        <p>点击上面的"运行测试"按钮，然后在实时报告中查看事件</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>等待历史数据</h4>
+                        <p>新数据通常需要 24-48 小时才能完整显示在标准报告中</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h3>🐛 开发者工具检查</h3>
+            <p>按 <strong>F12</strong> 打开浏览器控制台，查看以下信息：</p>
+            <div class="code">// 应该看到：<br>✅ Google Analytics 已加载<br>📊 Measurement ID: G-6FDEBZYFLT<br>📡 DataLayer: Array[...]</div>
+            <p style="margin-top: 10px;"><strong>网络 (Network) 标签:</strong> 搜索 <code>collect</code> 或 <code>analytics</code>，应该看到发送到 Google 的请求</p>
+        </div>
+        
+        <div class="info-box">
+            <h3>⚠️ 常见问题</h3>
+            <p><strong>流量为 0 的可能原因：</strong></p>
+            <ul style="margin-left: 20px; margin-top: 10px; color: #666; line-height: 1.8;">
+                <li>数据刚开始收集，需要等待 24-48 小时</li>
+                <li>广告拦截器（AdBlock、uBlock）阻止了 GA</li>
+                <li>浏览器隐私保护功能屏蔽了跟踪</li>
+                <li>网站实际访问量很低</li>
+                <li>过滤了自己的 IP 地址</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // 检查 GA 是否加载
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const status = document.getElementById('ga-status');
+                if (typeof gtag !== 'undefined' && window.dataLayer) {
+                    status.textContent = '✅ GA 脚本已成功加载';
+                    status.className = 'status success';
+                    console.log('✅ GA 验证成功');
+                } else {
+                    status.textContent = '❌ GA 脚本加载失败';
+                    status.className = 'status warning';
+                    console.error('❌ GA 验证失败');
+                }
+            }, 2000);
+        });
+        
+        // 测试函数
+        function runTest() {
+            const resultDiv = document.getElementById('test-result');
+            
+            // 发送测试事件
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'test_button_click', {
+                    'event_category': 'Testing',
+                    'event_label': 'GA Test Page',
+                    'value': 1
+                });
+                
+                resultDiv.className = 'success-result show';
+                resultDiv.innerHTML = `
+                    <strong>✅ 测试事件已发送！</strong><br><br>
+                    <strong>事件名称:</strong> test_button_click<br>
+                    <strong>时间:</strong> ${new Date().toLocaleString('zh-CN')}<br><br>
+                    现在去 Google Analytics → 实时 → 事件，应该能看到这个测试事件。
+                `;
+                
+                console.log('✅ 测试事件已发送:', {
+                    event: 'test_button_click',
+                    category: 'Testing',
+                    label: 'GA Test Page',
+                    time: new Date().toISOString()
+                });
+            } else {
+                resultDiv.className = 'show';
+                resultDiv.style.background = '#fff3cd';
+                resultDiv.style.border = '1px solid #ffeaa7';
+                resultDiv.style.color = '#856404';
+                resultDiv.innerHTML = '<strong>⚠️ GA 未加载，无法发送测试事件</strong>';
+            }
+        }
+        
+        // 页面浏览事件
+        console.log('📄 页面浏览已记录');
+    </script>
+</body>
+</html>
+

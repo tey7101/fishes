@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>域名重定向检查 - FishTalk.app</title>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6FDEBZYFLT"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-6FDEBZYFLT');
+      
+      // 立即发送测试事件
+      gtag('event', 'domain_check', {
+        'event_category': 'Testing',
+        'event_label': 'Domain Redirect Check',
+        'current_hostname': window.location.hostname,
+        'current_url': window.location.href
+      });
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .status-box {
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+        .status-box.success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .status-box.warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+        .status-box.error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .status-box.info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+        .info-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .info-box h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .value {
+            color: #6c757d;
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .button:active {
+            transform: translateY(0);
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .steps {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+        .step {
+            counter-increment: step-counter;
+            padding: 15px 0;
+            position: relative;
+            padding-left: 40px;
+        }
+        .step::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 15px;
+            background: #667eea;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 域名配置检查</h1>
+        <p class="subtitle">检查 FishTalk.app 的域名重定向和 GA 配置</p>
+        
+        <!-- 当前状态 -->
+        <div id="current-status"></div>
+        
+        <!-- 域名信息 -->
+        <div class="info-box">
+            <h3>📊 当前访问信息</h3>
+            <div class="info-row">
+                <span class="label">完整URL:</span>
+                <span class="value" id="full-url"></span>
+            </div>
+            <div class="info-row">
+                <span class="label">域名:</span>
+                <span class="value" id="hostname"></span>
+            </div>
+            <div class="info-row">
+                <span class="label">协议:</span>
+                <span class="value" id="protocol"></span>
+            </div>
+            <div class="info-row">
+                <span class="label">路径:</span>
+                <span class="value" id="pathname"></span>
+            </div>
+        </div>
+        
+        <!-- GA 状态 -->
+        <div class="info-box">
+            <h3>📈 Google Analytics 状态</h3>
+            <div class="info-row">
+                <span class="label">GA ID:</span>
+                <span class="value">G-6FDEBZYFLT</span>
+            </div>
+            <div class="info-row">
+                <span class="label">脚本加载:</span>
+                <span class="value" id="ga-loaded"></span>
+            </div>
+            <div class="info-row">
+                <span class="label">DataLayer:</span>
+                <span class="value" id="datalayer-status"></span>
+            </div>
+            <div class="info-row">
+                <span class="label">测试事件已发送:</span>
+                <span class="value">domain_check</span>
+            </div>
+        </div>
+        
+        <!-- 测试按钮 -->
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="button" onclick="testDomain('https://fishtalk.app')">测试 fishtalk.app</button>
+            <button class="button" onclick="testDomain('https://www.fishtalk.app')">测试 www.fishtalk.app</button>
+            <button class="button" onclick="window.location.reload()">刷新页面</button>
+        </div>
+        
+        <!-- 修复步骤 -->
+        <div class="info-box">
+            <h3>🔧 推荐修复步骤</h3>
+            <ol class="steps">
+                <li class="step">
+                    <strong>Render 后台设置</strong><br>
+                    <small>Settings → Custom Domains → 添加两个域名，设置主域名为 fishtalk.app</small>
+                </li>
+                <li class="step">
+                    <strong>DNS 配置（Cloudflare）</strong><br>
+                    <small>创建页面规则：www.fishtalk.app/* 301重定向到 https://fishtalk.app/$1</small>
+                </li>
+                <li class="step">
+                    <strong>更新 Google Analytics</strong><br>
+                    <small>数据流URL改为：https://fishtalk.app（不带www）</small>
+                </li>
+                <li class="step">
+                    <strong>验证配置</strong><br>
+                    <small>访问两个域名，确认都重定向到同一个URL</small>
+                </li>
+            </ol>
+        </div>
+        
+        <!-- Cloudflare 页面规则示例 -->
+        <div class="info-box">
+            <h3>⚡ Cloudflare 页面规则配置</h3>
+            <p style="margin-bottom: 10px; color: #666;">在 Cloudflare 中创建以下规则：</p>
+            <div class="code-block">
+URL 匹配: www.fishtalk.app/*
+设置: 转发 URL (301 - 永久重定向)
+目标 URL: https://fishtalk.app/$1
+            </div>
+        </div>
+        
+        <!-- 验证命令 -->
+        <div class="info-box">
+            <h3>💻 命令行验证</h3>
+            <p style="margin-bottom: 10px; color: #666;">在 PowerShell 中运行：</p>
+            <div class="code-block">
+# 检查重定向
+curl -I https://www.fishtalk.app
+curl -I https://fishtalk.app
+
+# 应该看到 Location: https://fishtalk.app
+            </div>
+        </div>
+        
+        <!-- 下一步 -->
+        <div class="status-box info">
+            <strong>📌 重要提醒</strong><br>
+            1. 修复后，在 GA 实时报告中应该立即看到数据（1-2分钟）<br>
+            2. 历史数据需要 24-48 小时才能完整显示<br>
+            3. 确保所有 HTML 文件中的 canonical URL 使用统一域名<br>
+            4. 建议使用 <strong>fishtalk.app</strong>（不带www）作为主域名
+        </div>
+    </div>
+    
+    <script>
+        // 显示当前URL信息
+        function displayURLInfo() {
+            document.getElementById('full-url').textContent = window.location.href;
+            document.getElementById('hostname').textContent = window.location.hostname;
+            document.getElementById('protocol').textContent = window.location.protocol;
+            document.getElementById('pathname').textContent = window.location.pathname;
+            
+            // 检查GA状态
+            const gaLoaded = typeof gtag !== 'undefined' && window.dataLayer;
+            document.getElementById('ga-loaded').textContent = gaLoaded ? '✅ 已加载' : '❌ 未加载';
+            document.getElementById('datalayer-status').textContent = window.dataLayer ? `✅ ${window.dataLayer.length} 事件` : '❌ 未初始化';
+            
+            // 显示状态提示
+            const statusDiv = document.getElementById('current-status');
+            const isWWW = window.location.hostname.startsWith('www.');
+            const isHTTPS = window.location.protocol === 'https:';
+            
+            let statusHTML = '';
+            
+            if (!isHTTPS) {
+                statusHTML += '<div class="status-box error"><strong>❌ 警告：未使用 HTTPS</strong><br>请使用 HTTPS 协议访问</div>';
+            }
+            
+            if (isWWW) {
+                statusHTML += '<div class="status-box warning"><strong>⚠️ 当前使用 WWW 子域名</strong><br>建议重定向到不带 www 的主域名：fishtalk.app<br>这可能导致 GA 数据丢失或不准确</div>';
+            } else if (window.location.hostname === 'fishtalk.app') {
+                statusHTML += '<div class="status-box success"><strong>✅ 域名配置正确</strong><br>当前使用主域名（不带www），这是推荐的配置</div>';
+            } else {
+                statusHTML += '<div class="status-box info"><strong>ℹ️ 本地测试</strong><br>当前在本地或测试环境运行</div>';
+            }
+            
+            if (gaLoaded) {
+                statusHTML += '<div class="status-box success"><strong>✅ Google Analytics 已激活</strong><br>测试事件已发送，请在 GA 实时报告中查看<br>可能需要等待 1-2 分钟才能看到数据</div>';
+            } else {
+                statusHTML += '<div class="status-box error"><strong>❌ Google Analytics 未加载</strong><br>可能被广告拦截器屏蔽</div>';
+            }
+            
+            statusDiv.innerHTML = statusHTML;
+            
+            // 控制台输出详细信息
+            console.group('🔍 域名配置检查');
+            console.log('完整URL:', window.location.href);
+            console.log('域名:', window.location.hostname);
+            console.log('是否WWW:', isWWW);
+            console.log('是否HTTPS:', isHTTPS);
+            console.log('GA加载:', gaLoaded);
+            console.log('DataLayer:', window.dataLayer);
+            console.groupEnd();
+        }
+        
+        // 测试域名
+        function testDomain(url) {
+            window.open(url + '/check-domain-redirect.html', '_blank');
+        }
+        
+        // 页面加载完成后执行
+        window.addEventListener('load', function() {
+            displayURLInfo();
+            
+            // 5秒后再次检查GA状态
+            setTimeout(function() {
+                const gaLoaded = typeof gtag !== 'undefined' && window.dataLayer;
+                document.getElementById('ga-loaded').textContent = gaLoaded ? '✅ 已加载' : '❌ 未加载';
+                document.getElementById('datalayer-status').textContent = window.dataLayer ? `✅ ${window.dataLayer.length} 事件` : '❌ 未初始化';
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
+

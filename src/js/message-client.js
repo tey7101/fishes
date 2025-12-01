@@ -209,15 +209,15 @@ const MessageClient = {
       const days = Math.floor(hours / 24);
 
       if (seconds < 60) {
-        return '刚刚';
+        return 'Just now';
       } else if (minutes < 60) {
-        return `${minutes}分钟前`;
+        return `${minutes}m ago`;
       } else if (hours < 24) {
-        return `${hours}小时前`;
+        return `${hours}h ago`;
       } else if (days < 7) {
-        return `${days}天前`;
+        return `${days}d ago`;
       } else {
-        return date.toLocaleDateString('zh-CN');
+        return date.toLocaleDateString('en-US');
       }
     } catch (error) {
       console.error('Format time error:', error);

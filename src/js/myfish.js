@@ -219,7 +219,7 @@ async function loadMyFish() {
     const emptyState = document.getElementById('empty-state');
     
     try {
-        loadingElement.textContent = '加载中...';
+        loadingElement.textContent = 'Loading...';
         loadingElement.style.display = 'block';
         gridElement.style.display = 'none';
         emptyState.style.display = 'none';
@@ -227,7 +227,7 @@ async function loadMyFish() {
         // 获取认证 token
         const token = localStorage.getItem('userToken');
         if (!token) {
-            throw new Error('请先登录');
+            throw new Error('Please login first');
         }
         
         // 调用 API
@@ -248,7 +248,7 @@ async function loadMyFish() {
         const result = await response.json();
         
         if (!result.success) {
-            throw new Error(result.error || '加载失败');
+            throw new Error(result.error || 'Load failed');
         }
         
         allFish = result.fish || [];
@@ -262,12 +262,12 @@ async function loadMyFish() {
         
     } catch (error) {
         console.error('❌ 加载鱼数据失败:', error);
-        loadingElement.textContent = `加载失败: ${error.message}`;
+        loadingElement.textContent = `Load failed: ${error.message}`;
         loadingElement.style.display = 'block';
         gridElement.style.display = 'none';
         
         // 如果是未登录错误，显示提示
-        if (error.message.includes('登录')) {
+        if (error.message.includes('login')) {
             setTimeout(() => {
                 window.location.href = 'login.html?redirect=myfish.html';
             }, 1500);

@@ -2565,7 +2565,7 @@ function showFishInfoModal(fish) {
     info += `</div>`;
 
     // Fish info section with fish name and artist - 单行显示
-    const fishName = fish.name || fish.title || `Fish #${fish.docId?.substring(0, 8) || 'Unknown'}`;
+    const fishName = fish.fish_name || fish.fishName || fish.name || fish.title || `Fish #${fish.docId?.substring(0, 8) || 'Unknown'}`;
     info += `<div style='margin-bottom: 10px; font-size: 15px; color: #333; line-height: 1.4; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'><strong style='color: #6366F1; font-size: 16px;'>${escapeHtml(fishName)}</strong> <span style='font-size: 14px; color: #666;'>by ${artistLink}</span></div>`;
 
     // Action buttons: Like, Favorite, Report (并列，样式一致，更精简)

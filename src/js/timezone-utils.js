@@ -99,13 +99,13 @@ export function formatRelativeTime(utcTimestamp) {
     const diffDay = Math.floor(diffHour / 24);
     
     if (diffSec < 60) {
-      return `${diffSec} 秒前`;
+      return `${diffSec}s ago`;
     } else if (diffMin < 60) {
-      return `${diffMin} 分钟前`;
+      return `${diffMin}m ago`;
     } else if (diffHour < 24) {
-      return `${diffHour} 小时前`;
+      return `${diffHour}h ago`;
     } else if (diffDay < 7) {
-      return `${diffDay} 天前`;
+      return `${diffDay}d ago`;
     } else {
       return formatBeijingDate(utcTimestamp);
     }

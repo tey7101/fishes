@@ -289,7 +289,7 @@ function createFishCard(fish, stackIndex) {
         
         <div class="fish-content">
             <div class="fish-info">
-                <h3>Fish #${fish.id}</h3>
+                <h3>${escapeHtml(fish.fish_name || fish.fishName || `Fish #${fish.id.substring(0, 8)}`)}</h3>
                 <div class="fish-details">
                     <div><strong>Artist:</strong> ${escapeHtml(fish.Artist || fish.artist || 'Anonymous')}</div>
                     <div><strong>Score:</strong> ${score}</div>

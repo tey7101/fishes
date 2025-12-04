@@ -884,10 +884,10 @@
   <script src="src/js/fish-preset-dialogues.js"></script>
   <script src="src/js/fish-dialogue-simple.js"></script>
   <!-- Community Chat System (New) -->
-  <script src="src/js/tank-layout-manager.js?v=1.3"></script>
+    <script src="src/js/tank-layout-manager.js?v=1.5"></script>
   <script src="src/js/community-chat-manager.js?v=2.7"></script>
   <script src="src/js/tank-chat-panel-manager.js?v=1.0"></script>
-    <script src="src/js/tank.js?v=5.2"></script>
+    <script src="src/js/tank.js?v=5.7"></script>
     <script>
       // Initialize navigation authentication
       if (typeof initializeAuthNavigation === 'function') {
@@ -1302,34 +1302,10 @@
         const shareBtnSidebar = document.getElementById('tank-share-btn-sidebar');
         const fishCountSelector = document.getElementById('fish-count-selector-sidebar');
         
-        // Sort selector - trigger loadFishIntoTank directly
-        if (sortSelectSidebar) {
-          sortSelectSidebar.addEventListener('change', () => {
-            const selectedSort = sortSelectSidebar.value;
-            
-            // 🆕 保存排序选择�?localStorage
-            localStorage.setItem('tankSortPreference', selectedSort);
-            
-            if (typeof loadFishIntoTank === 'function') {
-              loadFishIntoTank(selectedSort);
-            }
-            // Update URL
-            const newUrl = new URL(window.location);
-            newUrl.searchParams.set('sort', selectedSort);
-            window.history.replaceState({}, '', newUrl);
-          });
-        }
-        
-        // Refresh button - trigger loadFishIntoTank with current sort
-        if (refreshBtnSidebar) {
-          refreshBtnSidebar.addEventListener('click', (e) => {
-            e.preventDefault();
-            const selectedSort = sortSelectSidebar ? sortSelectSidebar.value : 'recent';
-            if (typeof loadFishIntoTank === 'function') {
-              loadFishIntoTank(selectedSort);
-            }
-          });
-        }
+        // 🔧 移除重复的事件监听器 - tank.js已经处理了这些事件
+        // ❌ 已删除：Sort selector事件监听器（由tank.js处理）
+        // ❌ 已删除：Refresh button事件监听器（由tank.js处理）
+        // ❌ 已删除：Fish count selector事件监听器（由tank.js处理）
         
         // Share button - trigger share modal
         if (shareBtnSidebar) {

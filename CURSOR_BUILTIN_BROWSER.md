@@ -144,3 +144,5 @@ Simple Browser: Show
 - [VS Code Simple Browser 文档](https://code.visualstudio.com/docs/editor/integrated-terminal)
 - [Cursor 文档](https://docs.cursor.com)
 
+
+

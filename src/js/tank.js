@@ -108,8 +108,10 @@ function updateFoodPellets() {
         pellet.y += pellet.vy;
 
         // Stop at bottom of tank
-        if (pellet.y > swimCanvas.height - pellet.size) {
-            pellet.y = swimCanvas.height - pellet.size;
+        // 🔧 修复：使用逻辑高度
+        const logicalHeight = swimCanvas.logicalHeight || swimCanvas.height;
+        if (pellet.y > logicalHeight - pellet.size) {
+            pellet.y = logicalHeight - pellet.size;
             pellet.vy = 0;
         }
 
@@ -241,8 +243,9 @@ function renderFeedingEffects() {
 
 // Calculate optimal fish size based on tank size
 function calculateFishSize() {
-    const tankWidth = swimCanvas.width;
-    const tankHeight = swimCanvas.height;
+    // 🔧 关键修复：使用逻辑尺寸而非实际像素尺寸
+    const tankWidth = swimCanvas.logicalWidth || swimCanvas.width;
+    const tankHeight = swimCanvas.logicalHeight || swimCanvas.height;
     const isMobile = window.innerWidth <= 768;
 
     // Scale fish size based on tank dimensions
@@ -250,18 +253,18 @@ function calculateFishSize() {
     const baseDimension = Math.min(tankWidth, tankHeight);
 
     // Fish width should be roughly 8-12% of the smaller tank dimension
-    // 🔧 修复：移动端鱼尺寸缩小一半，从20%降到10%
-    const basePercentage = isMobile ? 0.1 : 0.1;
+    // 🔧 移动端使用更大的比例，确保鱼在小屏幕上清晰可见
+    const basePercentage = isMobile ? 0.20 : 0.1;
     const fishWidth = Math.floor(baseDimension * basePercentage);
     const fishHeight = Math.floor(fishWidth * 0.6); // Maintain 3:5 aspect ratio
 
-    // 🔧 修复：调整移动端尺寸边界，缩小一半
-    // - Mobile: 30px - 150px wide (与桌面端相同)
+    // 🔧 移动端和桌面端使用不同的尺寸范围
+    // - Mobile: 60px - 160px wide (适中大小)
     // - Desktop: 30px - 150px wide
-    const minWidth = 30;
-    const maxWidth = 150;
-    const minHeight = 18;
-    const maxHeight = 90;
+    const minWidth = isMobile ? 60 : 30;
+    const maxWidth = isMobile ? 160 : 150;
+    const minHeight = isMobile ? 36 : 18;
+    const maxHeight = isMobile ? 96 : 90;
     
     const finalWidth = Math.max(minWidth, Math.min(maxWidth, fishWidth));
     const finalHeight = Math.max(minHeight, Math.min(maxHeight, fishHeight));
@@ -317,8 +320,11 @@ function rescaleAllFish() {
         fish.height = newSize.height;
 
         // Adjust position to prevent fish from going off-screen
-        fish.x = Math.max(0, Math.min(swimCanvas.width - newSize.width, fish.x));
-        fish.y = Math.max(0, Math.min(swimCanvas.height - newSize.height, fish.y));
+        // 🔧 修复：使用逻辑尺寸
+        const logicalWidth = swimCanvas.logicalWidth || swimCanvas.width;
+        const logicalHeight = swimCanvas.logicalHeight || swimCanvas.height;
+        fish.x = Math.max(0, Math.min(logicalWidth - newSize.width, fish.x));
+        fish.y = Math.max(0, Math.min(logicalHeight - newSize.height, fish.y));
     });
 }
 
@@ -479,6 +485,7 @@ function createFishObject({
 }
 
 function loadFishImageToTank(imgUrl, fishData, onDone) {
+    console.log(`[TRACE] loadFishImageToTank called for ${imgUrl.substring(0, 50)}...`);
     const img = new window.Image();
     img.crossOrigin = 'anonymous';
     
@@ -488,6 +495,7 @@ function loadFishImageToTank(imgUrl, fishData, onDone) {
     };
     
     img.onload = function () {
+        console.log(`[TRACE] img.onload fired for ${imgUrl.substring(0, 50)}...`);
         // Check for duplicate fish before loading
         const fishId = fishData.docId || fishData.id;
         if (fishId) {
@@ -509,10 +517,66 @@ function loadFishImageToTank(imgUrl, fishData, onDone) {
         const fishSize = calculateFishSize();
         const displayCanvas = makeDisplayFishCanvas(img, fishSize.width, fishSize.height);
         if (displayCanvas && displayCanvas.width && displayCanvas.height) {
-            const maxX = Math.max(0, swimCanvas.width - fishSize.width);
-            const maxY = Math.max(0, swimCanvas.height - fishSize.height);
-            const x = Math.floor(Math.random() * maxX);
-            const y = Math.floor(Math.random() * maxY);
+            // 🔧 关键修复：使用逻辑尺寸而非实际像素尺寸
+            const logicalWidth = swimCanvas.logicalWidth || swimCanvas.width;
+            const logicalHeight = swimCanvas.logicalHeight || swimCanvas.height;
+            const maxX = Math.max(0, logicalWidth - fishSize.width);
+            const maxY = Math.max(0, logicalHeight - fishSize.height);
+            
+            // 🔧 大幅增加X坐标的随机性和变化
+            // 使用多种随机策略组合，避免鱼的起始位置看起来一样
+            const xRandomStrategy = Math.random();
+            const xJitter = (Math.random() - 0.5) * 50; // 额外的±25像素抖动
+            let x;
+            
+            if (xRandomStrategy < 0.2) {
+                // 20%概率：靠近左边缘
+                x = Math.floor(Math.random() * Math.min(100, maxX * 0.15)) + xJitter;
+            } else if (xRandomStrategy < 0.4) {
+                // 20%概率：左侧1/4到中间
+                x = Math.floor(maxX * 0.15 + Math.random() * (maxX * 0.35)) + xJitter;
+            } else if (xRandomStrategy < 0.6) {
+                // 20%概率：中间区域
+                x = Math.floor(maxX * 0.35 + Math.random() * (maxX * 0.3)) + xJitter;
+            } else if (xRandomStrategy < 0.8) {
+                // 20%概率：中间到右侧3/4
+                x = Math.floor(maxX * 0.5 + Math.random() * (maxX * 0.35)) + xJitter;
+            } else {
+                // 20%概率：靠近右边缘
+                x = Math.floor(maxX * 0.85 + Math.random() * (maxX * 0.15)) + xJitter;
+            }
+            
+            // 确保X坐标在有效范围内
+            x = Math.max(0, Math.min(maxX, x));
+            
+            // 🔧 改进：使用轮询算法均匀分配鱼到各行，而不是完全随机
+            // 这样可以避免鱼扎堆在某些行
+            let y, targetRowIndex;
+            if (window.tankLayoutManager && window.tankLayoutManager.rows && window.tankLayoutManager.rows.length > 0) {
+                const rows = window.tankLayoutManager.rows;
+                targetRowIndex = nextFishRowIndex % rows.length;
+                const targetRow = rows[targetRowIndex];
+                
+                // 🔧 确保Y坐标在行的范围内，避免超出边界
+                const rowHeight = Math.max(1, targetRow.swimYMax - targetRow.swimYMin);
+                const yOffset = Math.random() * rowHeight;
+                // 不要使用 maxY 限制，因为行的范围本身已经是合理的
+                y = targetRow.swimYMin + yOffset;
+                // 只在必要时进行边界检查（防止超出画布）
+                if (y + fishSize.height > logicalHeight) {
+                    y = Math.max(0, logicalHeight - fishSize.height);
+                    console.warn(`⚠️ Fish Y adjusted to fit in canvas: ${Math.floor(y)}`);
+                }
+                
+                console.log(`🐠 Fish #${nextFishRowIndex} assigned to row ${targetRowIndex}/${rows.length}, Y: ${Math.floor(y)} (range: ${Math.floor(targetRow.swimYMin)}-${Math.floor(targetRow.swimYMax)})`);
+                nextFishRowIndex++;
+            } else {
+                // 备用方案：如果layout manager不可用，使用旧的随机方式
+                console.warn('⚠️ Layout manager not available, using random Y positioning');
+                y = Math.floor(Math.random() * maxY);
+                targetRowIndex = null;
+            }
+            
             const direction = Math.random() < 0.5 ? -1 : 1;
             const speed = fishData.speed || 2;
             const fishObj = createFishObject({
@@ -546,6 +610,16 @@ function loadFishImageToTank(imgUrl, fishData, onDone) {
                 defense: fishData.defense || 5
             });
             
+            // 🔧 如果已经分配了行号，标记一下以便assignFishToRows知道
+            if (targetRowIndex !== null && window.tankLayoutManager) {
+                fishObj.preassignedRowIndex = targetRowIndex;
+                const row = window.tankLayoutManager.rows[targetRowIndex];
+                if (row) {
+                    fishObj.yMin = row.swimYMin;
+                    fishObj.yMax = row.swimYMax;
+                }
+            }
+            
             // 🌟 新鱼特效标记
             if (fishData.isNewlyCreated) {
                 fishObj.isNewlyCreated = true;
@@ -563,6 +637,57 @@ function loadFishImageToTank(imgUrl, fishData, onDone) {
             }
 
             fishes.push(fishObj);
+            
+            console.log(`[DEBUG v2] Fish #${fishes.length} added, checking layout manager...`, {
+                hasLayoutManager: !!window.tankLayoutManager,
+                hasRows: !!(window.tankLayoutManager && window.tankLayoutManager.rows),
+                rowCount: window.tankLayoutManager ? window.tankLayoutManager.rows.length : 0
+            });
+            
+            // 🔧 添加到fishes数组后，立即分配行号
+            // 优先使用预分配的行号，否则使用负载均衡算法
+            if (window.tankLayoutManager && window.tankLayoutManager.rows && window.tankLayoutManager.rows.length > 0) {
+                const rows = window.tankLayoutManager.rows;
+                let targetRowIndex;
+                
+                if (fishObj.preassignedRowIndex !== undefined && fishObj.preassignedRowIndex >= 0 && fishObj.preassignedRowIndex < rows.length) {
+                    // 使用预分配的行号
+                    targetRowIndex = fishObj.preassignedRowIndex;
+                    console.log(`🐠 Fish #${fishes.length} using preassigned row ${targetRowIndex}`);
+                } else {
+                    // 使用负载均衡算法：找到当前鱼数最少的行
+                    const rowCounts = new Array(rows.length).fill(0);
+                    fishes.forEach(f => {
+                        if (f.rowIndex !== undefined && f.rowIndex >= 0 && f.rowIndex < rows.length) {
+                            rowCounts[f.rowIndex]++;
+                        }
+                    });
+                    
+                    const minCount = Math.min(...rowCounts);
+                    const availableRows = rowCounts
+                        .map((count, idx) => count === minCount ? idx : -1)
+                        .filter(idx => idx >= 0);
+                    targetRowIndex = availableRows[Math.floor(Math.random() * availableRows.length)];
+                    
+                    console.log(`🐠 Fish #${fishes.length} assigned to row ${targetRowIndex} (counts: [${rowCounts.join(',')}])`);
+                }
+                
+                fishObj.rowIndex = targetRowIndex;
+                const targetRow = rows[targetRowIndex];
+                fishObj.yMin = targetRow.swimYMin;
+                fishObj.yMax = targetRow.swimYMax;
+                
+                // 确保Y坐标在行范围内
+                if (fishObj.y < targetRow.swimYMin || fishObj.y > targetRow.swimYMax) {
+                    const oldY = fishObj.y;
+                    fishObj.y = targetRow.swimYMin + Math.random() * (targetRow.swimYMax - targetRow.swimYMin);
+                    console.log(`  └─ Y adjusted: ${Math.floor(oldY)} → ${Math.floor(fishObj.y)} (row range: ${Math.floor(targetRow.swimYMin)}-${Math.floor(targetRow.swimYMax)})`);
+                }
+                
+                delete fishObj.preassignedRowIndex; // 清除临时标记
+            } else {
+                console.warn(`⚠️ Cannot assign row for fish #${fishes.length}: layout manager not ready`);
+            }
 
             if (onDone) onDone(fishObj);
         } else {
@@ -579,6 +704,8 @@ let newestFishTimestamp = null;
 let newFishListener = null;
 let maxTankCapacity = 20; // Dynamic tank capacity controlled by slider
 let isUpdatingCapacity = false; // Prevent multiple simultaneous updates
+let nextFishRowIndex = 0; // Track which row to assign next fish to for even distribution
+let isLoadingFish = false; // Prevent multiple simultaneous fish loads
 
 // Update page title based on view mode and sort type
 function updatePageTitle(sortType) {
@@ -639,11 +766,20 @@ async function updateTankCapacity(newCapacity) {
 
     const oldCapacity = maxTankCapacity;
     maxTankCapacity = newCapacity;
+    
+    console.log(`🔧 updateTankCapacity: ${oldCapacity} -> ${newCapacity}, maxTankCapacity is now ${maxTankCapacity}`);
 
     // Update the display
     const displayElement = document.getElementById('fish-count-display');
     if (displayElement) {
         displayElement.textContent = newCapacity;
+    }
+    
+    // 🔧 同步更新下拉选择器的值
+    const fishCountSelector = document.getElementById('fish-count-selector-sidebar');
+    if (fishCountSelector) {
+        fishCountSelector.value = newCapacity.toString();
+        console.log(`🔧 Updated fish count selector to: ${newCapacity}`);
     }
 
     // Update current fish count display
@@ -917,6 +1053,15 @@ async function loadSingleFish(fishId) {
 
 // Load initial fish into tank based on sort type
 async function loadInitialFish(sortType = 'recent') {
+    // 🔧 防止重复加载
+    if (isLoadingFish) {
+        console.log('⚠️ Already loading fish, skipping duplicate call');
+        return;
+    }
+    
+    isLoadingFish = true;
+    console.log(`🔄 Starting loadInitialFish with sortType: ${sortType}, capacity: ${maxTankCapacity}`);
+    
     // Show loading indicator
     const loadingIndicator = document.getElementById('loading-indicator');
     if (loadingIndicator) {
@@ -925,6 +1070,9 @@ async function loadInitialFish(sortType = 'recent') {
 
     // Clear existing fish
     fishes.length = 0;
+    
+    // 🔧 重置行分配计数器，确保每次加载都能均匀分配
+    nextFishRowIndex = 0;
 
     try {
         // 🆕 检查是否有新鱼ID（用户刚画的鱼）
@@ -957,6 +1105,7 @@ async function loadInitialFish(sortType = 'recent') {
         const fishToLoad = newFishData ? maxTankCapacity - 1 : maxTankCapacity;
         const loadAmount = Math.ceil(fishToLoad * 1.5); // 加载1.5倍的数量
         
+        console.log(`🐠 [loadInitialFish] maxTankCapacity: ${maxTankCapacity}, fishToLoad: ${fishToLoad}, loadAmount: ${loadAmount}`);
         console.log(`🐠 Loading ${loadAmount} fish (target: ${fishToLoad}${newFishData ? ' + 1 new fish' : ''}) with sort type: ${sortType}`);
         
         // IMPORTANT: In global tank mode, do NOT pass userId to getFishBySort
@@ -1346,6 +1495,9 @@ async function loadInitialFish(sortType = 'recent') {
     } catch (error) {
         console.error('Error loading initial fish:', error);
     } finally {
+        // 🔧 重置加载标志
+        isLoadingFish = false;
+        
         // Hide loading indicator
         if (loadingIndicator) {
             setTimeout(() => {
@@ -1360,10 +1512,12 @@ async function loadInitialFish(sortType = 'recent') {
             clearTimeout(window.assignFishToRowsTimeout);
         }
         if (tankLayoutManager) {
+            // 🔧 增加延迟时间，确保所有鱼都异步加载完成
             window.assignFishToRowsTimeout = setTimeout(() => {
+                console.log(`🔄 [assignFishToRows] 准备分配 ${fishes.length} 条鱼到 ${tankLayoutManager.rows.length} 行...`);
                 tankLayoutManager.assignFishToRows(fishes, true);
                 // Log is now handled inside assignFishToRows
-            }, 1000); // Wait 1 second for images to load
+            }, 2500); // 从1秒增加到2.5秒，确保所有图片加载完成
         }
         
         // Filter user's fish after loading - keep only the newest one
@@ -1632,6 +1786,12 @@ async function checkForNewFish() {
             });
             
             if (!fishAlreadyExists) {
+                // 🔧 检查是否已达到容量限制
+                const currentFishCount = fishes.filter(f => !f.isDying).length;
+                if (currentFishCount >= maxTankCapacity) {
+                    console.log(`🐠 Tank is full (${currentFishCount}/${maxTankCapacity}), skipping new fish: ${fishId}`);
+                    continue;
+                }
 
                 // Check if this new fish belongs to the current user
                 const fishUserId = fishData.user_id || fishData.UserId || fishData.userId || fishData.owner_id || fishData.ownerId;
@@ -1864,6 +2024,9 @@ async function loadPrivateFish() {
         updatePrivateTankStats(result.stats);
 
         fishes.length = 0;
+        
+        // 🔧 重置行分配计数器，确保每次加载都能均匀分配
+        nextFishRowIndex = 0;
 
         console.log(`🔨 开始创建 ${fishToLoad.length} 个鱼对象...`);
         let successCount = 0;
@@ -2140,7 +2303,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         window.tankLayoutManager = tankLayoutManager;
         window.communityChatManager = communityChatManager;
         
-        console.log('✅ Tank Layout Manager initialized');
+        console.log(`✅ Tank Layout Manager initialized: ${tankLayoutManager.rows.length} rows for canvas ${swimCanvas.width}x${swimCanvas.height}`);
         console.log('✅ Community Chat Manager initialized');
         
         // Initialize group chat based on environment variable and user preference
@@ -2205,6 +2368,15 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
         }
         fishCountSelector.value = closest.toString();
+        console.log(`🔧 Initialized fish count selector to: ${closest}`);
+        
+        // 🔧 添加change事件监听器
+        fishCountSelector.addEventListener('change', (e) => {
+            const newCapacity = parseInt(e.target.value);
+            console.log(`🐠 Fish count selector changed from ${maxTankCapacity} to: ${newCapacity}`);
+            updateTankCapacity(newCapacity);
+        });
+        console.log(`✅ Fish count selector event listener registered`);
     }
     
     const displayElement = document.getElementById('fish-count-display');
@@ -2283,14 +2455,25 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Handle refresh button (only if element exists)
     if (refreshButton) {
         refreshButton.addEventListener('click', () => {
+            console.log(`🔄 Refresh button clicked! Current maxTankCapacity: ${maxTankCapacity}`);
             if (VIEW_MODE === 'my') {
                 // Private Tank mode - reload private fish
                 loadPrivateFish();
             } else {
                 // Global Tank mode - reload with current sort
                 const selectedSort = sortSelect ? sortSelect.value : initialSort;
+                console.log(`🔄 Reloading tank with sort: ${selectedSort}, capacity: ${maxTankCapacity}`);
                 loadFishIntoTank(selectedSort);
             }
+        });
+    }
+
+    // Handle fish count selector (sidebar dropdown)
+    if (fishCountSelector && VIEW_MODE !== 'my') {
+        fishCountSelector.addEventListener('change', (e) => {
+            const newCapacity = parseInt(e.target.value);
+            console.log(`🐠 Fish count selector changed to: ${newCapacity}`);
+            updateTankCapacity(newCapacity);
         });
     }
 
@@ -3124,10 +3307,49 @@ function resizeForMobile() {
 
     console.log(`🐠 Canvas resized with DPI fix: display ${viewportWidth}x${viewportHeight}, actual ${swimCanvas.width}x${swimCanvas.height} (${isMobile ? 'mobile' : 'desktop'}, DPR: ${devicePixelRatio})`);
 
-    // If canvas size changed significantly, rescale all fish
+    // 🔧 重新初始化TankLayoutManager以适应新的canvas尺寸
+    // 这样可以根据新的屏幕大小重新计算行数
     if (oldWidth > 0 && oldHeight > 0) {
         const widthChange = Math.abs(oldWidth - swimCanvas.width) / oldWidth;
         const heightChange = Math.abs(oldHeight - swimCanvas.height) / oldHeight;
+
+        // 如果尺寸变化超过20%，重新初始化layout manager
+        if (heightChange > 0.2) {
+            console.log('🔄 Significant height change detected, reinitializing TankLayoutManager...');
+            
+            if (typeof TankLayoutManager !== 'undefined') {
+                const oldRowCount = tankLayoutManager ? tankLayoutManager.rows.length : 0;
+                tankLayoutManager = new TankLayoutManager(swimCanvas, swimCtx);
+                window.tankLayoutManager = tankLayoutManager;
+                
+                console.log(`✅ TankLayoutManager reinitialized: ${oldRowCount} → ${tankLayoutManager.rows.length} rows`);
+                
+                // 重新分配所有鱼到新的行
+                if (fishes.length > 0) {
+                    // 重置行分配计数器
+                    nextFishRowIndex = 0;
+                    
+                    // 为每条鱼重新分配行
+                    fishes.forEach((fish, index) => {
+                        if (tankLayoutManager.rows.length > 0) {
+                            const targetRowIndex = index % tankLayoutManager.rows.length;
+                            const targetRow = tankLayoutManager.rows[targetRowIndex];
+                            
+                            fish.rowIndex = targetRowIndex;
+                            fish.yMin = targetRow.swimYMin;
+                            fish.yMax = targetRow.swimYMax;
+                            
+                            // 调整Y坐标到新行的范围内
+                            if (fish.y < targetRow.swimYMin || fish.y > targetRow.swimYMax) {
+                                fish.y = targetRow.swimYMin + Math.random() * (targetRow.swimYMax - targetRow.swimYMin);
+                            }
+                        }
+                    });
+                    
+                    console.log(`✅ Reassigned ${fishes.length} fish to ${tankLayoutManager.rows.length} rows after resize`);
+                }
+            }
+        }
 
         // Rescale if size changed by more than 20%
         if (widthChange > 0.2 || heightChange > 0.2) {
@@ -3167,6 +3389,56 @@ function animateFishes() {
     }
     if (typeof window.cacheUpdateCounter === 'undefined') {
         window.cacheUpdateCounter = 0;
+    }
+    if (typeof window.lastRowCheckTime === 'undefined') {
+        window.lastRowCheckTime = 0;
+    }
+    
+    // 🔧 自动修复机制：定期检查并修复未分配行号的鱼
+    const now = Date.now();
+    if (now - window.lastRowCheckTime > 500 && tankLayoutManager && tankLayoutManager.rows && tankLayoutManager.rows.length > 0) {
+        window.lastRowCheckTime = now;
+        
+        // 检查是否有鱼没有rowIndex
+        const unassignedFish = fishes.filter(f => f.rowIndex === undefined);
+        
+        if (unassignedFish.length > 0) {
+            console.log(`🔧 发现 ${unassignedFish.length} 条鱼未分配行号，立即修复...`);
+            
+            // 统计当前每行的鱼数
+            const rows = tankLayoutManager.rows;
+            const rowCounts = new Array(rows.length).fill(0);
+            fishes.forEach(f => {
+                if (f.rowIndex !== undefined && f.rowIndex >= 0 && f.rowIndex < rows.length) {
+                    rowCounts[f.rowIndex]++;
+                }
+            });
+            
+            // 为未分配的鱼分配行号
+            unassignedFish.forEach((fish, idx) => {
+                // 找到鱼数最少的行
+                const minCount = Math.min(...rowCounts);
+                const availableRows = rowCounts
+                    .map((count, i) => count === minCount ? i : -1)
+                    .filter(i => i >= 0);
+                const targetRow = availableRows[Math.floor(Math.random() * availableRows.length)];
+                
+                fish.rowIndex = targetRow;
+                const row = rows[targetRow];
+                fish.yMin = row.swimYMin;
+                fish.yMax = row.swimYMax;
+                
+                // 调整Y坐标到正确的行范围
+                if (fish.y < row.swimYMin || fish.y > row.swimYMax) {
+                    fish.y = row.swimYMin + Math.random() * (row.swimYMax - row.swimYMin);
+                }
+                
+                rowCounts[targetRow]++;
+                console.log(`  ✅ Fish ${fishes.indexOf(fish)} assigned to row ${targetRow}`);
+            });
+            
+            console.log(`✅ 修复完成，每行鱼数:`, rowCounts);
+        }
     }
     
     // 🔧 修复：在每次动画帧开始时设置高质量渲染，确保图片清晰度

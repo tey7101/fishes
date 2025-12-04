@@ -137,3 +137,5 @@ C:\Users\terry\AppData\Roaming\Cursor\User\globalStorage\saoudrizwan.claude-dev\
 3. 如果不行，尝试完全移除 Browser MCP 配置，看看 Cursor 是否会自动检测内置功能
 
 
+
+

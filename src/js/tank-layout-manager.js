@@ -284,24 +284,55 @@ class TankLayoutManager {
     this.ctx = ctx;
     this.rows = [];
     
-    // Calculate optimal number of rows based on canvas height
-    // Ensure we cover the entire canvas height
-    const minRowHeight = 150; // Minimum height per row
-    const calculatedRows = Math.max(4, Math.ceil(canvas.height / minRowHeight));
-    const actualRows = Math.min(calculatedRows, 10); // Cap at 10 rows
+    // 🔧 关键修复：使用逻辑尺寸而非实际像素尺寸
+    // 鱼的坐标系基于logicalWidth/logicalHeight，行管理器也必须使用相同坐标系
+    console.log('🔍 [TankLayoutManager] Canvas properties:', {
+      actualWidth: canvas.width,
+      actualHeight: canvas.height,
+      logicalWidth: canvas.logicalWidth,
+      logicalHeight: canvas.logicalHeight
+    });
+    
+    const canvasWidth = canvas.logicalWidth || canvas.width;
+    const canvasHeight = canvas.logicalHeight || canvas.height;
+    
+    console.log('🔍 [TankLayoutManager] Using dimensions:', {
+      canvasWidth,
+      canvasHeight,
+      source: canvas.logicalHeight ? 'logical' : 'fallback'
+    });
+    
+    // 🔧 移动端优化：使用更小的最小行高，确保有足够多的行
+    // 移动端屏幕较小，需要更多行来避免鱼扎堆
+    const isMobile = window.innerWidth <= 768;
+    const minRowHeight = isMobile ? 80 : 120; // 进一步降低最小行高，允许更多行
+    const calculatedRows = Math.max(isMobile ? 8 : 6, Math.ceil(canvasHeight / minRowHeight));
+    const actualRows = Math.min(calculatedRows, 15); // 增加上限到15行
     
     // Update TANK_LAYOUT.rows dynamically
     const originalRows = TANK_LAYOUT.rows;
     TANK_LAYOUT.rows = actualRows;
-    TANK_LAYOUT.rowHeight = Math.floor(canvas.height / actualRows);
+    TANK_LAYOUT.rowHeight = Math.floor(canvasHeight / actualRows);
     TANK_LAYOUT.swimZone.height = Math.floor(TANK_LAYOUT.rowHeight * 0.7); // 70% of row height for swimming
     
-    // Create row managers
+    // Create row managers with logical width
     for (let i = 0; i < TANK_LAYOUT.rows; i++) {
-      this.rows.push(new TankRow(i, canvas.width, ctx));
+      this.rows.push(new TankRow(i, canvasWidth, ctx));
     }
     
-    console.log(`TankLayoutManager initialized with ${TANK_LAYOUT.rows} rows (canvas: ${canvas.width}x${canvas.height}, row height: ${TANK_LAYOUT.rowHeight}px)`);
+    // 🔧 修复：确保最后一行不超出画布边界
+    const lastRow = this.rows[this.rows.length - 1];
+    if (lastRow.swimYMax > canvasHeight) {
+      console.warn(`⚠️ Last row swimYMax (${lastRow.swimYMax}) exceeds canvas height (${canvasHeight}), adjusting...`);
+      lastRow.swimYMax = canvasHeight - 10; // 留10px边距
+      console.log(`   Fixed: swimYMax adjusted to ${lastRow.swimYMax}`);
+    }
+    
+    console.log(`✅ TankLayoutManager initialized with ${TANK_LAYOUT.rows} rows`);
+    console.log(`   📐 Canvas: logical ${canvasWidth}x${canvasHeight}, actual ${canvas.width}x${canvas.height}`);
+    console.log(`   📏 Row height: ${TANK_LAYOUT.rowHeight}px, ${isMobile ? 'mobile' : 'desktop'} mode`);
+    console.log(`   🎯 First row Y range: ${this.rows[0].swimYMin}-${this.rows[0].swimYMax}`);
+    console.log(`   🎯 Last row Y range: ${this.rows[this.rows.length-1].swimYMin}-${this.rows[this.rows.length-1].swimYMax}`);
   }
   
   /**
@@ -310,7 +341,32 @@ class TankLayoutManager {
    * @param {boolean} preserveDistribution - If true, distribute evenly across rows instead of using Y position
    */
   assignFishToRows(fishes, preserveDistribution = false) {
+    // 🔧 改进：计算每行应该分配的鱼数量，确保尽量均匀
+    const rowCounts = new Array(this.rows.length).fill(0);
+    let preassignedCount = 0;
+    
     fishes.forEach((fish, index) => {
+      // 🔧 检查是否已预分配行号（由loadFishImageToTank设置）
+      if (fish.preassignedRowIndex !== undefined && fish.preassignedRowIndex >= 0 && fish.preassignedRowIndex < this.rows.length) {
+        const rowIndex = fish.preassignedRowIndex;
+        fish.rowIndex = rowIndex;
+        const row = this.rows[rowIndex];
+        fish.yMin = row.swimYMin;
+        fish.yMax = row.swimYMax;
+        rowCounts[rowIndex]++;
+        preassignedCount++;
+        
+        // 确保Y坐标在行范围内
+        if (fish.y < row.swimYMin || fish.y > row.swimYMax) {
+          const oldY = fish.y;
+          fish.y = row.swimYMin + Math.random() * (row.swimYMax - row.swimYMin);
+          console.log(`🔧 Fish #${index} Y adjusted: ${Math.floor(oldY)} → ${Math.floor(fish.y)} (row ${rowIndex}: ${Math.floor(row.swimYMin)}-${Math.floor(row.swimYMax)})`);
+        }
+        
+        delete fish.preassignedRowIndex; // 清除临时标记
+        return;
+      }
+      
       // If preserveDistribution is true, assign rows without moving fish positions
       // This prevents fish from being moved to upper screen after refresh
       if (preserveDistribution) {
@@ -332,7 +388,8 @@ class TankLayoutManager {
           
           // If not found, assign to closest row based on Y position
           if (!foundRow) {
-            const totalHeight = this.canvas.height;
+            // 🔧 使用逻辑高度而非实际像素高度
+            const totalHeight = this.canvas.logicalHeight || this.canvas.height;
             const yProportion = Math.max(0, Math.min(1, fish.y / totalHeight));
             rowIndex = Math.min(
               Math.floor(yProportion * TANK_LAYOUT.rows),
@@ -340,8 +397,12 @@ class TankLayoutManager {
             );
           }
         } else {
-          // If no Y position, distribute evenly by index
-          rowIndex = index % TANK_LAYOUT.rows;
+          // 🔧 改进：使用更均匀的分配算法，而不是简单取模
+          // 找到当前鱼数最少的行
+          let minCount = Math.min(...rowCounts);
+          let availableRows = rowCounts.map((count, idx) => count === minCount ? idx : -1).filter(idx => idx >= 0);
+          // 在鱼数最少的行中随机选择一个
+          rowIndex = availableRows[Math.floor(Math.random() * availableRows.length)];
         }
         
         // Assign row but DON'T move the fish - keep its current Y position
@@ -349,6 +410,7 @@ class TankLayoutManager {
         const row = this.rows[rowIndex];
         fish.yMin = row.swimYMin;
         fish.yMax = row.swimYMax;
+        rowCounts[rowIndex]++;
         
         // Don't modify fish.y - keep it at its current position
         // The fish will be constrained by updateFishPosition during animation
@@ -372,7 +434,8 @@ class TankLayoutManager {
         // This ensures even distribution instead of all going to first row
         if (assignedRowIndex === 0 && fish.y < this.rows[0].swimYMin) {
           // Calculate which row based on Y position proportion
-          const totalHeight = this.canvas.height;
+          // 🔧 使用逻辑高度而非实际像素高度
+          const totalHeight = this.canvas.logicalHeight || this.canvas.height;
           const yProportion = fish.y / totalHeight;
           assignedRowIndex = Math.min(
             Math.floor(yProportion * TANK_LAYOUT.rows),
@@ -386,6 +449,7 @@ class TankLayoutManager {
         const row = this.rows[assignedRowIndex];
         fish.yMin = row.swimYMin;
         fish.yMax = row.swimYMax;
+        rowCounts[assignedRowIndex]++;
         
         // Only adjust Y if fish is significantly outside the row bounds
         // But don't move fish that are already in a reasonable position
@@ -395,23 +459,56 @@ class TankLayoutManager {
           fish.y = row.swimYMax - Math.random() * TANK_LAYOUT.swimZone.height;
         }
       } else {
-        // If fish doesn't have Y position, distribute evenly across rows
-        const rowIndex = index % TANK_LAYOUT.rows;
-        fish.rowIndex = rowIndex;
+        // 🔧 改进：如果鱼没有Y坐标，使用均匀分配算法
+        // 找到当前鱼数最少的行
+        let minCount = Math.min(...rowCounts);
+        let availableRows = rowCounts.map((count, idx) => count === minCount ? idx : -1).filter(idx => idx >= 0);
+        // 在鱼数最少的行中随机选择一个
+        const rowIndex = availableRows[Math.floor(Math.random() * availableRows.length)];
         
+        fish.rowIndex = rowIndex;
         const row = this.rows[rowIndex];
         fish.yMin = row.swimYMin;
         fish.yMax = row.swimYMax;
+        rowCounts[rowIndex]++;
         
         // Place fish randomly within its row's swim zone
         fish.y = row.swimYMin + Math.random() * TANK_LAYOUT.swimZone.height;
       }
     });
     
+    const summary = {
+      totalFish: fishes.length,
+      totalRows: this.rows.length,
+      rowCounts: rowCounts,
+      preassignedCount: preassignedCount,
+      minPerRow: Math.min(...rowCounts),
+      maxPerRow: Math.max(...rowCounts),
+      avgPerRow: (fishes.length / this.rows.length).toFixed(1)
+    };
+    
+    // 🔧 详细的每行分布信息
+    const rowDistribution = rowCounts.map((count, idx) => `Row${idx}:${count}`).join(', ');
+    
     if (preserveDistribution) {
       console.log(`✅ Assigned ${fishes.length} fish to ${TANK_LAYOUT.rows} rows (preserving distribution)`);
+      console.log(`📊 Distribution: [${rowDistribution}] | Min:${summary.minPerRow}, Max:${summary.maxPerRow}, Avg:${summary.avgPerRow}, Preassigned:${preassignedCount}`);
     } else {
       console.log(`Assigned ${fishes.length} fish to ${TANK_LAYOUT.rows} rows based on their positions`);
+      console.log(`📊 Distribution: [${rowDistribution}] | Min:${summary.minPerRow}, Max:${summary.maxPerRow}, Avg:${summary.avgPerRow}`);
+    }
+    
+    // 🔧 警告：如果某行鱼数量过多
+    const maxReasonable = Math.ceil(fishes.length / this.rows.length) + 2;
+    const problemRows = [];
+    rowCounts.forEach((count, idx) => {
+      if (count > maxReasonable) {
+        problemRows.push(`Row${idx}(${count})`);
+      }
+    });
+    
+    if (problemRows.length > 0) {
+      console.warn(`⚠️ Crowded rows detected: ${problemRows.join(', ')} (expected ~${summary.avgPerRow} per row)`);
     }
   }
   

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tank Debug - Fish Distribution</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; font-family: monospace; }
+        #debug-overlay {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 10000;
+            max-height: 90vh;
+            overflow-y: auto;
+            min-width: 300px;
+        }
+        .stat-row { margin: 3px 0; }
+        .row-bar { display: inline-block; background: #0f0; height: 10px; margin-left: 5px; }
+        .warning { color: #ff0; }
+        .error { color: #f00; }
+        .good { color: #0f0; }
+        h3 { margin: 10px 0 5px 0; color: #0ff; }
+    </style>
+</head>
+<body>
+    <iframe id="tank-frame" src="http://localhost:3000/tank.html?capacity=10" 
+            style="width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; border: none;"></iframe>
+    
+    <div id="debug-overlay">
+        <h3>🔍 Fish Distribution Debug</h3>
+        <div id="debug-content">Loading...</div>
+    </div>
+
+    <script>
+        const iframe = document.getElementById('tank-frame');
+        const debugContent = document.getElementById('debug-content');
+        
+        function updateDebugInfo() {
+            try {
+                const iframeWindow = iframe.contentWindow;
+                
+                if (!iframeWindow.fishes || !iframeWindow.tankLayoutManager) {
+                    debugContent.innerHTML = '<span class="warning">⏳ Waiting for tank to load...</span>';
+                    return;
+                }
+                
+                const fishes = iframeWindow.fishes;
+                const layoutManager = iframeWindow.tankLayoutManager;
+                const canvas = iframeWindow.swimCanvas;
+                
+                // 统计每行的鱼数量
+                const rowCounts = new Array(layoutManager.rows.length).fill(0);
+                const fishDetails = [];
+                
+                fishes.forEach((fish, index) => {
+                    if (fish.rowIndex !== undefined) {
+                        rowCounts[fish.rowIndex]++;
+                        fishDetails.push({
+                            index,
+                            rowIndex: fish.rowIndex,
+                            y: Math.floor(fish.y),
+                            yMin: Math.floor(fish.yMin || 0),
+                            yMax: Math.floor(fish.yMax || 0)
+                        });
+                    } else {
+                        fishDetails.push({
+                            index,
+                            rowIndex: '❌ NO ROW',
+                            y: Math.floor(fish.y),
+                            yMin: '-',
+                            yMax: '-'
+                        });
+                    }
+                });
+                
+                // 计算统计数据
+                const totalFish = fishes.length;
+                const totalRows = layoutManager.rows.length;
+                const avgPerRow = (totalFish / totalRows).toFixed(1);
+                const maxCount = Math.max(...rowCounts);
+                const minCount = Math.min(...rowCounts);
+                
+                // 检测crowding
+                const maxReasonable = Math.ceil(parseFloat(avgPerRow)) + 1;
+                const crowdedRows = rowCounts
+                    .map((count, idx) => count > maxReasonable ? { row: idx, count } : null)
+                    .filter(x => x);
+                
+                // 生成HTML
+                let html = `
+                    <div class="stat-row"><strong>总鱼数:</strong> ${totalFish}</div>
+                    <div class="stat-row"><strong>总行数:</strong> ${totalRows}</div>
+                    <div class="stat-row"><strong>画布:</strong> ${canvas.width}x${canvas.height}</div>
+                    <div class="stat-row"><strong>期望每行:</strong> ${avgPerRow} 条</div>
+                    <div class="stat-row"><strong>实际范围:</strong> ${minCount} - ${maxCount} 条</div>
+                    
+                    <h3>📊 每行分布</h3>
+                `;
+                
+                rowCounts.forEach((count, idx) => {
+                    const barWidth = count * 20;
+                    const colorClass = count > maxReasonable ? 'warning' : 'good';
+                    const row = layoutManager.rows[idx];
+                    html += `
+                        <div class="stat-row ${colorClass}">
+                            Row ${idx}: ${count} 条 
+                            <span class="row-bar" style="width: ${barWidth}px;"></span>
+                            <span style="font-size: 10px; color: #888;">
+                                (Y: ${Math.floor(row.swimYMin)}-${Math.floor(row.swimYMax)})
+                            </span>
+                        </div>
+                    `;
+                });
+                
+                if (crowdedRows.length > 0) {
+                    html += `<h3 class="warning">⚠️ 拥挤的行</h3>`;
+                    crowdedRows.forEach(({ row, count }) => {
+                        html += `<div class="stat-row warning">Row ${row}: ${count} 条 (期望 ~${avgPerRow})</div>`;
+                    });
+                }
+                
+                // 显示每条鱼的详细信息
+                html += `<h3>🐠 鱼的详细信息</h3>`;
+                fishDetails.slice(0, 15).forEach(fish => {
+                    const rowClass = typeof fish.rowIndex === 'string' && fish.rowIndex.includes('NO ROW') ? 'error' : 'good';
+                    html += `
+                        <div class="stat-row ${rowClass}" style="font-size: 10px;">
+                            Fish #${fish.index}: Row ${fish.rowIndex}, Y=${fish.y} (${fish.yMin}-${fish.yMax})
+                        </div>
+                    `;
+                });
+                
+                if (fishDetails.length > 15) {
+                    html += `<div class="stat-row" style="font-size: 10px; color: #888;">... 还有 ${fishDetails.length - 15} 条鱼</div>`;
+                }
+                
+                debugContent.innerHTML = html;
+                
+            } catch (error) {
+                debugContent.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+            }
+        }
+        
+        // 初始等待iframe加载
+        iframe.addEventListener('load', () => {
+            console.log('✅ Iframe loaded, starting debug monitor...');
+            // 等待2秒让tank初始化
+            setTimeout(() => {
+                updateDebugInfo();
+                // 每秒更新一次
+                setInterval(updateDebugInfo, 1000);
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
+

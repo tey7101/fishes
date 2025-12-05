@@ -1,6 +1,9 @@
 {
   "mcpServers": {
-    "browser": {}
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@hisma/server-puppeteer"]
+    }
   }
 }
 

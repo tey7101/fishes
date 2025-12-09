@@ -290,6 +290,14 @@ async function handleSignUp(event) {
     }
     
     if (data) {
+      // Track registration completion with Meta Pixel
+      if (typeof fbq !== 'undefined') {
+        fbq('track', 'CompleteRegistration', {
+          content_name: 'User Registration',
+          status: 'success'
+        });
+      }
+      
       // Check if email confirmation is required
       if (data.user && !data.session) {
         showSuccess("Registration successful! Please check your email to confirm your account.");

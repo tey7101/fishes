@@ -422,6 +422,11 @@ function displayProfile(profile, searchedUserId = null) {
         loadUserMessages(profileUserId);
     }
     
+    // Load subscription info if user is viewing own profile
+    if (isCurrentUser && profileUserId) {
+        loadUserSubscription(profileUserId);
+    }
+    
     // Handle #messages hash - scroll to messages section if present
     handleMessagesHashOnLoad();
 }
@@ -1658,3 +1663,138 @@ window.addEventListener('hashchange', function() {
 
 // Export showEditProfileModal globally for use in other modules
 window.showEditProfileModal = showEditProfileModal;
+
+/**
+ * 加载用户订阅信息
+ * @param {string} userId - 用户ID
+ */
+async function loadUserSubscription(userId) {
+    const subscriptionSection = document.getElementById('profile-subscription-section');
+    const subscriptionContainer = document.getElementById('profile-subscription-container');
+    
+    if (!subscriptionSection || !subscriptionContainer) return;
+    
+    try {
+        const query = `
+            query GetSubscription($userId: String!) {
+                user_subscriptions(
+                    where: { user_id: {_eq: $userId}, is_active: {_eq: true} }
+                    order_by: {created_at: desc}
+                    limit: 1
+                ) {
+                    id
+                    plan
+                    payment_provider
+                    current_period_end
+                    stripe_subscription_id
+                    paypal_subscription_id
+                }
+            }
+        `;
+        
+        const response = await fetch('/api/graphql', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query, variables: { userId } })
+        });
+        
+        const result = await response.json();
+        const subscription = result.data?.user_subscriptions?.[0];
+        
+        subscriptionSection.style.display = 'block';
+        subscriptionContainer.innerHTML = renderSubscriptionCard(subscription, userId);
+        
+        // 绑定取消按钮事件
+        const cancelBtn = document.getElementById('cancel-subscription-btn');
+        if (cancelBtn) {
+            cancelBtn.onclick = () => handleCancelSubscription(userId);
+        }
+    } catch (error) {
+        console.error('Failed to load subscription:', error);
+    }
+}
+
+/**
+ * 渲染订阅卡片
+ * @param {object} subscription - 订阅信息
+ * @param {string} userId - 用户ID
+ * @returns {string} HTML 字符串
+ */
+function renderSubscriptionCard(subscription, userId) {
+    if (!subscription || subscription.plan === 'free') {
+        return `
+            <div class="subscription-card">
+                <div class="subscription-status">
+                    <div class="subscription-badge">🆓</div>
+                    <div class="subscription-info">
+                        <div class="subscription-plan">Free Plan</div>
+                        <div class="subscription-details">Upgrade to unlock premium features</div>
+                    </div>
+                </div>
+                <div class="subscription-actions">
+                    <button class="subscription-btn upgrade-btn" onclick="window.location.href='membership.html'">
+                        Upgrade Now
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
+    const planName = subscription.plan.charAt(0).toUpperCase() + subscription.plan.slice(1);
+    const badge = subscription.plan === 'premium' ? '👑' : '⭐';
+    const nextBilling = subscription.current_period_end 
+        ? new Date(subscription.current_period_end).toLocaleDateString() 
+        : 'N/A';
+    
+    return `
+        <div class="subscription-card">
+            <div class="subscription-status">
+                <div class="subscription-badge">${badge}</div>
+                <div class="subscription-info">
+                    <div class="subscription-plan">${planName} Plan</div>
+                    <div class="subscription-details">
+                        Provider: ${subscription.payment_provider || 'Unknown'}<br>
+                        Next billing: ${nextBilling}
+                    </div>
+                </div>
+            </div>
+            <div class="subscription-actions">
+                <button id="cancel-subscription-btn" class="subscription-btn cancel-btn">
+                    Cancel Subscription
+                </button>
+                <button class="subscription-btn upgrade-btn" onclick="window.location.href='membership.html'">
+                    Change Plan
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * 处理取消订阅
+ * @param {string} userId - 用户ID
+ */
+async function handleCancelSubscription(userId) {
+    if (!confirm('Are you sure you want to cancel your subscription? You will continue to have access until the end of your billing period.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/payment?action=manage-subscription', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, action: 'cancel' })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert('Subscription canceled successfully. You will have access until the end of your billing period.');
+            loadUserSubscription(userId); // 刷新显示
+        } else {
+            alert('Failed to cancel subscription: ' + (result.error || result.message));
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}

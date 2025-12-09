@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Subscription Module</title>
+    <link rel="stylesheet" href="src/css/profile.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>订阅模块测试页面</h1>
+        
+        <div class="test-section">
+            <h3>1. 测试 Free 用户订阅卡片</h3>
+            <button onclick="testFreeSubscription()">显示 Free 订阅</button>
+            <div id="free-result" class="result" style="display:none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. 测试 Plus 用户订阅卡片</h3>
+            <button onclick="testPlusSubscription()">显示 Plus 订阅</button>
+            <div id="plus-result" class="result" style="display:none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. 测试 Premium 用户订阅卡片</h3>
+            <button onclick="testPremiumSubscription()">显示 Premium 订阅</button>
+            <div id="premium-result" class="result" style="display:none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. 实际渲染测试</h3>
+            <div id="profile-subscription-section" class="profile-subscription-section">
+                <div class="subscription-header">
+                    <h3>💳 Subscription</h3>
+                </div>
+                <div id="profile-subscription-container">
+                    <!-- 内容由测试按钮动态生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>5. CSS 样式测试</h3>
+            <button onclick="testStyles()">检查 CSS 类</button>
+            <div id="style-result" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟 renderSubscriptionCard 函数
+        function renderSubscriptionCard(subscription, userId) {
+            if (!subscription || subscription.plan === 'free') {
+                return `
+                    <div class="subscription-card">
+                        <div class="subscription-status">
+                            <div class="subscription-badge">🆓</div>
+                            <div class="subscription-info">
+                                <div class="subscription-plan">Free Plan</div>
+                                <div class="subscription-details">Upgrade to unlock premium features</div>
+                            </div>
+                        </div>
+                        <div class="subscription-actions">
+                            <button class="subscription-btn upgrade-btn" onclick="alert('Would redirect to membership.html')">
+                                Upgrade Now
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            const planName = subscription.plan.charAt(0).toUpperCase() + subscription.plan.slice(1);
+            const badge = subscription.plan === 'premium' ? '👑' : '⭐';
+            const nextBilling = subscription.current_period_end 
+                ? new Date(subscription.current_period_end).toLocaleDateString() 
+                : 'N/A';
+            
+            return `
+                <div class="subscription-card">
+                    <div class="subscription-status">
+                        <div class="subscription-badge">${badge}</div>
+                        <div class="subscription-info">
+                            <div class="subscription-plan">${planName} Plan</div>
+                            <div class="subscription-details">
+                                Provider: ${subscription.payment_provider || 'Unknown'}<br>
+                                Next billing: ${nextBilling}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="subscription-actions">
+                        <button id="cancel-subscription-btn" class="subscription-btn cancel-btn" onclick="alert('Cancel subscription clicked')">
+                            Cancel Subscription
+                        </button>
+                        <button class="subscription-btn upgrade-btn" onclick="alert('Would redirect to membership.html')">
+                            Change Plan
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function testFreeSubscription() {
+            const result = document.getElementById('free-result');
+            const container = document.getElementById('profile-subscription-container');
+            
+            const subscription = null; // Free user has no subscription
+            const html = renderSubscriptionCard(subscription, 'test-user-id');
+            
+            container.innerHTML = html;
+            result.style.display = 'block';
+            result.textContent = 'Free 订阅卡片已渲染到上方';
+        }
+
+        function testPlusSubscription() {
+            const result = document.getElementById('plus-result');
+            const container = document.getElementById('profile-subscription-container');
+            
+            const subscription = {
+                id: 1,
+                plan: 'plus',
+                payment_provider: 'stripe',
+                current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                stripe_subscription_id: 'sub_test123'
+            };
+            
+            const html = renderSubscriptionCard(subscription, 'test-user-id');
+            
+            container.innerHTML = html;
+            result.style.display = 'block';
+            result.textContent = 'Plus 订阅卡片已渲染到上方\n\n' + JSON.stringify(subscription, null, 2);
+        }
+
+        function testPremiumSubscription() {
+            const result = document.getElementById('premium-result');
+            const container = document.getElementById('profile-subscription-container');
+            
+            const subscription = {
+                id: 2,
+                plan: 'premium',
+                payment_provider: 'paypal',
+                current_period_end: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+                paypal_subscription_id: 'I-TEST123'
+            };
+            
+            const html = renderSubscriptionCard(subscription, 'test-user-id');
+            
+            container.innerHTML = html;
+            result.style.display = 'block';
+            result.textContent = 'Premium 订阅卡片已渲染到上方\n\n' + JSON.stringify(subscription, null, 2);
+        }
+
+        function testStyles() {
+            const result = document.getElementById('style-result');
+            const classes = [
+                'profile-subscription-section',
+                'subscription-header',
+                'subscription-card',
+                'subscription-status',
+                'subscription-badge',
+                'subscription-info',
+                'subscription-plan',
+                'subscription-details',
+                'subscription-actions',
+                'subscription-btn',
+                'cancel-btn',
+                'upgrade-btn'
+            ];
+            
+            let output = 'CSS 类检查结果:\n\n';
+            
+            classes.forEach(className => {
+                const elements = document.getElementsByClassName(className);
+                const exists = elements.length > 0;
+                output += `${exists ? '✅' : '❌'} .${className} (${elements.length} 个元素)\n`;
+            });
+            
+            result.style.display = 'block';
+            result.textContent = output;
+        }
+
+        // 页面加载时显示说明
+        window.addEventListener('load', () => {
+            console.log('订阅模块测试页面已加载');
+            console.log('点击按钮测试不同的订阅状态');
+        });
+    </script>
+</body>
+</html>
+
+

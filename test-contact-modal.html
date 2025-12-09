@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Modal Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .test-btn {
+            padding: 20px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(180deg, #4ECDC4 0%, #45B7D1 100%);
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #3BA89F, 0 8px 20px rgba(78, 205, 196, 0.3);
+            transition: all 0.3s;
+        }
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #3BA89F, 0 10px 25px rgba(78, 205, 196, 0.4);
+        }
+        .test-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #3BA89F, 0 4px 15px rgba(78, 205, 196, 0.3);
+        }
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <h1>📧 Contact Modal Test</h1>
+    <button class="test-btn" onclick="showContactModal()">
+        点击测试 Contact Us 弹窗
+    </button>
+
+    <script src="src/js/contact-modal.js?v=1.0"></script>
+</body>
+</html>

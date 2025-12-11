@@ -1962,7 +1962,21 @@ async function loadPrivateFish() {
         }
         console.log('🐠 Loading private fish...');
 
-        const token = localStorage.getItem('userToken');
+        // 🔧 修复：优先从 Supabase session 获取 token，避免 localStorage 延迟
+        let token = localStorage.getItem('userToken');
+        
+        // 如果 localStorage 中没有 token，尝试从 Supabase session 获取
+        if (!token && window.supabaseAuth) {
+            console.log('⚠️ No token in localStorage, fetching from Supabase session...');
+            const session = await window.supabaseAuth.getSession();
+            if (session?.access_token) {
+                token = session.access_token;
+                // 同步更新 localStorage
+                localStorage.setItem('userToken', token);
+                console.log('✅ Token retrieved from Supabase session and saved to localStorage');
+            }
+        }
+        
         if (!token) {
             throw new Error('Not logged in - no token found');
         }

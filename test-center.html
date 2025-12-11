@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>API测试中心 - Fish Art</title>
+  <title>测试中心 - FishTalk</title>
   <style>
     * {
       margin: 0;
@@ -228,48 +228,25 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>🧪 API 测试中心</h1>
-      <p>测试 Fish Art 项目的各种后端功能模块</p>
+      <h1>🧪 测试中心</h1>
+      <p>测试 FishTalk 各后端模块</p>
     </div>
 
     <div class="test-grid">
-      <!-- 数据表管理 -->
-      <a href="admin-table-manager.html" class="test-card">
-        <div class="test-card-header">
-          <span class="test-card-icon">🗄️</span>
-          <h2 class="test-card-title">数据表管理</h2>
-        </div>
-        <p class="test-card-description">
-          可视化管理数据库表，支持在线编辑、批量操作
-        </p>
-        <div class="test-card-features">
-          <span class="feature-tag">在线编辑</span>
-          <span class="feature-tag">批量删除</span>
-          <span class="feature-tag">排序筛选</span>
-          <span class="feature-tag">实时保存</span>
-        </div>
-        <div class="test-card-footer">
-          <span>开始管理</span>
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
-        </div>
-      </a>
-
-      <!-- 七牛云上传测试 -->
+      <!-- 七牛上传测试 -->
       <a href="test-qiniu-upload.html" class="test-card">
         <div class="test-card-header">
           <span class="test-card-icon">📁</span>
-          <h2 class="test-card-title">七牛云上传测试</h2>
+          <h2 class="test-card-title">七牛上传测试</h2>
         </div>
         <p class="test-card-description">
-          测试七牛云图片上传功能，支持拖拽上传、预览和下载
+          测试七牛云图片上传，支持拖拽、预览和下载
         </p>
         <div class="test-card-features">
           <span class="feature-tag">文件上传</span>
           <span class="feature-tag">拖拽上传</span>
-          <span class="feature-tag">预览下载</span>
-          <span class="feature-tag">CDN加速</span>
+          <span class="feature-tag">预览</span>
+          <span class="feature-tag">CDN</span>
         </div>
         <div class="test-card-footer">
           <span>开始测试</span>
@@ -289,10 +266,10 @@
           测试鱼的提交、查询、更新和删除功能
         </p>
         <div class="test-card-features">
-          <span class="feature-tag">提交鱼</span>
-          <span class="feature-tag">查询鱼</span>
-          <span class="feature-tag">更新信息</span>
-          <span class="feature-tag">删除鱼</span>
+          <span class="feature-tag">提交</span>
+          <span class="feature-tag">查询</span>
+          <span class="feature-tag">更新</span>
+          <span class="feature-tag">删除</span>
         </div>
         <div class="test-card-footer">
           <span>开始测试</span>
@@ -312,9 +289,9 @@
           测试投票系统和举报功能
         </p>
         <div class="test-card-features">
-          <span class="feature-tag">点赞投票</span>
-          <span class="feature-tag">举报内容</span>
-          <span class="feature-tag">查询结果</span>
+          <span class="feature-tag">点赞/投票</span>
+          <span class="feature-tag">举报</span>
+          <span class="feature-tag">查询</span>
         </div>
         <div class="test-card-footer">
           <span>开始测试</span>
@@ -331,59 +308,13 @@
           <h2 class="test-card-title">认证系统测试</h2>
         </div>
         <p class="test-card-description">
-          测试 Supabase 认证功能，包括登录、注册和密码重置
+          测试 Supabase 认证，包括登录、注册和密码重置
         </p>
         <div class="test-card-features">
-          <span class="feature-tag">用户登录</span>
-          <span class="feature-tag">用户注册</span>
-          <span class="feature-tag">密码重置</span>
-          <span class="feature-tag">Session管理</span>
-        </div>
-        <div class="test-card-footer">
-          <span>开始测试</span>
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
-        </div>
-      </a>
-
-      <!-- 战斗系统测试 -->
-      <a href="test-battle.html" class="test-card">
-        <div class="test-card-header">
-          <span class="test-card-icon">⚔️</span>
-          <h2 class="test-card-title">战斗系统测试</h2>
-        </div>
-        <p class="test-card-description">
-          测试鱼的战斗匹配、战斗执行和结算功能
-        </p>
-        <div class="test-card-features">
-          <span class="feature-tag">匹配对手</span>
-          <span class="feature-tag">执行战斗</span>
-          <span class="feature-tag">查看历史</span>
-          <span class="feature-tag">Redis缓存</span>
-        </div>
-        <div class="test-card-footer">
-          <span>开始测试</span>
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
-        </div>
-      </a>
-
-      <!-- 经济系统测试 -->
-      <a href="test-economy.html" class="test-card">
-        <div class="test-card-header">
-          <span class="test-card-icon">💰</span>
-          <h2 class="test-card-title">经济系统测试</h2>
-        </div>
-        <p class="test-card-description">
-          测试用户金币、奖励和交易功能
-        </p>
-        <div class="test-card-features">
-          <span class="feature-tag">查询余额</span>
-          <span class="feature-tag">发放奖励</span>
-          <span class="feature-tag">扣除金币</span>
-          <span class="feature-tag">交易历史</span>
+          <span class="feature-tag">登录</span>
+          <span class="feature-tag">注册</span>
+          <span class="feature-tag">重置密码</span>
+          <span class="feature-tag">会话</span>
         </div>
         <div class="test-card-footer">
           <span>开始测试</span>
@@ -400,13 +331,13 @@
           <h2 class="test-card-title">PayPal 支付测试</h2>
         </div>
         <p class="test-card-description">
-          测试 PayPal 订阅支付功能，包括创建订阅、支付处理和 Webhook 回调
+          测试 PayPal 订阅支付、Webhook 和状态同步
         </p>
         <div class="test-card-features">
-          <span class="feature-tag">创建订阅</span>
-          <span class="feature-tag">支付处理</span>
-          <span class="feature-tag">Webhook回调</span>
-          <span class="feature-tag">状态同步</span>
+          <span class="feature-tag">订阅</span>
+          <span class="feature-tag">支付</span>
+          <span class="feature-tag">Webhook</span>
+          <span class="feature-tag">同步</span>
         </div>
         <div class="test-card-footer">
           <span>开始测试</span>
@@ -423,13 +354,13 @@
           <h2 class="test-card-title">COZE AI 测试</h2>
         </div>
         <p class="test-card-description">
-          测试 COZE AI 聊天功能，包括创建会话、发送消息、AI回复轮询
+          测试 COZE AI 聊天，包括会话、消息和 AI 回复
         </p>
         <div class="test-card-features">
-          <span class="feature-tag">创建会话</span>
-          <span class="feature-tag">发送消息</span>
-          <span class="feature-tag">AI回复</span>
-          <span class="feature-tag">日志查看</span>
+          <span class="feature-tag">会话</span>
+          <span class="feature-tag">消息</span>
+          <span class="feature-tag">AI 回复</span>
+          <span class="feature-tag">日志</span>
         </div>
         <div class="test-card-footer">
           <span>开始测试</span>
@@ -450,24 +381,24 @@
             <li>Supabase Auth</li>
             <li>Vercel Serverless</li>
             <li>PostgreSQL + Hasura</li>
-            <li>Redis (战斗系统)</li>
-            <li>七牛云 CDN</li>
+            <li>Redis (Battle)</li>
+            <li>七牛 CDN</li>
             <li>PayPal SDK</li>
           </ul>
         </div>
         <div class="info-section">
-          <h4>API端点</h4>
+          <h4>API 接口</h4>
           <ul>
-            <li>15个后端API</li>
+            <li>15+ 后端 API</li>
             <li>认证保护</li>
-            <li>CORS支持</li>
+            <li>CORS 支持</li>
             <li>错误处理</li>
           </ul>
         </div>
         <div class="info-section">
-          <h4>测试说明</h4>
+          <h4>测试须知</h4>
           <ul>
-            <li>✅ 开发阶段无需登录</li>
+            <li>✅ 需要管理员权限</li>
             <li>配置环境变量</li>
             <li>检查网络连接</li>
             <li>查看控制台日志</li>

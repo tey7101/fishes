@@ -1,355 +1,259 @@
-# 🚀 Fish Art 部署检查清单
+# 生产环境部署检查清单
 
-完整的部署前检查清单，确保所有配置正确。
+## 部署前准备
 
-## 📋 部署前检查
-
-### ✅ 1. 数据库配置
-
-- [ ] **PostgreSQL数据库已创建**
-  - 推荐使用 Supabase 免费Postgres
-  - 或自建PostgreSQL 14+
-  
-- [ ] **运行数据库迁移脚本**
-  ```bash
-  # 在Hasura Console或psql中执行
-  scripts/migrate-database.sql
-  ```
-  
-- [ ] **验证表结构**
-  - 7个表：fish, votes, reports, battle_config, user_economy, battle_log, economy_log
-  - 3个视图：fish_rank, fish_battle, user_fish_summary
-  - 2个触发器
+- [ ] 本地代码已提交到 Git
+- [ ] 已获取 PayPal Production 凭证
+- [ ] 已获取 Stripe Production 凭证
+- [ ] 数据库 test_plus/test_premium 套餐已更新（$0.50）
 
 ---
 
-### ✅ 2. Supabase配置
+## Render 环境变量配置
 
-- [ ] **创建Supabase项目**
-  - 访问 https://supabase.com/
-  - 创建新项目
-  
-- [ ] **获取项目凭证**
-  - Project URL
-  - Anon Key
-  - Service Role Key (秘密，仅服务端使用)
-  
-- [ ] **配置JWT Secret**
-  - 在项目设置中找到JWT Secret
-  - 用于Hasura认证
-  
-- [ ] **配置认证提供商（可选）**
-  - Email/Password (必需)
-  - Google OAuth (可选)
-  
-- [ ] **配置邮箱模板**
-  - 欢迎邮件
-  - 密码重置邮件
-  - 邮箱验证
+访问：https://dashboard.render.com/ → 您的服务 → Environment
 
-参考：`docs/HASURA_SETUP.md`
+### Stripe 配置
+- [ ] `STRIPE_MODE=live`
+- [ ] `STRIPE_LIVE_PUBLISHABLE_KEY` 已配置
+- [ ] `STRIPE_LIVE_SECRET_KEY` 已配置
+- [ ] `STRIPE_TEST_PUBLISHABLE_KEY` 已配置（保留）
+- [ ] `STRIPE_TEST_SECRET_KEY` 已配置（保留）
 
----
+### PayPal 配置
+- [ ] `PAYPAL_MODE=production`
+- [ ] `PAYPAL_PRODUCTION_CLIENT_ID` 已配置
+- [ ] `PAYPAL_PRODUCTION_CLIENT_SECRET` 已配置
+- [ ] `PAYPAL_CLIENT_ID` 已配置（sandbox，保留）
+- [ ] `PAYPAL_CLIENT_SECRET` 已配置（sandbox，保留）
 
-### ✅ 3. Hasura配置
+### 数据库和认证
+- [ ] `HASURA_GRAPHQL_ENDPOINT` 已配置
+- [ ] `HASURA_ADMIN_SECRET` 已配置
+- [ ] `SUPABASE_URL` 已配置
+- [ ] `SUPABASE_ANON_KEY` 已配置
+- [ ] `SUPABASE_SERVICE_ROLE_KEY` 已配置
 
-- [ ] **部署Hasura Cloud**
-  - 访问 https://hasura.io/
-  - 创建新项目
-  
-- [ ] **连接数据库**
-  - 使用Supabase的连接字符串
-  - 或自建Postgres连接
-  
-- [ ] **配置环境变量**
-  ```
-  HASURA_GRAPHQL_ADMIN_SECRET=your-secret
-  HASURA_GRAPHQL_JWT_SECRET={"type":"HS256","key":"your-jwt-secret"}
-  ```
-  
-- [ ] **配置权限规则**
-  - 按照 `docs/HASURA_SETUP.md` 配置所有表的权限
-  - 测试CRUD操作
-  
-- [ ] **配置关系**
-  - fish → votes (一对多)
-  - fish → reports (一对多)
-  - user_economy → fish (一对多)
+### 其他
+- [ ] `JWT_SECRET` 已配置
+- [ ] `PORT=3000` 已配置
 
-参考：`docs/HASURA_SETUP.md`
+- [ ] **点击 "Save Changes"**
 
 ---
 
-### ✅ 4. Redis配置（可选但推荐）
+## Stripe Webhook 配置
 
-- [ ] **选择Redis服务**
-  - 推荐：Upstash Redis (免费10K请求/天)
-  - 或：Redis Labs
-  - 或：自建Redis
-  
-- [ ] **获取连接信息**
-  - Redis URL或REST API URL
-  - Redis Token (Upstash)
-  
-- [ ] **测试连接**
-  ```bash
-  npm run test:redis
-  ```
+访问：https://dashboard.stripe.com/webhooks （切换到 Live 模式）
 
----
-
-### ✅ 5. 七牛云配置
-
-- [ ] **注册并认证七牛云账号**
-  - 访问 https://www.qiniu.com/
-  - 完成实名认证
-  
-- [ ] **创建存储空间**
-  - 空间名称：`fish-art`
-  - 区域：华南 (Zone_z2) 或就近
-  - 访问控制：公开空间
-  
-- [ ] **获取密钥**
-  - AccessKey
-  - SecretKey
-  - ⚠️ 保密，不要提交到Git
-  
-- [ ] **配置CDN域名**
-  - 测试域名（30天免费）
-  - 或绑定自定义域名（需备案）
-  
-- [ ] **测试上传**
-  ```bash
-  # 在本地测试上传功能
-  npm run dev
-  # 绘制并提交一条鱼
-  ```
-
-参考：`docs/QINIU_SETUP.md`
+- [ ] 点击 "Add endpoint"
+- [ ] Endpoint URL: `https://fishtalk.app/api/payment?action=webhook`
+- [ ] 选择事件：
+  - [ ] `checkout.session.completed`
+  - [ ] `invoice.payment_succeeded`
+  - [ ] `customer.subscription.updated`
+  - [ ] `customer.subscription.deleted`
+- [ ] 点击 "Add endpoint"
+- [ ] 复制 Signing secret（whsec_xxx）
+- [ ] 更新 Render 环境变量：`STRIPE_LIVE_WEBHOOK_SECRET=whsec_xxx`
+- [ ] 保存并等待 Render 重新部署
 
 ---
 
-### ✅ 6. 环境变量配置
+## PayPal Webhook 配置
 
-#### 本地开发 (`.env.local`)
+访问：https://developer.paypal.com/dashboard/ （切换到 Live 模式）
 
-```env
-# Supabase
-SUPABASE_URL=https://xxx.supabase.co
-SUPABASE_ANON_KEY=eyJxxx...
-SUPABASE_SERVICE_ROLE_KEY=eyJxxx...
-SUPABASE_JWT_SECRET=xxx
-
-# Hasura
-HASURA_GRAPHQL_ENDPOINT=https://xxx.hasura.app/v1/graphql
-HASURA_ADMIN_SECRET=xxx
-
-# Redis (可选)
-REDIS_URL=redis://localhost:6379
-# 或
-UPSTASH_REDIS_REST_URL=https://xxx.upstash.io
-UPSTASH_REDIS_REST_TOKEN=xxx
-
-# 七牛云
-QINIU_ACCESS_KEY=xxx
-QINIU_SECRET_KEY=xxx
-QINIU_BUCKET=fish-art
-QINIU_BASE_URL=https://cdn.fishart.online
-QINIU_DIR_PATH=fish/
-QINIU_ZONE=Zone_z2
-```
-
-#### Vercel部署
-
-- [ ] **添加所有环境变量到Vercel**
-  - Project Settings → Environment Variables
-  - 选中 Production, Preview, Development
-  
-- [ ] **验证环境变量**
-  ```bash
-  vercel env ls
-  ```
+- [ ] 左侧菜单 → Webhooks
+- [ ] 点击 "Create Webhook"
+- [ ] Webhook URL: `https://fishtalk.app/api/payment?action=paypal-webhook`
+- [ ] 选择事件：
+  - [ ] `BILLING.SUBSCRIPTION.CREATED`
+  - [ ] `BILLING.SUBSCRIPTION.ACTIVATED`
+  - [ ] `BILLING.SUBSCRIPTION.UPDATED`
+  - [ ] `BILLING.SUBSCRIPTION.CANCELLED`
+  - [ ] `BILLING.SUBSCRIPTION.SUSPENDED`
+  - [ ] `PAYMENT.SALE.COMPLETED`
+- [ ] 点击 "Save"
+- [ ] 复制 Webhook ID
+- [ ] 更新 Render 环境变量：`PAYPAL_PRODUCTION_WEBHOOK_ID=xxx`
+- [ ] 保存并等待 Render 重新部署
 
 ---
 
-### ✅ 7. 代码检查
+## 部署代码
 
-- [ ] **安装依赖**
-  ```bash
-  npm install
-  ```
-  
-- [ ] **运行测试**
-  ```bash
-  npm run test:all
-  ```
-  
-- [ ] **本地构建测试**
-  ```bash
-  npm run build
-  ```
-  
-- [ ] **检查Linter错误**
-  ```bash
-  # 如果有eslint配置
-  npm run lint
-  ```
+### Git 自动部署
+- [ ] 运行：`git add .`
+- [ ] 运行：`git commit -m "Production deployment with live payment"`
+- [ ] 运行：`git push origin main`
+- [ ] 在 Render Dashboard → Logs 查看部署进度
+
+### 或手动部署
+- [ ] Render Dashboard → 服务 → Manual Deploy
+- [ ] 点击 "Deploy latest commit"
 
 ---
 
-### ✅ 8. 前端配置
+## 部署验证
 
-- [ ] **更新Supabase公开配置**
-  - 编辑 `public/supabase-config.js`
-  - 填入正确的URL和Anon Key
-  
-- [ ] **更新后端URL**
-  - 检查 `src/js/fish-utils.js` 中的 `BACKEND_URL`
-  - 生产环境应自动检测
-  
-- [ ] **测试前端功能**
-  - [ ] 用户注册
-  - [ ] 用户登录
-  - [ ] 绘制并提交鱼
-  - [ ] 查看鱼列表
-  - [ ] 投票功能
-  - [ ] 举报功能
+### 基础验证
+- [ ] Render Logs 显示：`💳 PayPal 模式: PRODUCTION`
+- [ ] Render Logs 显示：`🚀 Stripe 模式: LIVE`
+- [ ] Render Logs 显示：`🚀 Server running...`
+- [ ] Render Service 状态显示 "Live" (绿色)
+
+### 访问测试
+- [ ] 访问 `https://fishtalk.app` 正常加载
+- [ ] 访问 `https://fishtalk.app/membership.html` 正常显示套餐
+
+### API 测试
+- [ ] 运行：`curl https://fishtalk.app/api/payment?action=webhook`
+- [ ] 返回 400/401 错误（正常，说明端点存在）
 
 ---
 
-### ✅ 9. Vercel部署
+## 支付功能测试
 
-- [ ] **连接Git仓库**
-  - GitHub/GitLab/Bitbucket
-  
-- [ ] **配置项目**
-  - Framework Preset: Other
-  - Build Command: (留空)
-  - Output Directory: (留空)
-  - Install Command: `npm install`
-  
-- [ ] **配置域名（可选）**
-  - 添加自定义域名
-  - 配置DNS记录
-  
-- [ ] **部署**
-  ```bash
-  vercel --prod
-  ```
-  
-- [ ] **验证部署**
-  - 访问生产URL
-  - 测试所有功能
+### 测试用户登录
+- [ ] 访问 `https://fishtalk.app/membership.html`
+- [ ] 使用测试用户登录：
+  - User ID: `11312701-f1d2-43f8-a13d-260eac812b7a`
+  - 或使用邮箱/密码登录
 
----
+### Stripe Test Premium 测试（$0.50）
+- [ ] 选择 "Test Premium" 套餐
+- [ ] 选择月付或年付
+- [ ] 选择 "Stripe" 支付方式
+- [ ] 点击 "Subscribe Now"
+- [ ] 使用真实信用卡完成支付（$0.50）
+- [ ] 支付成功后跳转到 `stripe-success.html`
+- [ ] 3秒后自动跳转回 `membership.html`
+- [ ] 页面显示用户为 Premium 会员
 
-### ✅ 10. 部署后验证
+### PayPal Test Plus 测试（$0.50）
+- [ ] 注销当前用户或使用另一个账户
+- [ ] 选择 "Test Plus" 套餐
+- [ ] 选择 "PayPal" 支付方式
+- [ ] 使用真实 PayPal 账户完成支付（$0.50）
+- [ ] 支付成功后跳转回网站
+- [ ] 页面显示用户为 Plus 会员
 
-- [ ] **功能测试**
-  - [ ] 用户注册和登录
-  - [ ] 绘制并提交鱼
-  - [ ] 图片正确显示（七牛云CDN）
-  - [ ] 鱼列表加载
-  - [ ] 投票功能
-  - [ ] 举报功能
-  
-- [ ] **性能测试**
-  - [ ] 页面加载速度 < 3s
-  - [ ] 图片加载速度 < 1s
-  - [ ] API响应时间 < 500ms
-  
-- [ ] **监控配置**
-  - [ ] Vercel Analytics（免费）
-  - [ ] Sentry错误监控（可选）
-  - [ ] 七牛云用量监控
+### 数据库验证
+- [ ] 本地运行：`node check-test-payments.js`
+- [ ] 确认 `user_subscriptions` 表有新记录
+- [ ] 确认 `payment` 表有支付记录
+- [ ] 确认金额为 $0.50
 
----
+### Dashboard 验证
 
-## 🔧 常见问题排查
+#### Stripe Dashboard
+- [ ] 访问：https://dashboard.stripe.com/payments
+- [ ] 确认显示 $0.50 支付记录
+- [ ] 访问：https://dashboard.stripe.com/webhooks
+- [ ] 选择 fishtalk.app endpoint
+- [ ] 查看 "Recent deliveries"
+- [ ] 确认 webhook 返回 **200 OK**
 
-### 问题1: 图片上传失败
+#### PayPal Dashboard
+- [ ] 访问：https://www.paypal.com/billing/subscriptions
+- [ ] 确认显示新订阅
+- [ ] 访问：https://developer.paypal.com/dashboard/ → Webhooks
+- [ ] 选择 fishtalk.app webhook
+- [ ] 查看 Events/Recent deliveries
+- [ ] 确认 webhook 触发成功
 
-**排查步骤：**
-1. 检查七牛云环境变量是否正确
-2. 验证七牛云空间是否为公开
-3. 检查CDN域名是否可访问
-4. 查看浏览器Console错误
-
-**解决方案：**
-```bash
-# 测试七牛云配置
-node -e "require('./lib/qiniu/config').qiniuConfig"
-```
+### Render Logs 验证
+- [ ] Render Dashboard → Logs 标签
+- [ ] 搜索 "webhook"
+- [ ] 确认看到：`✅ Webhook 签名验证成功`
+- [ ] 确认看到：`✅ 订阅记录已创建`
+- [ ] 无 ERROR 级别日志
 
 ---
 
-### 问题2: API调用失败
+## 问题排查
 
-**排查步骤：**
-1. 检查Hasura是否连接数据库
-2. 验证Hasura权限配置
-3. 检查环境变量是否正确
-4. 查看Vercel函数日志
+如果测试失败，检查：
 
-**解决方案：**
-```bash
-# 测试API端点
-npm run test:api
-```
+### Webhook 返回 400/401
+- [ ] 检查 Render 环境变量中的 webhook secret
+- [ ] 确认已保存并重新部署
+- [ ] 从 Dashboard 重新复制 secret
 
----
+### Webhook 返回 404
+- [ ] 确认 URL 包含 `?action=webhook` 或 `?action=paypal-webhook`
+- [ ] 检查 Render 服务是否正常运行
 
-### 问题3: 用户无法登录
+### 支付成功但无记录
+- [ ] 查看 Render Event Logs
+- [ ] 查看 Dashboard webhook 日志
+- [ ] 检查数据库连接配置
 
-**排查步骤：**
-1. 检查Supabase Auth配置
-2. 验证JWT Secret是否匹配
-3. 检查邮箱验证设置
-4. 查看浏览器Network错误
-
-**解决方案：**
-- 在Supabase Dashboard检查用户状态
-- 验证邮箱模板配置
-- 检查CORS设置
+### 无法访问 fishtalk.app
+- [ ] 检查 Render 服务状态
+- [ ] 确认域名 DNS 解析
+- [ ] 检查 HTTPS 证书
 
 ---
 
-## 📊 性能基准
+## 回滚准备
 
-部署后应达到的性能指标：
+如果需要回滚：
 
-| 指标 | 目标值 | 测试方法 |
-|------|--------|---------|
-| 首页加载 | < 2s | Chrome DevTools |
-| API响应 | < 300ms | Network面板 |
-| 图片加载 | < 500ms | 七牛云CDN |
-| 数据库查询 | < 100ms | Hasura Console |
+### 快速切换回测试模式
+在 Render Environment 中修改：
+- [ ] `STRIPE_MODE=test`
+- [ ] `PAYPAL_MODE=sandbox`
+- [ ] 保存并重新部署
 
----
-
-## 🎯 发布检查
-
-最终发布前：
-
-- [ ] ✅ 所有环境变量已配置
-- [ ] ✅ 数据库迁移已完成
-- [ ] ✅ API测试全部通过
-- [ ] ✅ 前端功能测试通过
-- [ ] ✅ 性能达到基准
-- [ ] ✅ 错误监控已配置
-- [ ] ✅ 备份策略已制定
-- [ ] ✅ 文档已更新
+### 回滚代码版本
+- [ ] Render Dashboard → Deploys
+- [ ] 找到上一个稳定版本
+- [ ] 点击 "Redeploy"
 
 ---
 
-## 🔗 相关文档
+## 生产环境正式测试
 
-- [Hasura配置指南](./HASURA_SETUP.md)
-- [七牛云配置指南](./QINIU_SETUP.md)
-- [进度报告](./plans/BACKEND_REBUILD_PROGRESS.md)
-- [快速部署指南](./QUICK_DEPLOY.md)
+测试套餐测试成功后，进行正式测试：
+
+### Plus 套餐测试（$4.99）
+- [ ] 使用新账户测试 Plus 月付（Stripe）
+- [ ] 验证支付和订阅记录
+
+### Premium 套餐测试（$9.99）
+- [ ] 使用新账户测试 Premium 月付（PayPal）
+- [ ] 验证支付和订阅记录
+
+### 升级流程测试
+- [ ] Free 用户 → Plus（验证升级）
+- [ ] Plus 用户 → Premium（验证旧订阅被禁用）
 
 ---
 
-**🎉 检查完成后，你的Fish Art项目就可以成功部署了！**
+## 最终确认
+
+- [ ] 所有测试支付成功
+- [ ] 所有 webhook 返回 200
+- [ ] 数据库记录完整
+- [ ] Render Logs 无错误
+- [ ] 用户体验流畅
+- [ ] Dashboard 数据一致
+
+---
+
+## 部署完成！
+
+✅ 支付系统已成功部署到生产环境
+
+下一步：
+- 监控支付成功率
+- 定期检查 webhook 日志
+- 处理用户反馈
+- 准备运维文档
+
+---
+
+**祝贺！您的支付系统现在已经上线运行了！** 🎉
 

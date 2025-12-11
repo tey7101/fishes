@@ -3,6 +3,77 @@
  * 使用Supabase替换原有的Firebase/自定义后端认证
  */
 
+/**
+ * 确保用户记录在数据库中存在
+ * 用于注册后立即关联推广码
+ */
+async function ensureUserRecordExists(user) {
+  if (!user || !user.id) {
+    throw new Error('无效的用户对象');
+  }
+  
+  console.log('[ensureUserRecordExists] 检查/创建用户记录:', user.id);
+  
+  // 提取用户信息
+  const email = user.email || '';
+  const nickName = user.user_metadata?.name || 
+                   user.user_metadata?.nick_name || 
+                   email.split('@')[0] || 
+                   'User';
+  const avatarUrl = user.user_metadata?.avatar_url || null;
+  
+  const createUserMutation = `
+    mutation CreateUser($userId: String!, $email: String!, $nickName: String!, $avatarUrl: String) {
+      insert_users_one(
+        object: { 
+          id: $userId, 
+          email: $email, 
+          nick_name: $nickName,
+          avatar_url: $avatarUrl
+        },
+        on_conflict: {
+          constraint: users_pkey,
+          update_columns: []
+        }
+      ) {
+        id
+        email
+      }
+    }
+  `;
+  
+  try {
+    const response = await fetch('/api/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: createUserMutation,
+        variables: { 
+          userId: user.id,
+          email: email,
+          nickName: nickName,
+          avatarUrl: avatarUrl
+        }
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.errors) {
+      console.error('[ensureUserRecordExists] GraphQL 错误:', result.errors);
+      throw new Error(result.errors[0]?.message || 'GraphQL 错误');
+    }
+    
+    console.log('[ensureUserRecordExists] ✅ 用户记录已创建/存在:', result.data?.insert_users_one);
+    return result.data?.insert_users_one;
+  } catch (error) {
+    console.error('[ensureUserRecordExists] ❌ 创建用户记录失败:', error);
+    throw error;
+  }
+}
+
 window.onload = () => {
   // Check if user is already logged in
   checkIfAlreadyLoggedIn();
@@ -296,6 +367,43 @@ async function handleSignUp(event) {
           content_name: 'User Registration',
           status: 'success'
         });
+      }
+      
+      // 关联推广者（如果有推广码）- 需求 2.2
+      console.log('[Signup] 检查推广码关联...', {
+        hasUser: !!data.user,
+        userId: data.user?.id,
+        hasAffiliateTracking: !!window.AffiliateTracking,
+        storedRefCode: window.AffiliateTracking?.getStoredReferralCode?.()
+      });
+      
+      if (data.user && window.AffiliateTracking) {
+        const storedCode = window.AffiliateTracking.getStoredReferralCode();
+        console.log('[Signup] 存储的推广码:', storedCode);
+        
+        if (storedCode) {
+          try {
+            // 先确保用户记录在数据库中存在
+            console.log('[Signup] 先创建用户记录...');
+            await ensureUserRecordExists(data.user);
+            
+            console.log('[Signup] 开始关联推广者, userId:', data.user.id);
+            const linkResult = await window.AffiliateTracking.linkReferral(data.user.id);
+            console.log('[Signup] 关联结果:', linkResult);
+            if (linkResult.success) {
+              console.log('[Signup] ✅ 成功关联推广者:', linkResult.affiliate_id);
+            } else {
+              console.log('[Signup] ⚠️ 关联未成功:', linkResult.error || linkResult.reason);
+            }
+          } catch (affiliateError) {
+            console.error('[Signup] ❌ 关联推广者失败:', affiliateError);
+            // 不影响注册流程
+          }
+        } else {
+          console.log('[Signup] 没有存储的推广码，跳过关联');
+        }
+      } else {
+        console.log('[Signup] 跳过推广码关联:', { hasUser: !!data.user, hasAffiliateTracking: !!window.AffiliateTracking });
       }
       
       // Check if email confirmation is required

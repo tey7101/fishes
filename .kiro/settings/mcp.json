@@ -1,0 +1,39 @@
+{
+  "mcpServers": {
+    "fetch": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-fetch"
+      ],
+      "env": {},
+      "disabled": true,
+      "autoApprove": []
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ],
+      "autoApprove": [
+        "list_console_messages",
+        "list_network_requests",
+        "get_network_request",
+        "navigate_page",
+        "take_snapshot",
+        "click",
+        "evaluate_script",
+        "list_pages",
+        "fill_form",
+        "fill",
+        "wait_for",
+        "hover",
+        "press_key",
+        "handle_dialog",
+        "new_page",
+        "select_page",
+        "take_screenshot"
+      ]
+    }
+  }
+}

@@ -1,7 +1,178 @@
 /**
- * 管理员权限验证工具
+ * 管理员和推广者权限验证工具
  * 通过subscription记录确认当前用户的会员等级
+ * 通过referral_code字段确认用户是否为推广者
  */
+
+/**
+ * 检查用户是否为推广者
+ * @param {Object} user - 用户对象
+ * @returns {Promise<boolean>} 是否为推广者
+ */
+async function checkAffiliateAccess(user = null) {
+  try {
+    // 获取当前用户（如果未提供）
+    if (!user) {
+      user = await window.supabaseAuth?.getCurrentUser();
+      if (!user) {
+        try {
+          const userData = localStorage.getItem('userData');
+          const userId = localStorage.getItem('userId');
+          if (userData || userId) {
+            let parsedUserData = {};
+            if (userData) {
+              try {
+                parsedUserData = JSON.parse(userData);
+              } catch (e) {
+                // ignore
+              }
+            }
+            user = {
+              id: userId || parsedUserData.uid || parsedUserData.userId || parsedUserData.id,
+              email: parsedUserData.email
+            };
+          }
+        } catch (error) {
+          // ignore
+        }
+      }
+    }
+    
+    if (!user || !user.id) {
+      console.log('❌ [Affiliate] No user logged in');
+      return false;
+    }
+
+    // 查询用户是否有推广码（推广者标识）
+    const query = `
+      query CheckAffiliate($userId: String!) {
+        users_by_pk(id: $userId) {
+          id
+          email
+          referral_code
+        }
+      }
+    `;
+
+    const response = await fetch('/api/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query,
+        variables: { userId: user.id }
+      })
+    });
+
+    if (!response.ok) {
+      console.error('❌ [Affiliate] GraphQL request failed:', response.status);
+      return false;
+    }
+
+    const result = await response.json();
+    
+    if (result.errors) {
+      console.error('❌ [Affiliate] GraphQL errors:', result.errors);
+      return false;
+    }
+
+    const userData = result.data?.users_by_pk;
+    const isAffiliate = !!userData?.referral_code;
+
+    console.log('🔐 [Affiliate] Check result:', { 
+      userId: user.id,
+      email: userData?.email,
+      isAffiliate,
+      referralCode: userData?.referral_code || 'N/A'
+    });
+    
+    return isAffiliate;
+
+  } catch (error) {
+    console.error('❌ [Affiliate] Check failed:', error);
+    return false;
+  }
+}
+
+/**
+ * 要求推广者或管理员权限访问
+ * @returns {Promise<boolean>} 是否有权限
+ */
+async function requireAffiliateOrAdminAccess() {
+  console.log('🔐 requireAffiliateOrAdminAccess called');
+  
+  // 确保 supabaseAuth 已初始化
+  if (!window.supabaseAuth) {
+    console.log('⏳ Waiting for supabaseAuth to initialize...');
+    await new Promise(resolve => {
+      let attempts = 0;
+      const maxAttempts = 50;
+      const checkInterval = setInterval(() => {
+        attempts++;
+        if (window.supabaseAuth) {
+          clearInterval(checkInterval);
+          resolve();
+        } else if (attempts >= maxAttempts) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100);
+    });
+  }
+  
+  // 获取用户
+  let user = await window.supabaseAuth?.getCurrentUser();
+  
+  if (!user) {
+    try {
+      const userData = localStorage.getItem('userData');
+      const userId = localStorage.getItem('userId');
+      if (userData || userId) {
+        let parsedUserData = {};
+        if (userData) {
+          try {
+            parsedUserData = JSON.parse(userData);
+          } catch (e) {}
+        }
+        user = {
+          id: userId || parsedUserData.uid || parsedUserData.userId || parsedUserData.id,
+          email: parsedUserData.email
+        };
+      }
+    } catch (error) {}
+  }
+  
+  if (!user || !user.id) {
+    document.body.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: center; height: 100vh; flex-direction: column; font-family: sans-serif;">
+        <h1>🔒 Access Denied</h1>
+        <p>Please log in first.</p>
+        <a href="/" style="margin-top: 20px; padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">Return to Home</a>
+      </div>
+    `;
+    return false;
+  }
+  
+  // 检查是否为管理员或推广者
+  const isAdmin = await checkAdminAccess(user);
+  const isAffiliate = await checkAffiliateAccess(user);
+  
+  if (!isAdmin && !isAffiliate) {
+    document.body.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: center; height: 100vh; flex-direction: column; font-family: sans-serif;">
+        <h1>🔒 Access Denied</h1>
+        <p>This page is only accessible to affiliates and administrators.</p>
+        <p style="color: #666; font-size: 14px; margin-top: 10px;">User ID: ${user.id}</p>
+        <a href="/" style="margin-top: 20px; padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">Return to Home</a>
+      </div>
+    `;
+    return false;
+  }
+  
+  console.log('✅ Affiliate/Admin access granted');
+  return true;
+}
 
 async function checkAdminAccess(user = null) {
   try {
@@ -275,5 +446,10 @@ async function requireAdminAccess() {
   return true;
 }
 
-window.adminAuth = { checkAdminAccess, requireAdminAccess };
+window.adminAuth = { 
+  checkAdminAccess, 
+  requireAdminAccess, 
+  checkAffiliateAccess, 
+  requireAffiliateOrAdminAccess 
+};
 

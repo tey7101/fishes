@@ -808,22 +808,59 @@ let favoritesData = [];
 // Load user's fish and favorites
 async function loadUserFishCategories() {
     try {
+        console.log('🐠 loadUserFishCategories: Starting...');
         const user = await window.supabaseAuth.getCurrentUser();
-        if (!user) return;
+        if (!user) {
+            console.log('🐠 loadUserFishCategories: No user, skipping');
+            return;
+        }
         
-        const userToken = localStorage.getItem('userToken');
-        if (!userToken) return;
+        // Get fresh token from Supabase session
+        const session = await window.supabaseAuth.getSession();
+        const userToken = session?.access_token || localStorage.getItem('userToken');
+        if (!userToken) {
+            console.log('🐠 loadUserFishCategories: No token, skipping');
+            return;
+        }
         
-        // Load from my-tank API
+        console.log('🐠 loadUserFishCategories: Fetching my-tank API...');
+        
+        // Load from my-tank API with retry logic
         const BACKEND_URL = window.BACKEND_URL || '';
-        const response = await fetch(`${BACKEND_URL}/api/fish-api?action=my-tank`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${userToken}`
-            }
-        });
+        let response;
+        let retryCount = 0;
+        const maxRetries = 3;
         
-        if (!response.ok) return;
+        while (retryCount < maxRetries) {
+            // Get fresh token on each retry
+            const freshSession = await window.supabaseAuth.getSession();
+            const freshToken = freshSession?.access_token || localStorage.getItem('userToken');
+            
+            response = await fetch(`${BACKEND_URL}/api/fish-api?action=my-tank`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${freshToken}`
+                }
+            });
+            
+            console.log('🐠 loadUserFishCategories: Response status:', response.status, 'attempt:', retryCount + 1);
+            
+            if (response.ok) break;
+            
+            // If 401, wait a bit and retry
+            if (response.status === 401 && retryCount < maxRetries - 1) {
+                console.log('🐠 loadUserFishCategories: Got 401, retrying...');
+                await new Promise(resolve => setTimeout(resolve, 500));
+                retryCount++;
+            } else {
+                break;
+            }
+        }
+        
+        if (!response.ok) {
+            console.error('🐠 loadUserFishCategories: API error', response.status);
+            return;
+        }
         
         const data = await response.json();
         if (!data.success) return;
@@ -942,6 +979,17 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (window.initializeUserCache) {
         await window.initializeUserCache();
         console.log('✅ User cache initialized for rank page');
+    }
+    
+    // Wait for Supabase to be fully initialized
+    // Try to wait for supabase client to be ready
+    let waitAttempts = 0;
+    while (!window.supabaseAuth?.getSession && waitAttempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        waitAttempts++;
+    }
+    if (waitAttempts >= 50) {
+        console.warn('⚠️ Supabase initialization timeout');
     }
     
     // Check for URL parameters first

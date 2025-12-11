@@ -1003,78 +1003,16 @@ function showSuccessModal(fishImageUrl, needsModeration, fishId = null) {
             ">
                 ${needsModeration 
                     ? '🐠 Your fish will appear in the tank after review.' 
-                    : '💙 Love creating with AI? Join our community!'}
+                    : '🐠 Your fish is now swimming in the tank!'}
             </p>
             
-            <!-- Social Links -->
-            <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap;">
-                <a href="${config.twitter.url}" target="_blank" rel="noopener noreferrer" 
-                   class="game-btn" style="
-                       display: flex;
-                       align-items: center;
-                       gap: 8px;
-                       padding: 12px 20px;
-                       background: linear-gradient(180deg, #000000 0%, #1a1a1a 50%, #000000 100%);
-                       border-bottom: 3px solid #000000;
-                       color: white;
-                       text-decoration: none;
-                       border-radius: 16px;
-                       font-weight: 700;
-                       font-size: 14px;
-                       box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
-                       transition: all 0.15s ease;
-                       transform: translateY(0);
-                   "
-                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 0 rgba(0, 0, 0, 0.25)';"
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 0 rgba(0, 0, 0, 0.25)';"
-                   onmousedown="this.style.transform='translateY(2px)'; this.style.boxShadow='0 2px 0 rgba(0, 0, 0, 0.25)';"
-                   onmouseup="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 0 rgba(0, 0, 0, 0.25)';">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                    </svg>
-                    Follow on X
-                </a>
-                <a href="${config.discord.inviteUrl}" target="_blank" rel="noopener noreferrer"
-                   class="game-btn" style="
-                       display: flex;
-                       align-items: center;
-                       gap: 8px;
-                       padding: 12px 20px;
-                       background: linear-gradient(180deg, #5865F2 0%, #4752C4 50%, #3C45A5 100%);
-                       border-bottom: 3px solid #2F3136;
-                       color: white;
-                       text-decoration: none;
-                       border-radius: 16px;
-                       font-weight: 700;
-                       font-size: 14px;
-                       box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
-                       transition: all 0.15s ease;
-                       transform: translateY(0);
-                   "
-                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 0 rgba(0, 0, 0, 0.25)';"
-                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 0 rgba(0, 0, 0, 0.25)';"
-                   onmousedown="this.style.transform='translateY(2px)'; this.style.boxShadow='0 2px 0 rgba(0, 0, 0, 0.25)';"
-                   onmouseup="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 0 rgba(0, 0, 0, 0.25)';">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
-                    </svg>
-                    Join Discord
-                </a>
-            </div>
-            
-            <!-- Share Section -->
-            <div style="text-align: center; margin: 24px 0 16px 0; font-weight: 600; font-size: 16px; color: #333;">
-                📢 Share your creation:
-            </div>
-            
-            <div id="share-buttons-container" style="margin-bottom: 24px;"></div>
-            
             <!-- Let's Swim Button -->
-            <div style="text-align: center; margin-top: 24px;">
+            <div style="display: flex; justify-content: center; margin-top: 24px; width: 100%; box-sizing: border-box;">
                 <button id="lets-swim-btn" onclick="window.location.href='${tankUrl}'" 
                         class="game-btn game-btn-blue" style="
+                            max-width: 350px;
                             width: 100%;
-                            padding: 16px 28px;
+                            padding: 20px 35px;
                             border: none;
                             border-radius: 24px;
                             background: linear-gradient(180deg, #63A4E8 0%, #4A90E2 50%, #357ABD 100%);
@@ -1120,12 +1058,7 @@ function showSuccessModal(fishImageUrl, needsModeration, fishId = null) {
             });
         }
         
-        // Add share buttons using the social share module
-        const shareContainer = modal.modal.querySelector('#share-buttons-container');
-        if (shareContainer && window.socialShare) {
-            const shareMenu = window.socialShare.createShareMenu('success-modal-share');
-            shareContainer.appendChild(shareMenu);
-        }
+
     }, 100);
 }
 
@@ -1431,9 +1364,9 @@ swimBtn.addEventListener('click', async () => {
         // 不设置loginRedirect，让用户登录后回到画鱼页面完成提交流程
         localStorage.removeItem('loginRedirect'); // 确保清除任何现有的重定向
         
-        // 显示登录弹窗
+        // 显示登录弹窗（带自定义提示文本，加大加粗）
         if (window.authUI && window.authUI.showLoginModal) {
-            window.authUI.showLoginModal();
+            window.authUI.showLoginModal('Your fish is saved! Sign in to make it swim.', true);
         } else {
             showUserAlert({
                 type: 'warning',
@@ -1488,8 +1421,9 @@ swimBtn.addEventListener('click', async () => {
         }
     }
     
+    // 移除概率低时的蒙板提示，直接允许提交
     // Show different modal based on fish validity
-    if (!isFish) {
+    if (false && !isFish) {
         // Show encouragement modal for low-scoring fish - no submission (Fish Group Chat style)
         const notFishModal = `
             <div class="modal-title-banner">
@@ -2198,7 +2132,7 @@ function createPaintOptions() {
         paintBar.style.display = 'flex';
         paintBar.style.flexWrap = 'wrap';
         paintBar.style.gap = '8px';
-        paintBar.style.margin = '8px auto';
+        paintBar.style.margin = '8px auto 40px auto';
         paintBar.style.alignItems = 'center';
         paintBar.style.justifyContent = 'center';
         paintBar.style.padding = '6px 10px';
@@ -2206,9 +2140,15 @@ function createPaintOptions() {
         paintBar.style.width = '100%';
         paintBar.style.boxSizing = 'border-box';
         paintBar.style.overflowX = 'auto';
-        // Insert at the top of draw-ui
-        const drawUI = document.getElementById('draw-ui');
-        if (drawUI) drawUI.insertBefore(paintBar, drawUI.firstChild);
+        // Insert above the canvas wrapper
+        const canvasWrapper = document.querySelector('.game-canvas-wrapper');
+        if (canvasWrapper) {
+            canvasWrapper.parentNode.insertBefore(paintBar, canvasWrapper);
+        } else {
+            // Fallback: insert at the top of draw-ui
+            const drawUI = document.getElementById('draw-ui');
+            if (drawUI) drawUI.insertBefore(paintBar, drawUI.firstChild);
+        }
     } else {
         paintBar.innerHTML = '';
     }
@@ -2791,7 +2731,7 @@ async function verifyFishDoodle(canvas) {
     // Since the model was trained with inverted labels (fish=0, not_fish=1)
     // A low probability means it's more likely to be a fish
     const fishProbability = 1 - prob;
-    const isFish = fishProbability >= 0.60;  // Threshold for fish classification
+    const isFish = fishProbability >= 0.50;  // Threshold for fish classification (50%)
         
     // Update UI with fish probability
     // Display the probability (element is pre-created in HTML to prevent layout shifts)
@@ -3081,8 +3021,9 @@ async function setupAuthListener() {
                         }
                     }
                     
+                    // 移除概率低时的蒙板提示，直接允许提交
                     // 显示命名modal
-                    if (!isFish) {
+                    if (false && !isFish) {
                         // 显示警告modal（低分鱼）- Fish Group Chat style
                         const notFishModal = `
                             <div class="modal-title-banner">

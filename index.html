@@ -178,10 +178,36 @@
         <img src="https://cdn.fishart.online/fishart_web/icon/premium.svg" alt="Premium" style="width: 28px; height: 28px; object-fit: contain; vertical-align: middle;">
         <span>Upgrade</span>
       </a>
-      <a href="test-center.html" class="game-btn game-btn-white" id="nav-test-btn" style="display: none;">
-        <span>🧪</span>
-        <span>Test</span>
-      </a>
+      <!-- Dashboard 下拉菜单 - 管理员/推广者可见 -->
+      <div class="dashboard-dropdown" id="nav-dashboard-btn" style="display: none;">
+        <button class="dashboard-dropdown-btn" type="button">
+          <span>📊</span>
+          <span>Dashboard</span>
+          <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        <div class="dashboard-dropdown-menu">
+          <a href="admin-center.html" class="dashboard-menu-item" data-menu="admin-center">
+            <span class="menu-icon">🛠️</span>
+            <span class="menu-text">管理中心</span>
+          </a>
+          <div class="dashboard-menu-divider" data-menu="affiliate-divider"></div>
+          <a href="affiliate-register.html" class="dashboard-menu-item" data-menu="affiliate-register">
+            <span class="menu-icon">🤝</span>
+            <span class="menu-text">Become Affiliate</span>
+          </a>
+          <a href="affiliate-dashboard.html" class="dashboard-menu-item" data-menu="affiliate-center">
+            <span class="menu-icon">💰</span>
+            <span class="menu-text">My Referrals</span>
+          </a>
+          <div class="dashboard-menu-divider" data-menu="test-divider"></div>
+          <a href="test-center.html" class="dashboard-menu-item" data-menu="test-center">
+            <span class="menu-icon">🧪</span>
+            <span class="menu-text">测试中心</span>
+          </a>
+        </div>
+      </div>
       <!-- 登录按钮和用户菜单将由 auth-ui.js 动态插入 -->
     </div>
   </nav>
@@ -237,21 +263,14 @@
       </div>
       
       <!-- SEO-optimized hero section -->
-      <section class="hero-intro" style="text-align: center; max-width: 800px; margin: 0 auto 20px; padding: 0 20px;">
-        <p style="font-size: 18px; line-height: 1.6; color: rgba(255, 255, 255, 0.95); font-weight: 600; margin-bottom: 15px; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);">
+      <section class="hero-intro" style="text-align: center; max-width: 1000px; margin: 0 auto 20px; padding: 0 20px;">
+        <p style="font-size: 18px; line-height: 1.6; color: #ffffff; font-weight: 700; margin-bottom: 15px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6), 0 0 10px rgba(0, 0, 0, 0.3);">
           <strong>Draw a fish</strong> powered by AI! Create <strong>talking fish</strong> and join their chat in the <strong>global tank</strong> with 50K+ doodles 🐠
         </p>
       </section>
       
       <section id="drawing-section">
         <h1 class="game-title"><span style="display: inline-block; transform: scaleX(-1);">🐠</span> Draw Your Talking Fish <span style="display: inline-block; transform: scaleX(-1);">🐠</span></h1>
-        <div style="display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
-          <!-- Fish probability indicator (pre-created to prevent layout shifts) -->
-          <div id="fish-probability" class="game-probability low" style="display: none;">
-            <span>🐠</span>
-            <span>Fish probability: <strong>00.0%</strong></span>
-          </div>
-        </div>
         
         <!-- 画布容器 -->
         <div class="game-canvas-wrapper">
@@ -263,6 +282,12 @@
           </div>
           <!-- 绘画粒子容器 -->
           <div id="drawing-particles"></div>
+        </div>
+        
+        <!-- Fish probability indicator (below canvas, hidden by default with no height) -->
+        <div id="fish-probability" class="game-probability low" style="display: none;">
+          <span>🐠</span>
+          <span>Fish probability: <strong>00.0%</strong></span>
         </div>
         
         <!-- ONNX 模型加载进度条 -->
@@ -533,6 +558,7 @@
   <script src="src/js/supabase-init.js?v=2.3"></script>
   <script src="src/js/auth-cache.js?v=1.0"></script>
   <script src="src/js/admin-auth.js"></script>
+  <script src="src/js/affiliate-tracking.js?v=1.0"></script>
   
   <script src="src/js/fish-utils.js?v=2.5"></script>
   <script src="src/js/fishtank-favorites.js"></script>
@@ -543,6 +569,7 @@
   <script src="src/js/fish-info-modal.js?v=1.0"></script>
   <script src="src/js/contact-modal.js?v=1.0"></script>
   <script src="src/js/hamburger-menu.js?v=1.0"></script>
+  <script src="src/js/dashboard-dropdown.js?v=1.0"></script>
   <script src="src/js/app.js?v=2.3"></script>
   <script>
     // Initialize social links for footer and mobile

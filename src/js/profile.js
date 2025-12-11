@@ -1725,13 +1725,15 @@ function renderSubscriptionCard(subscription, userId) {
         return `
             <div class="subscription-card">
                 <div class="subscription-status">
-                    <div class="subscription-badge">🆓</div>
                     <div class="subscription-info">
-                        <div class="subscription-plan">Free Plan</div>
+                        <div class="subscription-plan">
+                            <img src="https://cdn.fishart.online/fishart_web/icon/free.svg" alt="Free" style="width: 24px; height: 24px; vertical-align: middle; margin-right: 8px;">
+                            Free Plan
+                        </div>
                         <div class="subscription-details">Upgrade to unlock premium features</div>
                     </div>
                 </div>
-                <div class="subscription-actions">
+                <div class="subscription-actions" style="text-align: center;">
                     <button class="subscription-btn upgrade-btn" onclick="window.location.href='membership.html'">
                         Upgrade Now
                     </button>
@@ -1758,7 +1760,7 @@ function renderSubscriptionCard(subscription, userId) {
                     </div>
                 </div>
             </div>
-            <div class="subscription-actions">
+            <div class="subscription-actions" style="text-align: center;">
                 <button id="cancel-subscription-btn" class="subscription-btn cancel-btn">
                     Cancel Subscription
                 </button>

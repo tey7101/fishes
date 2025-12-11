@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Referrals - FishTalk</title>
+    <link rel="icon" type="image/png" href="/fish_logo.png">
+    <script src="public/supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="src/js/supabase-init.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f7fafc;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+        .header {
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 1rem;
+        }
+        .header h1 { font-size: 2rem; color: #1a202c; margin-bottom: 0.5rem; }
+        .header p { color: #718096; }
+        .back-link {
+            display: inline-block;
+            color: #667eea;
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        
+        /* Date Range Picker */
+        .date-range-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .date-range-container label { font-weight: 500; color: #4a5568; }
+        .date-input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+        .quick-range-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .quick-range-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        .quick-range-btn:hover { background: #f7fafc; }
+        .quick-range-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-card .value { font-size: 2rem; font-weight: bold; }
+        .stat-card .label { font-size: 0.875rem; opacity: 0.9; }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .card h2 {
+            font-size: 1.125rem;
+            color: #2d3748;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #667eea;
+        }
+        .referral-link-box {
+            background: #f8f9fa;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .referral-link {
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            display: inline-block;
+            margin: 0.75rem 0;
+            word-break: break-all;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5a67d8; }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #718096;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { color: #667eea; }
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8f9fa; font-weight: 600; color: #4a5568; }
+        tr:hover { background: #f8f9fa; }
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .status-paid { background: #c6f6d5; color: #22543d; }
+        .status-pending { background: #fefcbf; color: #744210; }
+        .status-completed { background: #c6f6d5; color: #22543d; }
+        .loading { text-align: center; padding: 3rem; color: #718096; }
+        .spinner {
+            display: inline-block;
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error { background: #fff5f5; border: 1px solid #fc8181; color: #c53030; padding: 1rem; border-radius: 6px; text-align: center; }
+        .not-affiliate { text-align: center; padding: 3rem; }
+        .not-affiliate h2 { color: #2d3748; margin-bottom: 0.5rem; }
+        .not-affiliate p { color: #718096; }
+        .empty-state { text-align: center; padding: 2rem; color: #718096; }
+        .user-info { display: flex; flex-direction: column; }
+        .user-nickname { font-weight: 500; color: #2d3748; }
+        .user-email { font-size: 0.75rem; color: #718096; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="index.html" class="back-link">← Back to Home</a>
+            <h1>📊 My Referrals</h1>
+            <p>Track your referral performance and earnings</p>
+        </div>
+        <div id="content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 1rem;">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="src/js/auth-cache.js"></script>
+    <script>
+        let currentUserId = null;
+        let dashboardData = null;
+        let referralsData = [];
+        let ordersData = [];
+        let currentTab = 'users';
+        let dateRange = { start: null, end: null };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await waitForAuth();
+            let user = await window.supabaseAuth?.getCurrentUser();
+            if (!user) {
+                try {
+                    const userId = localStorage.getItem('userId');
+                    if (userId) user = { id: userId };
+                } catch (e) {}
+            }
+            if (!user) {
+                alert('Please log in first');
+                window.location.href = 'login.html';
+                return;
+            }
+            const urlParams = new URLSearchParams(window.location.search);
+            currentUserId = urlParams.get('userId') || user.id;
+            
+            // 默认选择本月
+            setThisMonth();
+            loadDashboard();
+        });
+
+        async function waitForAuth() {
+            let retries = 0;
+            while (!window.supabaseAuth && retries < 100) {
+                await new Promise(r => setTimeout(r, 100));
+                retries++;
+            }
+            await new Promise(r => setTimeout(r, 800));
+        }
+
+        function setThisMonth() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            // 使用本地日期格式避免时区问题
+            dateRange.start = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            dateRange.end = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+        }
+
+        function setLastMonth() {
+            const now = new Date();
+            let year = now.getFullYear();
+            let month = now.getMonth() - 1;
+            if (month < 0) { month = 11; year--; }
+            dateRange.start = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            dateRange.end = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+        }
+
+        function setAllTime() {
+            dateRange.start = null;
+            dateRange.end = null;
+        }
+
+        function onQuickRange(range) {
+            if (range === 'thisMonth') setThisMonth();
+            else if (range === 'lastMonth') setLastMonth();
+            else if (range === 'allTime') setAllTime();
+            updateQuickRangeBtns(range);
+            loadDashboard();
+        }
+
+        function updateQuickRangeBtns(active) {
+            document.querySelectorAll('.quick-range-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.range === active);
+            });
+        }
+
+        function onDateChange() {
+            const startInput = document.getElementById('date-start');
+            const endInput = document.getElementById('date-end');
+            if (startInput && endInput) {
+                dateRange.start = startInput.value || null;
+                dateRange.end = endInput.value || null;
+            }
+            document.querySelectorAll('.quick-range-btn').forEach(btn => btn.classList.remove('active'));
+            loadDashboard();
+        }
+
+        async function loadDashboard() {
+            try {
+                let url = `/api/affiliate-api?action=dashboard`;
+                if (dateRange.start) url += `&startDate=${dateRange.start}`;
+                if (dateRange.end) url += `&endDate=${dateRange.end}`;
+                
+                const response = await fetch(url, { headers: { 'x-user-id': currentUserId } });
+                const data = await response.json();
+                if (!data.success) {
+                    renderNotAffiliate();
+                    return;
+                }
+                dashboardData = data;
+                await Promise.all([loadReferrals(), loadOrders()]);
+                renderDashboard();
+            } catch (error) {
+                console.error('Failed to load dashboard:', error);
+                document.getElementById('content').innerHTML = 
+                    `<div class="card"><div class="error">Loading failed: ${error.message}</div></div>`;
+            }
+        }
+
+        async function loadReferrals() {
+            try {
+                let url = `/api/affiliate-api?action=referrals&limit=100`;
+                if (dateRange.start) url += `&startDate=${dateRange.start}`;
+                if (dateRange.end) url += `&endDate=${dateRange.end}`;
+                
+                const response = await fetch(url, { headers: { 'x-user-id': currentUserId } });
+                const data = await response.json();
+                if (data.success) referralsData = data.referrals || [];
+            } catch (error) {
+                console.error('Failed to load referrals:', error);
+            }
+        }
+
+        async function loadOrders() {
+            try {
+                let url = `/api/affiliate-api?action=orders&limit=100`;
+                if (dateRange.start) url += `&startDate=${dateRange.start}`;
+                if (dateRange.end) url += `&endDate=${dateRange.end}`;
+                
+                const response = await fetch(url, { headers: { 'x-user-id': currentUserId } });
+                const data = await response.json();
+                if (data.success) ordersData = data.orders || [];
+            } catch (error) {
+                console.error('Failed to load orders:', error);
+                ordersData = [];
+            }
+        }
+
+        function renderNotAffiliate() {
+            document.getElementById('content').innerHTML = `
+                <div class="card not-affiliate">
+                    <h2>🔒 You're Not an Affiliate Yet</h2>
+                    <p>You haven't been registered as an affiliate partner.</p>
+                    <p style="margin-top: 1rem; color: #718096;">Please contact the administrator to become an affiliate.</p>
+                </div>
+            `;
+        }
+
+        function renderDashboard() {
+            const { affiliate, stats } = dashboardData;
+            const referralLink = `${window.location.origin}?ref=${affiliate.referral_code}`;
+            
+            document.getElementById('content').innerHTML = `
+                <!-- Date Range Picker -->
+                <div class="date-range-container">
+                    <label>📅 Date Range:</label>
+                    <input type="date" id="date-start" class="date-input" value="${dateRange.start || ''}" onchange="onDateChange()">
+                    <span>to</span>
+                    <input type="date" id="date-end" class="date-input" value="${dateRange.end || ''}" onchange="onDateChange()">
+                    <div class="quick-range-btns">
+                        <button class="quick-range-btn active" data-range="thisMonth" onclick="onQuickRange('thisMonth')">This Month</button>
+                        <button class="quick-range-btn" data-range="lastMonth" onclick="onQuickRange('lastMonth')">Last Month</button>
+                        <button class="quick-range-btn" data-range="allTime" onclick="onQuickRange('allTime')">All Time</button>
+                    </div>
+                </div>
+                
+                <!-- Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="value">${stats.total_referrals}</div><div class="label">Total Referrals</div></div>
+                    <div class="stat-card"><div class="value">$${stats.total_revenue.toFixed(2)}</div><div class="label">Total Revenue</div></div>
+                    <div class="stat-card"><div class="value">$${stats.total_commission.toFixed(2)}</div><div class="label">Total Commission</div></div>
+                    <div class="stat-card"><div class="value">${stats.commission_rate}%</div><div class="label">Commission Rate</div></div>
+                </div>
+                
+                <!-- Referral Link -->
+                <div class="card">
+                    <h2>🔗 Your Referral Link</h2>
+                    <div class="referral-link-box">
+                        <p style="color: #4a5568;">Share this link with your friends. You'll earn commission when they sign up or make a payment.</p>
+                        <div class="referral-link" id="referral-link">${referralLink}</div>
+                        <br>
+                        <button class="btn btn-primary" onclick="copyLink()">📋 Copy Link</button>
+                        <p style="margin-top: 1rem; color: #718096; font-size: 0.875rem;">Referral Code: <strong>${affiliate.referral_code}</strong></p>
+                    </div>
+                </div>
+                
+                <!-- Tabs: Users & Orders -->
+                <div class="card">
+                    <div class="tabs">
+                        <button class="tab-btn ${currentTab === 'users' ? 'active' : ''}" onclick="switchTab('users')">👥 Referred Users (${referralsData.length})</button>
+                        <button class="tab-btn ${currentTab === 'orders' ? 'active' : ''}" onclick="switchTab('orders')">🧾 Referred Orders (${ordersData.length})</button>
+                    </div>
+                    <div id="tab-users" class="tab-content ${currentTab === 'users' ? 'active' : ''}">${renderReferralsTable()}</div>
+                    <div id="tab-orders" class="tab-content ${currentTab === 'orders' ? 'active' : ''}">${renderOrdersTable()}</div>
+                </div>
+            `;
+            
+            // 更新快捷按钮状态
+            if (!dateRange.start && !dateRange.end) {
+                updateQuickRangeBtns('allTime');
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase().includes(tab));
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.toggle('active', content.id === `tab-${tab}`);
+            });
+        }
+
+        function renderReferralsTable() {
+            if (referralsData.length === 0) {
+                return '<div class="empty-state">No referrals in this period. Share your link to start earning!</div>';
+            }
+            return `
+                <table>
+                    <thead><tr><th>User</th><th>Registered</th><th>Amount Paid</th><th>Status</th></tr></thead>
+                    <tbody>
+                        ${referralsData.map(r => {
+                            const totalPaid = r.payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
+                            const hasPaid = totalPaid > 0;
+                            const nickname = r.nick_name || r.email?.split('@')[0] || '-';
+                            return `<tr>
+                                <td>
+                                    <div class="user-info">
+                                        <span class="user-nickname">${nickname}</span>
+                                        <span class="user-email">${r.email || '-'}</span>
+                                    </div>
+                                </td>
+                                <td>${formatDate(r.created_at)}</td>
+                                <td>$${totalPaid.toFixed(2)}</td>
+                                <td><span class="status-badge ${hasPaid ? 'status-paid' : 'status-pending'}">${hasPaid ? 'Paid' : 'Registered'}</span></td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function renderOrdersTable() {
+            if (ordersData.length === 0) {
+                return '<div class="empty-state">No orders in this period.</div>';
+            }
+            return `
+                <table>
+                    <thead><tr><th>Order ID</th><th>User</th><th>Plan</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+                    <tbody>
+                        ${ordersData.map(o => {
+                            const nickname = o.user?.nick_name || o.user?.email?.split('@')[0] || '-';
+                            return `<tr>
+                                <td>#${o.id}</td>
+                                <td>
+                                    <div class="user-info">
+                                        <span class="user-nickname">${nickname}</span>
+                                        <span class="user-email">${o.user?.email || '-'}</span>
+                                    </div>
+                                </td>
+                                <td>${o.plan || '-'}</td>
+                                <td>$${(o.amount || 0).toFixed(2)}</td>
+                                <td>${formatDate(o.created_at)}</td>
+                                <td><span class="status-badge status-${o.status || 'completed'}">${o.status || 'Completed'}</span></td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function copyLink() {
+            const link = document.getElementById('referral-link').textContent;
+            navigator.clipboard.writeText(link).then(() => {
+                alert('Referral link copied to clipboard!');
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = link;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('Referral link copied to clipboard!');
+            });
+        }
+    </script>
+</body>
+</html>

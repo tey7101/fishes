@@ -629,6 +629,7 @@
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .subscription-btn {
@@ -650,12 +651,12 @@
 }
 
 .upgrade-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(180deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
     color: white;
 }
 
 .upgrade-btn:hover {
-    opacity: 0.9;
+    background: linear-gradient(180deg, #FFE44D 0%, #FFB347 50%, #FF9500 100%);
     transform: translateY(-2px);
 }
 

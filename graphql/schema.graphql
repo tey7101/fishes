@@ -5662,6 +5662,8 @@ enum order_by {
 columns and relationships of "payment"
 """
 type payment {
+  """关联的推广者用户ID"""
+  affiliate_id: String
   amount: numeric!
   billing_period: String
   created_at: timestamp
@@ -5682,6 +5684,9 @@ type payment {
   subscription_id: Int
   transaction_id: String
   updated_at: timestamp
+
+  """An object relationship"""
+  user: users
   user_id: String!
 }
 
@@ -5776,6 +5781,7 @@ input payment_bool_exp {
   _and: [payment_bool_exp!]
   _not: payment_bool_exp
   _or: [payment_bool_exp!]
+  affiliate_id: String_comparison_exp
   amount: numeric_comparison_exp
   billing_period: String_comparison_exp
   created_at: timestamp_comparison_exp
@@ -5791,6 +5797,7 @@ input payment_bool_exp {
   subscription_id: Int_comparison_exp
   transaction_id: String_comparison_exp
   updated_at: timestamp_comparison_exp
+  user: users_bool_exp
   user_id: String_comparison_exp
 }
 
@@ -5838,6 +5845,8 @@ input payment_inc_input {
 input type for inserting data into table "payment"
 """
 input payment_insert_input {
+  """关联的推广者用户ID"""
+  affiliate_id: String
   amount: numeric
   billing_period: String
   created_at: timestamp
@@ -5853,11 +5862,14 @@ input payment_insert_input {
   subscription_id: Int
   transaction_id: String
   updated_at: timestamp
+  user: users_obj_rel_insert_input
   user_id: String
 }
 
 """aggregate max on columns"""
 type payment_max_fields {
+  """关联的推广者用户ID"""
+  affiliate_id: String
   amount: numeric
   billing_period: String
   created_at: timestamp
@@ -5878,6 +5890,8 @@ type payment_max_fields {
 order by max() on columns of table "payment"
 """
 input payment_max_order_by {
+  """关联的推广者用户ID"""
+  affiliate_id: order_by
   amount: order_by
   billing_period: order_by
   created_at: order_by
@@ -5896,6 +5910,8 @@ input payment_max_order_by {
 
 """aggregate min on columns"""
 type payment_min_fields {
+  """关联的推广者用户ID"""
+  affiliate_id: String
   amount: numeric
   billing_period: String
   created_at: timestamp
@@ -5916,6 +5932,8 @@ type payment_min_fields {
 order by min() on columns of table "payment"
 """
 input payment_min_order_by {
+  """关联的推广者用户ID"""
+  affiliate_id: order_by
   amount: order_by
   billing_period: order_by
   created_at: order_by
@@ -5954,6 +5972,7 @@ input payment_on_conflict {
 
 """Ordering options when selecting data from "payment"."""
 input payment_order_by {
+  affiliate_id: order_by
   amount: order_by
   billing_period: order_by
   created_at: order_by
@@ -5969,6 +5988,7 @@ input payment_order_by {
   subscription_id: order_by
   transaction_id: order_by
   updated_at: order_by
+  user: users_order_by
   user_id: order_by
 }
 
@@ -5986,6 +6006,9 @@ input payment_prepend_input {
 select columns of table "payment"
 """
 enum payment_select_column {
+  """column name"""
+  affiliate_id
+
   """column name"""
   amount
 
@@ -6036,6 +6059,8 @@ enum payment_select_column {
 input type for updating data in table "payment"
 """
 input payment_set_input {
+  """关联的推广者用户ID"""
+  affiliate_id: String
   amount: numeric
   billing_period: String
   created_at: timestamp
@@ -6114,6 +6139,8 @@ input payment_stream_cursor_input {
 
 """Initial value of the column from where the streaming should start"""
 input payment_stream_cursor_value_input {
+  """关联的推广者用户ID"""
+  affiliate_id: String
   amount: numeric
   billing_period: String
   created_at: timestamp
@@ -6151,6 +6178,9 @@ input payment_sum_order_by {
 update columns of table "payment"
 """
 enum payment_update_column {
+  """column name"""
+  affiliate_id
+
   """column name"""
   amount
 
@@ -9511,9 +9541,84 @@ columns and relationships of "users"
 """
 type users {
   about_me: String
+
+  """An array relationship"""
+  affiliate_payments(
+    """distinct select on columns"""
+    distinct_on: [payment_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [payment_order_by!]
+
+    """filter the rows returned"""
+    where: payment_bool_exp
+  ): [payment!]!
+
+  """An aggregate relationship"""
+  affiliate_payments_aggregate(
+    """distinct select on columns"""
+    distinct_on: [payment_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [payment_order_by!]
+
+    """filter the rows returned"""
+    where: payment_bool_exp
+  ): payment_aggregate!
+
+  """An array relationship"""
+  affiliate_users(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): [users!]!
+
+  """An aggregate relationship"""
+  affiliate_users_aggregate(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): users_aggregate!
   avatar_url: String
   ban_reason: String
   banned_until: timestamp
+
+  """推广者佣金比例（百分比）"""
+  commission_rate: numeric
 
   """An array relationship"""
   conversations(
@@ -9702,6 +9807,12 @@ type users {
   ): messages_aggregate!
   nick_name: String
 
+  """推广者的唯一推广码"""
+  referral_code: String
+
+  """推荐人用户ID（通过推广链接注册的用户）"""
+  referred_by: String
+
   """An array relationship"""
   reports(
     """distinct select on columns"""
@@ -9741,6 +9852,9 @@ type users {
   total_fish_created: Int
   total_votes_received: Int
   updated_at: timestamp
+
+  """An object relationship"""
+  user_affiliate: users
 
   """
   用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean
@@ -9828,6 +9942,33 @@ type users_aggregate {
   nodes: [users!]!
 }
 
+input users_aggregate_bool_exp {
+  bool_and: users_aggregate_bool_exp_bool_and
+  bool_or: users_aggregate_bool_exp_bool_or
+  count: users_aggregate_bool_exp_count
+}
+
+input users_aggregate_bool_exp_bool_and {
+  arguments: users_select_column_users_aggregate_bool_exp_bool_and_arguments_columns!
+  distinct: Boolean
+  filter: users_bool_exp
+  predicate: Boolean_comparison_exp!
+}
+
+input users_aggregate_bool_exp_bool_or {
+  arguments: users_select_column_users_aggregate_bool_exp_bool_or_arguments_columns!
+  distinct: Boolean
+  filter: users_bool_exp
+  predicate: Boolean_comparison_exp!
+}
+
+input users_aggregate_bool_exp_count {
+  arguments: [users_select_column!]
+  distinct: Boolean
+  filter: users_bool_exp
+  predicate: Int_comparison_exp!
+}
+
 """
 aggregate fields of "users"
 """
@@ -9845,11 +9986,51 @@ type users_aggregate_fields {
   variance: users_variance_fields
 }
 
+"""
+order by aggregate values of table "users"
+"""
+input users_aggregate_order_by {
+  avg: users_avg_order_by
+  count: order_by
+  max: users_max_order_by
+  min: users_min_order_by
+  stddev: users_stddev_order_by
+  stddev_pop: users_stddev_pop_order_by
+  stddev_samp: users_stddev_samp_order_by
+  sum: users_sum_order_by
+  var_pop: users_var_pop_order_by
+  var_samp: users_var_samp_order_by
+  variance: users_variance_order_by
+}
+
+"""
+input type for inserting array relation for remote table "users"
+"""
+input users_arr_rel_insert_input {
+  data: [users_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: users_on_conflict
+}
+
 """aggregate avg on columns"""
 type users_avg_fields {
+  """推广者佣金比例（百分比）"""
+  commission_rate: Float
   reputation_score: Float
   total_fish_created: Float
   total_votes_received: Float
+}
+
+"""
+order by avg() on columns of table "users"
+"""
+input users_avg_order_by {
+  """推广者佣金比例（百分比）"""
+  commission_rate: order_by
+  reputation_score: order_by
+  total_fish_created: order_by
+  total_votes_received: order_by
 }
 
 """
@@ -9860,9 +10041,14 @@ input users_bool_exp {
   _not: users_bool_exp
   _or: [users_bool_exp!]
   about_me: String_comparison_exp
+  affiliate_payments: payment_bool_exp
+  affiliate_payments_aggregate: payment_aggregate_bool_exp
+  affiliate_users: users_bool_exp
+  affiliate_users_aggregate: users_aggregate_bool_exp
   avatar_url: String_comparison_exp
   ban_reason: String_comparison_exp
   banned_until: timestamp_comparison_exp
+  commission_rate: numeric_comparison_exp
   conversations: conversations_bool_exp
   conversations_aggregate: conversations_aggregate_bool_exp
   created_at: timestamp_comparison_exp
@@ -9880,12 +10066,15 @@ input users_bool_exp {
   messagesBySenderId_aggregate: messages_aggregate_bool_exp
   messages_aggregate: messages_aggregate_bool_exp
   nick_name: String_comparison_exp
+  referral_code: String_comparison_exp
+  referred_by: String_comparison_exp
   reports: reports_bool_exp
   reports_aggregate: reports_aggregate_bool_exp
   reputation_score: Int_comparison_exp
   total_fish_created: Int_comparison_exp
   total_votes_received: Int_comparison_exp
   updated_at: timestamp_comparison_exp
+  user_affiliate: users_bool_exp
   user_language: String_comparison_exp
   user_subscriptions: user_subscriptions_bool_exp
   user_subscriptions_aggregate: user_subscriptions_aggregate_bool_exp
@@ -9906,12 +10095,19 @@ enum users_constraint {
   unique or primary key constraint on columns "id"
   """
   users_pkey
+
+  """
+  unique or primary key constraint on columns "referral_code"
+  """
+  users_referral_code_key
 }
 
 """
 input type for incrementing numeric columns in table "users"
 """
 input users_inc_input {
+  """推广者佣金比例（百分比）"""
+  commission_rate: numeric
   reputation_score: Int
   total_fish_created: Int
   total_votes_received: Int
@@ -9922,9 +10118,14 @@ input type for inserting data into table "users"
 """
 input users_insert_input {
   about_me: String
+  affiliate_payments: payment_arr_rel_insert_input
+  affiliate_users: users_arr_rel_insert_input
   avatar_url: String
   ban_reason: String
   banned_until: timestamp
+
+  """推广者佣金比例（百分比）"""
+  commission_rate: numeric
   conversations: conversations_arr_rel_insert_input
   created_at: timestamp
   email: String
@@ -9937,11 +10138,18 @@ input users_insert_input {
   messages: messages_arr_rel_insert_input
   messagesBySenderId: messages_arr_rel_insert_input
   nick_name: String
+
+  """推广者的唯一推广码"""
+  referral_code: String
+
+  """推荐人用户ID（通过推广链接注册的用户）"""
+  referred_by: String
   reports: reports_arr_rel_insert_input
   reputation_score: Int
   total_fish_created: Int
   total_votes_received: Int
   updated_at: timestamp
+  user_affiliate: users_obj_rel_insert_input
 
   """
   用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean
@@ -9957,11 +10165,20 @@ type users_max_fields {
   avatar_url: String
   ban_reason: String
   banned_until: timestamp
+
+  """推广者佣金比例（百分比）"""
+  commission_rate: numeric
   created_at: timestamp
   email: String
   id: String
   last_active: timestamp
   nick_name: String
+
+  """推广者的唯一推广码"""
+  referral_code: String
+
+  """推荐人用户ID（通过推广链接注册的用户）"""
+  referred_by: String
   reputation_score: Int
   total_fish_created: Int
   total_votes_received: Int
@@ -9973,17 +10190,59 @@ type users_max_fields {
   user_language: String
 }
 
+"""
+order by max() on columns of table "users"
+"""
+input users_max_order_by {
+  about_me: order_by
+  avatar_url: order_by
+  ban_reason: order_by
+  banned_until: order_by
+
+  """推广者佣金比例（百分比）"""
+  commission_rate: order_by
+  created_at: order_by
+  email: order_by
+  id: order_by
+  last_active: order_by
+  nick_name: order_by
+
+  """推广者的唯一推广码"""
+  referral_code: order_by
+
+  """推荐人用户ID（通过推广链接注册的用户）"""
+  referred_by: order_by
+  reputation_score: order_by
+  total_fish_created: order_by
+  total_votes_received: order_by
+  updated_at: order_by
+
+  """
+  用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean
+  """
+  user_language: order_by
+}
+
 """aggregate min on columns"""
 type users_min_fields {
   about_me: String
   avatar_url: String
   ban_reason: String
   banned_until: timestamp
+
+  """推广者佣金比例（百分比）"""
+  commission_rate: numeric
   created_at: timestamp
   email: String
   id: String
   last_active: timestamp
   nick_name: String
+
+  """推广者的唯一推广码"""
+  referral_code: String
+
+  """推荐人用户ID（通过推广链接注册的用户）"""
+  referred_by: String
   reputation_score: Int
   total_fish_created: Int
   total_votes_received: Int
@@ -9993,6 +10252,39 @@ type users_min_fields {
   用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean
   """
   user_language: String
+}
+
+"""
+order by min() on columns of table "users"
+"""
+input users_min_order_by {
+  about_me: order_by
+  avatar_url: order_by
+  ban_reason: order_by
+  banned_until: order_by
+
+  """推广者佣金比例（百分比）"""
+  commission_rate: order_by
+  created_at: order_by
+  email: order_by
+  id: order_by
+  last_active: order_by
+  nick_name: order_by
+
+  """推广者的唯一推广码"""
+  referral_code: order_by
+
+  """推荐人用户ID（通过推广链接注册的用户）"""
+  referred_by: order_by
+  reputation_score: order_by
+  total_fish_created: order_by
+  total_votes_received: order_by
+  updated_at: order_by
+
+  """
+  用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean
+  """
+  user_language: order_by
 }
 
 """
@@ -10028,9 +10320,12 @@ input users_on_conflict {
 """Ordering options when selecting data from "users"."""
 input users_order_by {
   about_me: order_by
+  affiliate_payments_aggregate: payment_aggregate_order_by
+  affiliate_users_aggregate: users_aggregate_order_by
   avatar_url: order_by
   ban_reason: order_by
   banned_until: order_by
+  commission_rate: order_by
   conversations_aggregate: conversations_aggregate_order_by
   created_at: order_by
   email: order_by
@@ -10043,11 +10338,14 @@ input users_order_by {
   messagesBySenderId_aggregate: messages_aggregate_order_by
   messages_aggregate: messages_aggregate_order_by
   nick_name: order_by
+  referral_code: order_by
+  referred_by: order_by
   reports_aggregate: reports_aggregate_order_by
   reputation_score: order_by
   total_fish_created: order_by
   total_votes_received: order_by
   updated_at: order_by
+  user_affiliate: users_order_by
   user_language: order_by
   user_subscriptions_aggregate: user_subscriptions_aggregate_order_by
   votes_aggregate: votes_aggregate_order_by
@@ -10075,6 +10373,9 @@ enum users_select_column {
   banned_until
 
   """column name"""
+  commission_rate
+
+  """column name"""
   created_at
 
   """column name"""
@@ -10096,6 +10397,12 @@ enum users_select_column {
   nick_name
 
   """column name"""
+  referral_code
+
+  """column name"""
+  referred_by
+
+  """column name"""
   reputation_score
 
   """column name"""
@@ -10112,6 +10419,28 @@ enum users_select_column {
 }
 
 """
+select "users_aggregate_bool_exp_bool_and_arguments_columns" columns of table "users"
+"""
+enum users_select_column_users_aggregate_bool_exp_bool_and_arguments_columns {
+  """column name"""
+  fish_talk
+
+  """column name"""
+  is_banned
+}
+
+"""
+select "users_aggregate_bool_exp_bool_or_arguments_columns" columns of table "users"
+"""
+enum users_select_column_users_aggregate_bool_exp_bool_or_arguments_columns {
+  """column name"""
+  fish_talk
+
+  """column name"""
+  is_banned
+}
+
+"""
 input type for updating data in table "users"
 """
 input users_set_input {
@@ -10119,6 +10448,9 @@ input users_set_input {
   avatar_url: String
   ban_reason: String
   banned_until: timestamp
+
+  """推广者佣金比例（百分比）"""
+  commission_rate: numeric
   created_at: timestamp
   email: String
   fish_talk: Boolean
@@ -10126,6 +10458,12 @@ input users_set_input {
   is_banned: Boolean
   last_active: timestamp
   nick_name: String
+
+  """推广者的唯一推广码"""
+  referral_code: String
+
+  """推荐人用户ID（通过推广链接注册的用户）"""
+  referred_by: String
   reputation_score: Int
   total_fish_created: Int
   total_votes_received: Int
@@ -10139,23 +10477,62 @@ input users_set_input {
 
 """aggregate stddev on columns"""
 type users_stddev_fields {
+  """推广者佣金比例（百分比）"""
+  commission_rate: Float
   reputation_score: Float
   total_fish_created: Float
   total_votes_received: Float
+}
+
+"""
+order by stddev() on columns of table "users"
+"""
+input users_stddev_order_by {
+  """推广者佣金比例（百分比）"""
+  commission_rate: order_by
+  reputation_score: order_by
+  total_fish_created: order_by
+  total_votes_received: order_by
 }
 
 """aggregate stddev_pop on columns"""
 type users_stddev_pop_fields {
+  """推广者佣金比例（百分比）"""
+  commission_rate: Float
   reputation_score: Float
   total_fish_created: Float
   total_votes_received: Float
 }
 
+"""
+order by stddev_pop() on columns of table "users"
+"""
+input users_stddev_pop_order_by {
+  """推广者佣金比例（百分比）"""
+  commission_rate: order_by
+  reputation_score: order_by
+  total_fish_created: order_by
+  total_votes_received: order_by
+}
+
 """aggregate stddev_samp on columns"""
 type users_stddev_samp_fields {
+  """推广者佣金比例（百分比）"""
+  commission_rate: Float
   reputation_score: Float
   total_fish_created: Float
   total_votes_received: Float
+}
+
+"""
+order by stddev_samp() on columns of table "users"
+"""
+input users_stddev_samp_order_by {
+  """推广者佣金比例（百分比）"""
+  commission_rate: order_by
+  reputation_score: order_by
+  total_fish_created: order_by
+  total_votes_received: order_by
 }
 
 """
@@ -10175,6 +10552,9 @@ input users_stream_cursor_value_input {
   avatar_url: String
   ban_reason: String
   banned_until: timestamp
+
+  """推广者佣金比例（百分比）"""
+  commission_rate: numeric
   created_at: timestamp
   email: String
   fish_talk: Boolean
@@ -10182,6 +10562,12 @@ input users_stream_cursor_value_input {
   is_banned: Boolean
   last_active: timestamp
   nick_name: String
+
+  """推广者的唯一推广码"""
+  referral_code: String
+
+  """推荐人用户ID（通过推广链接注册的用户）"""
+  referred_by: String
   reputation_score: Int
   total_fish_created: Int
   total_votes_received: Int
@@ -10195,9 +10581,22 @@ input users_stream_cursor_value_input {
 
 """aggregate sum on columns"""
 type users_sum_fields {
+  """推广者佣金比例（百分比）"""
+  commission_rate: numeric
   reputation_score: Int
   total_fish_created: Int
   total_votes_received: Int
+}
+
+"""
+order by sum() on columns of table "users"
+"""
+input users_sum_order_by {
+  """推广者佣金比例（百分比）"""
+  commission_rate: order_by
+  reputation_score: order_by
+  total_fish_created: order_by
+  total_votes_received: order_by
 }
 
 """
@@ -10215,6 +10614,9 @@ enum users_update_column {
 
   """column name"""
   banned_until
+
+  """column name"""
+  commission_rate
 
   """column name"""
   created_at
@@ -10236,6 +10638,12 @@ enum users_update_column {
 
   """column name"""
   nick_name
+
+  """column name"""
+  referral_code
+
+  """column name"""
+  referred_by
 
   """column name"""
   reputation_score
@@ -10266,23 +10674,62 @@ input users_updates {
 
 """aggregate var_pop on columns"""
 type users_var_pop_fields {
+  """推广者佣金比例（百分比）"""
+  commission_rate: Float
   reputation_score: Float
   total_fish_created: Float
   total_votes_received: Float
+}
+
+"""
+order by var_pop() on columns of table "users"
+"""
+input users_var_pop_order_by {
+  """推广者佣金比例（百分比）"""
+  commission_rate: order_by
+  reputation_score: order_by
+  total_fish_created: order_by
+  total_votes_received: order_by
 }
 
 """aggregate var_samp on columns"""
 type users_var_samp_fields {
+  """推广者佣金比例（百分比）"""
+  commission_rate: Float
   reputation_score: Float
   total_fish_created: Float
   total_votes_received: Float
 }
 
+"""
+order by var_samp() on columns of table "users"
+"""
+input users_var_samp_order_by {
+  """推广者佣金比例（百分比）"""
+  commission_rate: order_by
+  reputation_score: order_by
+  total_fish_created: order_by
+  total_votes_received: order_by
+}
+
 """aggregate variance on columns"""
 type users_variance_fields {
+  """推广者佣金比例（百分比）"""
+  commission_rate: Float
   reputation_score: Float
   total_fish_created: Float
   total_votes_received: Float
+}
+
+"""
+order by variance() on columns of table "users"
+"""
+input users_variance_order_by {
+  """推广者佣金比例（百分比）"""
+  commission_rate: order_by
+  reputation_score: order_by
+  total_fish_created: order_by
+  total_votes_received: order_by
 }
 
 scalar uuid

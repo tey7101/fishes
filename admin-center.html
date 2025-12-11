@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理中心 - FishTalk</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 3rem;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .admin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .admin-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .admin-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+    }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🛠️ 管理中心</h1>
+      <p>FishTalk 后台管理入口</p>
+    </div>
+
+    <div class="admin-grid">
+      <!-- 数据表管理 -->
+      <a href="admin-table-manager.html" class="admin-card">
+        <div class="admin-card-header">
+          <span class="admin-card-icon">🗄️</span>
+          <h2 class="admin-card-title">数据表管理</h2>
+        </div>
+        <p class="admin-card-description">
+          可视化数据库管理，支持行内编辑和批量操作
+        </p>
+        <div class="admin-card-features">
+          <span class="feature-tag">行内编辑</span>
+          <span class="feature-tag">批量删除</span>
+          <span class="feature-tag">排序筛选</span>
+        </div>
+        <div class="admin-card-footer">
+          <span>管理数据表</span>
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </a>
+
+      <!-- 推广者管理 -->
+      <a href="admin-affiliates.html" class="admin-card">
+        <div class="admin-card-header">
+          <span class="admin-card-icon">💰</span>
+          <h2 class="admin-card-title">推广者管理</h2>
+        </div>
+        <p class="admin-card-description">
+          管理推广者账户，查看推荐数据，设置佣金比例
+        </p>
+        <div class="admin-card-features">
+          <span class="feature-tag">创建推广者</span>
+          <span class="feature-tag">佣金设置</span>
+          <span class="feature-tag">报表导出</span>
+        </div>
+        <div class="admin-card-footer">
+          <span>管理推广者</span>
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </a>
+
+      <!-- 内容审核 -->
+      <a href="moderation.html" class="admin-card">
+        <div class="admin-card-header">
+          <span class="admin-card-icon">🛡️</span>
+          <h2 class="admin-card-title">内容审核</h2>
+        </div>
+        <p class="admin-card-description">
+          审核用户提交的鱼画作品，处理举报内容
+        </p>
+        <div class="admin-card-features">
+          <span class="feature-tag">审核作品</span>
+          <span class="feature-tag">处理举报</span>
+          <span class="feature-tag">批量操作</span>
+        </div>
+        <div class="admin-card-footer">
+          <span>开始审核</span>
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </a>
+
+      <!-- 会员管理 -->
+      <a href="admin-table-edit.html?table=user_subscriptions" class="admin-card">
+        <div class="admin-card-header">
+          <span class="admin-card-icon">👑</span>
+          <h2 class="admin-card-title">会员管理</h2>
+        </div>
+        <p class="admin-card-description">
+          管理用户订阅、会员等级和权限
+        </p>
+        <div class="admin-card-features">
+          <span class="feature-tag">订阅管理</span>
+          <span class="feature-tag">等级配置</span>
+          <span class="feature-tag">权限设置</span>
+        </div>
+        <div class="admin-card-footer">
+          <span>管理会员</span>
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </div>
+      </a>
+    </div>
+
+    <!-- 返回按钮 -->
+    <div class="footer">
+      <a href="index.html" class="back-button">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        返回首页
+      </a>
+    </div>
+  </div>
+
+  <script src="public/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="src/js/supabase-init.js"></script>
+  <script src="src/js/admin-auth.js"></script>
+  <script>
+    // 管理员权限检查
+    (async function() {
+      if (document.readyState === 'loading') {
+        await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
+      }
+      if (!window.supabaseAuth) {
+        await new Promise(resolve => {
+          const checkInterval = setInterval(() => {
+            if (window.supabaseAuth) {
+              clearInterval(checkInterval);
+              resolve();
+            }
+          }, 100);
+        });
+      }
+      await window.adminAuth.requireAdminAccess();
+    })();
+  </script>
+
+  <style>
+    .admin-card-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .admin-card-icon {
+      font-size: 2rem;
+      margin-right: 0.75rem;
+    }
+
+    .admin-card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1a202c;
+    }
+
+    .admin-card-description {
+      color: #4a5568;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .admin-card-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-tag {
+      background: #e6f2ff;
+      color: #0066cc;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .admin-card-footer {
+      display: flex;
+      align-items: center;
+      color: #0066cc;
+      font-weight: 500;
+    }
+
+    .admin-card-footer svg {
+      margin-left: 0.5rem;
+      transition: transform 0.2s;
+    }
+
+    .admin-card:hover .admin-card-footer svg {
+      transform: translateX(4px);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      background: #4a5568;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .back-button:hover {
+      background: #2d3748;
+    }
+
+    .back-button svg {
+      margin-right: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .admin-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</body>
+</html>

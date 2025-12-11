@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>推广者管理 - FishTalk Admin</title>
+    <link rel="icon" type="image/png" href="/fish_logo.png">
+    <script src="public/supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="src/js/supabase-init.js"></script>
+    <script src="src/js/admin-auth.js"></script>
+    <script>
+        (async function() {
+            if (document.readyState === 'loading') await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
+            if (!window.supabaseAuth) await new Promise(resolve => { const i = setInterval(() => { if (window.supabaseAuth) { clearInterval(i); resolve(); } }, 100); });
+            await window.adminAuth.requireAdminAccess();
+        })();
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #f7fafc; min-height: 100vh; padding: 2rem; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 2rem; }
+        .header { margin-bottom: 2rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .header h1 { font-size: 2rem; color: #1a202c; margin-bottom: 0.5rem; }
+        .header p { color: #718096; }
+        .back-link { display: inline-block; color: #667eea; text-decoration: none; margin-bottom: 0.5rem; }
+        .back-link:hover { text-decoration: underline; }
+        .header-actions { display: flex; gap: 0.5rem; }
+        .date-range-container { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; padding: 1rem; background: #f8f9fa; border-radius: 8px; }
+        .date-range-container label { font-weight: 500; color: #4a5568; }
+        .date-input { padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.875rem; }
+        .quick-range-btns { display: flex; gap: 0.5rem; }
+        .quick-range-btn { padding: 0.5rem 1rem; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer; font-size: 0.875rem; transition: all 0.2s; }
+        .quick-range-btn:hover { background: #f7fafc; }
+        .quick-range-btn.active { background: #667eea; color: white; border-color: #667eea; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 10px; text-align: center; }
+        .stat-card .value { font-size: 1.75rem; font-weight: bold; }
+        .stat-card .label { font-size: 0.875rem; opacity: 0.9; }
+        .card { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .card h2 { font-size: 1.125rem; color: #2d3748; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #667eea; }
+        .tabs { display: flex; gap: 0; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; }
+        .tab-btn { padding: 0.75rem 1.5rem; border: none; background: transparent; cursor: pointer; font-size: 1rem; font-weight: 500; color: #718096; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+        .tab-btn:hover { color: #667eea; }
+        .tab-btn.active { color: #667eea; border-bottom-color: #667eea; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8f9fa; font-weight: 600; color: #4a5568; }
+        tr:hover { background: #f8f9fa; }
+        .btn { padding: 0.5rem 1rem; border: none; border-radius: 6px; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5a67d8; }
+        .btn-success { background: #48bb78; color: white; }
+        .btn-success:hover { background: #38a169; }
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; padding: 2rem; border-radius: 12px; max-width: 500px; width: 90%; }
+        .modal-content h3 { margin-top: 0; margin-bottom: 1.5rem; color: #2d3748; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #4a5568; }
+        .form-group input, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 1rem; }
+        .referral-code { font-family: 'Courier New', monospace; background: #f0f0f0; padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: bold; }
+        .copy-btn { background: none; border: none; cursor: pointer; padding: 0.25rem; color: #667eea; }
+        .loading { text-align: center; padding: 3rem; color: #718096; }
+        .spinner { display: inline-block; width: 48px; height: 48px; border: 4px solid #e2e8f0; border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error { background: #fff5f5; border: 1px solid #fc8181; color: #c53030; padding: 1rem; border-radius: 6px; text-align: center; }
+        .user-info { display: flex; flex-direction: column; }
+        .user-nickname { font-weight: 500; color: #2d3748; }
+        .user-email { font-size: 0.75rem; color: #718096; }
+        .status-badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 500; }
+        .status-completed { background: #c6f6d5; color: #22543d; }
+        .status-paid { background: #c6f6d5; color: #22543d; }
+        .status-pending { background: #fefcbf; color: #744210; }
+        .empty-state { text-align: center; padding: 2rem; color: #718096; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <a href="admin-center.html" class="back-link">← 返回管理中心</a>
+                <h1>🤝 推广者管理</h1>
+                <p>管理推广者账户，追踪推广业绩</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="showCreateModal()">+ 添加推广者</button>
+                <button class="btn btn-success" onclick="exportReport()">📊 导出报表</button>
+            </div>
+        </div>
+
+        <!-- 日期区间选择 -->
+        <div class="date-range-container">
+            <label>📅 日期范围:</label>
+            <input type="date" id="date-start" class="date-input" onchange="onDateChange()">
+            <span>至</span>
+            <input type="date" id="date-end" class="date-input" onchange="onDateChange()">
+            <div class="quick-range-btns">
+                <button class="quick-range-btn active" data-range="thisMonth" onclick="onQuickRange('thisMonth')">本月</button>
+                <button class="quick-range-btn" data-range="lastMonth" onclick="onQuickRange('lastMonth')">上月</button>
+                <button class="quick-range-btn" data-range="allTime" onclick="onQuickRange('allTime')">全部</button>
+            </div>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card"><div class="value" id="total-affiliates">-</div><div class="label">推广者总数</div></div>
+            <div class="stat-card"><div class="value" id="total-referrals">-</div><div class="label">推荐用户</div></div>
+            <div class="stat-card"><div class="value" id="total-revenue">-</div><div class="label">总收入 (USD)</div></div>
+            <div class="stat-card"><div class="value" id="total-commission">-</div><div class="label">总佣金 (USD)</div></div>
+            <div class="stat-card"><div class="value" id="total-orders">-</div><div class="label">订单数</div></div>
+        </div>
+
+        <!-- 标签页 -->
+        <div class="card">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('affiliates')">👥 推广者列表</button>
+                <button class="tab-btn" onclick="switchTab('referrals')">🧑‍🤝‍🧑 推荐用户</button>
+                <button class="tab-btn" onclick="switchTab('orders')">🧾 推荐订单</button>
+            </div>
+            <div id="tab-affiliates" class="tab-content active"></div>
+            <div id="tab-referrals" class="tab-content"></div>
+            <div id="tab-orders" class="tab-content"></div>
+        </div>
+    </div>
+
+    <!-- 创建推广者模态框 -->
+    <div class="modal" id="create-modal">
+        <div class="modal-content">
+            <h3>添加推广者</h3>
+            <form id="create-form" onsubmit="createAffiliate(event)">
+                <div class="form-group">
+                    <label>查找方式</label>
+                    <div style="display: flex; flex-direction: row; gap: 1.5rem; margin-bottom: 0.5rem;">
+                        <label style="display: flex; flex-direction: row; align-items: center; gap: 0.5rem; cursor: pointer; white-space: nowrap;">
+                            <input type="radio" name="lookup-type" value="id" checked onchange="toggleLookupType()">
+                            <span>用户 ID</span>
+                        </label>
+                        <label style="display: flex; flex-direction: row; align-items: center; gap: 0.5rem; cursor: pointer; white-space: nowrap;">
+                            <input type="radio" name="lookup-type" value="email" onchange="toggleLookupType()">
+                            <span>邮箱</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group" id="user-id-group">
+                    <label>用户 ID</label>
+                    <input type="text" id="target-user-id" placeholder="输入用户 ID">
+                </div>
+                <div class="form-group" id="email-group" style="display: none;">
+                    <label>邮箱地址</label>
+                    <input type="email" id="target-email" placeholder="输入用户邮箱">
+                </div>
+                <div class="form-group">
+                    <label>佣金比例 (%)</label>
+                    <input type="number" id="commission-rate" value="10" min="0" max="100" step="0.01">
+                </div>
+                <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+                    <button type="button" class="btn" onclick="hideCreateModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">创建</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑佣金模态框 -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <h3>编辑佣金比例</h3>
+            <form id="edit-form" onsubmit="updateAffiliate(event)">
+                <input type="hidden" id="edit-user-id">
+                <div class="form-group">
+                    <label>佣金比例 (%)</label>
+                    <input type="number" id="edit-commission-rate" min="0" max="100" step="0.01">
+                </div>
+                <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+                    <button type="button" class="btn" onclick="hideEditModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUserId = null;
+        let affiliatesData = [];
+        let allReferralsData = [];
+        let allOrdersData = [];
+        let currentTab = 'affiliates';
+        let dateRange = { start: null, end: null };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await waitForAuth();
+            const user = await window.supabaseAuth?.getCurrentUser();
+            if (!user) return;
+            currentUserId = user.id;
+            setThisMonth();
+            loadAllData();
+        });
+
+        async function waitForAuth() {
+            let retries = 0;
+            while (!window.supabaseAuth?.client && retries < 50) {
+                await new Promise(r => setTimeout(r, 100));
+                retries++;
+            }
+        }
+
+        function setThisMonth() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            dateRange.start = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            dateRange.end = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+            updateDateInputs();
+        }
+
+        function setLastMonth() {
+            const now = new Date();
+            let year = now.getFullYear();
+            let month = now.getMonth() - 1;
+            if (month < 0) { month = 11; year--; }
+            dateRange.start = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            dateRange.end = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+            updateDateInputs();
+        }
+
+        function setAllTime() {
+            dateRange.start = null;
+            dateRange.end = null;
+            updateDateInputs();
+        }
+
+        function updateDateInputs() {
+            document.getElementById('date-start').value = dateRange.start || '';
+            document.getElementById('date-end').value = dateRange.end || '';
+        }
+
+        function onQuickRange(range) {
+            if (range === 'thisMonth') setThisMonth();
+            else if (range === 'lastMonth') setLastMonth();
+            else if (range === 'allTime') setAllTime();
+            document.querySelectorAll('.quick-range-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.range === range));
+            loadAllData();
+        }
+
+        function onDateChange() {
+            dateRange.start = document.getElementById('date-start').value || null;
+            dateRange.end = document.getElementById('date-end').value || null;
+            document.querySelectorAll('.quick-range-btn').forEach(btn => btn.classList.remove('active'));
+            loadAllData();
+        }
+
+        async function loadAllData() {
+            document.getElementById('tab-affiliates').innerHTML = '<div class="loading"><div class="spinner"></div><p>加载中...</p></div>';
+            await Promise.all([loadAffiliates(), loadAllReferrals(), loadAllOrders()]);
+            renderStats();
+            renderCurrentTab();
+        }
+
+        async function loadAffiliates() {
+            try {
+                let url = `/api/affiliate-api?action=report`;
+                if (dateRange.start && dateRange.end) {
+                    url += `&startDate=${dateRange.start}T00:00:00Z&endDate=${dateRange.end}T23:59:59Z`;
+                }
+                const response = await fetch(url, { headers: { 'x-user-id': currentUserId } });
+                const data = await response.json();
+                affiliatesData = data.success ? (data.report || []) : [];
+            } catch (error) {
+                console.error('Failed to load affiliates:', error);
+                affiliatesData = [];
+            }
+        }
+
+        async function loadAllReferrals() {
+            try {
+                let url = `/api/affiliate-api?action=allReferrals&limit=200`;
+                if (dateRange.start && dateRange.end) {
+                    url += `&startDate=${dateRange.start}&endDate=${dateRange.end}`;
+                }
+                const response = await fetch(url, { headers: { 'x-user-id': currentUserId } });
+                const data = await response.json();
+                allReferralsData = data.success ? (data.referrals || []) : [];
+            } catch (error) {
+                console.error('Failed to load referrals:', error);
+                allReferralsData = [];
+            }
+        }
+
+        async function loadAllOrders() {
+            try {
+                let url = `/api/affiliate-api?action=allOrders&limit=200`;
+                if (dateRange.start && dateRange.end) {
+                    url += `&startDate=${dateRange.start}&endDate=${dateRange.end}`;
+                }
+                const response = await fetch(url, { headers: { 'x-user-id': currentUserId } });
+                const data = await response.json();
+                allOrdersData = data.success ? (data.orders || []) : [];
+            } catch (error) {
+                console.error('Failed to load orders:', error);
+                allOrdersData = [];
+            }
+        }
+
+        function renderStats() {
+            const totalAffiliates = affiliatesData.length;
+            const totalReferrals = affiliatesData.reduce((sum, a) => sum + (a.total_referrals || 0), 0);
+            const totalRevenue = affiliatesData.reduce((sum, a) => sum + (a.total_revenue || 0), 0);
+            const totalCommission = affiliatesData.reduce((sum, a) => sum + (a.total_commission || 0), 0);
+            const totalOrders = allOrdersData.length;
+            
+            document.getElementById('total-affiliates').textContent = totalAffiliates;
+            document.getElementById('total-referrals').textContent = totalReferrals;
+            document.getElementById('total-revenue').textContent = '$' + totalRevenue.toFixed(2);
+            document.getElementById('total-commission').textContent = '$' + totalCommission.toFixed(2);
+            document.getElementById('total-orders').textContent = totalOrders;
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+                const tabs = ['affiliates', 'referrals', 'orders'];
+                btn.classList.toggle('active', tabs[i] === tab);
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.toggle('active', content.id === `tab-${tab}`);
+            });
+            renderCurrentTab();
+        }
+
+        function renderCurrentTab() {
+            if (currentTab === 'affiliates') renderAffiliatesTable();
+            else if (currentTab === 'referrals') renderReferralsTable();
+            else if (currentTab === 'orders') renderOrdersTable();
+        }
+
+        function renderAffiliatesTable() {
+            if (affiliatesData.length === 0) {
+                document.getElementById('tab-affiliates').innerHTML = '<div class="empty-state">暂无推广者数据</div>';
+                return;
+            }
+            document.getElementById('tab-affiliates').innerHTML = `
+                <table>
+                    <thead><tr><th>推广者</th><th>推广码</th><th>佣金比例</th><th>推荐数</th><th>收入</th><th>佣金</th><th>操作</th></tr></thead>
+                    <tbody>
+                        ${affiliatesData.map(a => `<tr>
+                            <td><div class="user-info"><span class="user-nickname">${a.nick_name || a.email?.split('@')[0] || '-'}</span><span class="user-email">${a.email || '-'}</span></div></td>
+                            <td><span class="referral-code">${a.referral_code}</span><button class="copy-btn" onclick="copyCode('${a.referral_code}')" title="复制">📋</button></td>
+                            <td>${a.commission_rate}%</td>
+                            <td>${a.total_referrals || 0}</td>
+                            <td>$${(a.total_revenue || 0).toFixed(2)}</td>
+                            <td>$${(a.total_commission || 0).toFixed(2)}</td>
+                            <td><button class="btn btn-sm btn-primary" onclick="showEditModal('${a.id}', ${a.commission_rate})">编辑</button> <button class="btn btn-sm" onclick="viewDetails('${a.id}')">详情</button></td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>`;
+        }
+
+        function renderReferralsTable() {
+            if (allReferralsData.length === 0) {
+                document.getElementById('tab-referrals').innerHTML = '<div class="empty-state">暂无推荐用户数据</div>';
+                return;
+            }
+            document.getElementById('tab-referrals').innerHTML = `
+                <table>
+                    <thead><tr><th>用户</th><th>推荐人</th><th>注册时间</th><th>付费金额</th><th>状态</th></tr></thead>
+                    <tbody>
+                        ${allReferralsData.map(r => {
+                            const totalPaid = r.total_paid || 0;
+                            const hasPaid = totalPaid > 0;
+                            return `<tr>
+                                <td><div class="user-info"><span class="user-nickname">${r.nick_name || r.email?.split('@')[0] || '-'}</span><span class="user-email">${r.email || '-'}</span></div></td>
+                                <td><div class="user-info"><span class="user-nickname">${r.affiliate?.nick_name || r.affiliate?.email?.split('@')[0] || '-'}</span><span class="user-email">${r.affiliate?.referral_code || '-'}</span></div></td>
+                                <td>${formatDate(r.created_at)}</td>
+                                <td>$${totalPaid.toFixed(2)}</td>
+                                <td><span class="status-badge ${hasPaid ? 'status-paid' : 'status-pending'}">${hasPaid ? '已付费' : '已注册'}</span></td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>`;
+        }
+
+        function renderOrdersTable() {
+            if (allOrdersData.length === 0) {
+                document.getElementById('tab-orders').innerHTML = '<div class="empty-state">暂无订单数据</div>';
+                return;
+            }
+            document.getElementById('tab-orders').innerHTML = `
+                <table>
+                    <thead><tr><th>订单ID</th><th>用户</th><th>推广者</th><th>套餐</th><th>金额</th><th>日期</th><th>状态</th></tr></thead>
+                    <tbody>
+                        ${allOrdersData.map(o => `<tr>
+                            <td>#${o.id}</td>
+                            <td><div class="user-info"><span class="user-nickname">${o.user?.nick_name || o.user?.email?.split('@')[0] || '-'}</span><span class="user-email">${o.user?.email || '-'}</span></div></td>
+                            <td><div class="user-info"><span class="user-nickname">${o.affiliate?.nick_name || o.affiliate?.email?.split('@')[0] || '-'}</span><span class="user-email">${o.affiliate?.referral_code || '-'}</span></div></td>
+                            <td>${o.plan || '-'}</td>
+                            <td>$${(o.amount || 0).toFixed(2)}</td>
+                            <td>${formatDate(o.created_at)}</td>
+                            <td><span class="status-badge status-${o.status || 'completed'}">${o.status || 'completed'}</span></td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>`;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            return new Date(dateStr).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function copyCode(code) {
+            const link = `${window.location.origin}?ref=${code}`;
+            navigator.clipboard.writeText(link).then(() => alert('推广链接已复制: ' + link));
+        }
+
+        function showCreateModal() { document.getElementById('create-modal').classList.add('show'); }
+        function hideCreateModal() { document.getElementById('create-modal').classList.remove('show'); document.getElementById('create-form').reset(); }
+        function showEditModal(userId, rate) {
+            document.getElementById('edit-user-id').value = userId;
+            document.getElementById('edit-commission-rate').value = rate;
+            document.getElementById('edit-modal').classList.add('show');
+        }
+        function hideEditModal() { document.getElementById('edit-modal').classList.remove('show'); }
+
+        function toggleLookupType() {
+            const lookupType = document.querySelector('input[name="lookup-type"]:checked').value;
+            const userIdGroup = document.getElementById('user-id-group');
+            const emailGroup = document.getElementById('email-group');
+            const userIdInput = document.getElementById('target-user-id');
+            const emailInput = document.getElementById('target-email');
+            
+            if (lookupType === 'id') {
+                userIdGroup.style.display = 'block';
+                emailGroup.style.display = 'none';
+                userIdInput.required = true;
+                emailInput.required = false;
+            } else {
+                userIdGroup.style.display = 'none';
+                emailGroup.style.display = 'block';
+                userIdInput.required = false;
+                emailInput.required = true;
+            }
+        }
+
+        async function createAffiliate(event) {
+            event.preventDefault();
+            const lookupType = document.querySelector('input[name="lookup-type"]:checked').value;
+            const targetUserId = document.getElementById('target-user-id').value;
+            const targetEmail = document.getElementById('target-email').value;
+            const commissionRate = parseFloat(document.getElementById('commission-rate').value);
+            
+            // 验证输入
+            if (lookupType === 'id' && !targetUserId) {
+                alert('请输入用户 ID');
+                return;
+            }
+            if (lookupType === 'email' && !targetEmail) {
+                alert('请输入邮箱地址');
+                return;
+            }
+            
+            try {
+                const body = { commissionRate };
+                if (lookupType === 'id') {
+                    body.targetUserId = targetUserId;
+                } else {
+                    body.targetEmail = targetEmail;
+                }
+                
+                const response = await fetch('/api/affiliate-api?action=create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-user-id': currentUserId },
+                    body: JSON.stringify(body)
+                });
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || '创建失败');
+                alert('推广者创建成功！推广码: ' + data.affiliate.referral_code);
+                hideCreateModal();
+                loadAllData();
+            } catch (error) { alert('创建失败: ' + error.message); }
+        }
+
+        async function updateAffiliate(event) {
+            event.preventDefault();
+            const targetUserId = document.getElementById('edit-user-id').value;
+            const commissionRate = parseFloat(document.getElementById('edit-commission-rate').value);
+            try {
+                const response = await fetch('/api/affiliate-api?action=update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-user-id': currentUserId },
+                    body: JSON.stringify({ targetUserId, commissionRate })
+                });
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || '更新失败');
+                alert('佣金比例已更新');
+                hideEditModal();
+                loadAllData();
+            } catch (error) { alert('更新失败: ' + error.message); }
+        }
+
+        function viewDetails(userId) { window.location.href = `affiliate-dashboard.html?userId=${userId}`; }
+
+        async function exportReport() {
+            try {
+                let url = '/api/affiliate-api?action=export';
+                if (dateRange.start && dateRange.end) url += `&startDate=${dateRange.start}T00:00:00Z&endDate=${dateRange.end}T23:59:59Z`;
+                const response = await fetch(url, { headers: { 'x-user-id': currentUserId } });
+                if (!response.ok) throw new Error('导出失败');
+                const blob = await response.blob();
+                const blobUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = `affiliate-report-${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+            } catch (error) { alert('导出失败: ' + error.message); }
+        }
+    </script>
+</body>
+</html>

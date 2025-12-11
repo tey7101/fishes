@@ -4654,6 +4654,8 @@ export enum Order_By {
 /** columns and relationships of "payment" */
 export type Payment = {
   __typename?: 'payment';
+  /** 关联的推广者用户ID */
+  affiliate_id?: Maybe<Scalars['String']['output']>;
   amount: Scalars['numeric']['output'];
   billing_period?: Maybe<Scalars['String']['output']>;
   created_at?: Maybe<Scalars['timestamp']['output']>;
@@ -4670,6 +4672,8 @@ export type Payment = {
   subscription_id?: Maybe<Scalars['Int']['output']>;
   transaction_id?: Maybe<Scalars['String']['output']>;
   updated_at?: Maybe<Scalars['timestamp']['output']>;
+  /** An object relationship */
+  user?: Maybe<Users>;
   user_id: Scalars['String']['output'];
 };
 
@@ -4767,6 +4771,7 @@ export type Payment_Bool_Exp = {
   _and?: InputMaybe<Array<Payment_Bool_Exp>>;
   _not?: InputMaybe<Payment_Bool_Exp>;
   _or?: InputMaybe<Array<Payment_Bool_Exp>>;
+  affiliate_id?: InputMaybe<String_Comparison_Exp>;
   amount?: InputMaybe<Numeric_Comparison_Exp>;
   billing_period?: InputMaybe<String_Comparison_Exp>;
   created_at?: InputMaybe<Timestamp_Comparison_Exp>;
@@ -4782,6 +4787,7 @@ export type Payment_Bool_Exp = {
   subscription_id?: InputMaybe<Int_Comparison_Exp>;
   transaction_id?: InputMaybe<String_Comparison_Exp>;
   updated_at?: InputMaybe<Timestamp_Comparison_Exp>;
+  user?: InputMaybe<Users_Bool_Exp>;
   user_id?: InputMaybe<String_Comparison_Exp>;
 };
 
@@ -4815,6 +4821,8 @@ export type Payment_Inc_Input = {
 
 /** input type for inserting data into table "payment" */
 export type Payment_Insert_Input = {
+  /** 关联的推广者用户ID */
+  affiliate_id?: InputMaybe<Scalars['String']['input']>;
   amount?: InputMaybe<Scalars['numeric']['input']>;
   billing_period?: InputMaybe<Scalars['String']['input']>;
   created_at?: InputMaybe<Scalars['timestamp']['input']>;
@@ -4830,12 +4838,15 @@ export type Payment_Insert_Input = {
   subscription_id?: InputMaybe<Scalars['Int']['input']>;
   transaction_id?: InputMaybe<Scalars['String']['input']>;
   updated_at?: InputMaybe<Scalars['timestamp']['input']>;
+  user?: InputMaybe<Users_Obj_Rel_Insert_Input>;
   user_id?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** aggregate max on columns */
 export type Payment_Max_Fields = {
   __typename?: 'payment_max_fields';
+  /** 关联的推广者用户ID */
+  affiliate_id?: Maybe<Scalars['String']['output']>;
   amount?: Maybe<Scalars['numeric']['output']>;
   billing_period?: Maybe<Scalars['String']['output']>;
   created_at?: Maybe<Scalars['timestamp']['output']>;
@@ -4854,6 +4865,8 @@ export type Payment_Max_Fields = {
 
 /** order by max() on columns of table "payment" */
 export type Payment_Max_Order_By = {
+  /** 关联的推广者用户ID */
+  affiliate_id?: InputMaybe<Order_By>;
   amount?: InputMaybe<Order_By>;
   billing_period?: InputMaybe<Order_By>;
   created_at?: InputMaybe<Order_By>;
@@ -4873,6 +4886,8 @@ export type Payment_Max_Order_By = {
 /** aggregate min on columns */
 export type Payment_Min_Fields = {
   __typename?: 'payment_min_fields';
+  /** 关联的推广者用户ID */
+  affiliate_id?: Maybe<Scalars['String']['output']>;
   amount?: Maybe<Scalars['numeric']['output']>;
   billing_period?: Maybe<Scalars['String']['output']>;
   created_at?: Maybe<Scalars['timestamp']['output']>;
@@ -4891,6 +4906,8 @@ export type Payment_Min_Fields = {
 
 /** order by min() on columns of table "payment" */
 export type Payment_Min_Order_By = {
+  /** 关联的推广者用户ID */
+  affiliate_id?: InputMaybe<Order_By>;
   amount?: InputMaybe<Order_By>;
   billing_period?: InputMaybe<Order_By>;
   created_at?: InputMaybe<Order_By>;
@@ -4925,6 +4942,7 @@ export type Payment_On_Conflict = {
 
 /** Ordering options when selecting data from "payment". */
 export type Payment_Order_By = {
+  affiliate_id?: InputMaybe<Order_By>;
   amount?: InputMaybe<Order_By>;
   billing_period?: InputMaybe<Order_By>;
   created_at?: InputMaybe<Order_By>;
@@ -4940,6 +4958,7 @@ export type Payment_Order_By = {
   subscription_id?: InputMaybe<Order_By>;
   transaction_id?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
+  user?: InputMaybe<Users_Order_By>;
   user_id?: InputMaybe<Order_By>;
 };
 
@@ -4955,6 +4974,8 @@ export type Payment_Prepend_Input = {
 
 /** select columns of table "payment" */
 export enum Payment_Select_Column {
+  /** column name */
+  AffiliateId = 'affiliate_id',
   /** column name */
   Amount = 'amount',
   /** column name */
@@ -4989,6 +5010,8 @@ export enum Payment_Select_Column {
 
 /** input type for updating data in table "payment" */
 export type Payment_Set_Input = {
+  /** 关联的推广者用户ID */
+  affiliate_id?: InputMaybe<Scalars['String']['input']>;
   amount?: InputMaybe<Scalars['numeric']['input']>;
   billing_period?: InputMaybe<Scalars['String']['input']>;
   created_at?: InputMaybe<Scalars['timestamp']['input']>;
@@ -5061,6 +5084,8 @@ export type Payment_Stream_Cursor_Input = {
 
 /** Initial value of the column from where the streaming should start */
 export type Payment_Stream_Cursor_Value_Input = {
+  /** 关联的推广者用户ID */
+  affiliate_id?: InputMaybe<Scalars['String']['input']>;
   amount?: InputMaybe<Scalars['numeric']['input']>;
   billing_period?: InputMaybe<Scalars['String']['input']>;
   created_at?: InputMaybe<Scalars['timestamp']['input']>;
@@ -5095,6 +5120,8 @@ export type Payment_Sum_Order_By = {
 
 /** update columns of table "payment" */
 export enum Payment_Update_Column {
+  /** column name */
+  AffiliateId = 'affiliate_id',
   /** column name */
   Amount = 'amount',
   /** column name */
@@ -7704,9 +7731,19 @@ export type User_Visible_Messages_View_Updates = {
 export type Users = {
   __typename?: 'users';
   about_me?: Maybe<Scalars['String']['output']>;
+  /** An array relationship */
+  affiliate_payments: Array<Payment>;
+  /** An aggregate relationship */
+  affiliate_payments_aggregate: Payment_Aggregate;
+  /** An array relationship */
+  affiliate_users: Array<Users>;
+  /** An aggregate relationship */
+  affiliate_users_aggregate: Users_Aggregate;
   avatar_url?: Maybe<Scalars['String']['output']>;
   ban_reason?: Maybe<Scalars['String']['output']>;
   banned_until?: Maybe<Scalars['timestamp']['output']>;
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: Maybe<Scalars['numeric']['output']>;
   /** An array relationship */
   conversations: Array<Conversations>;
   /** An aggregate relationship */
@@ -7734,6 +7771,10 @@ export type Users = {
   /** An aggregate relationship */
   messages_aggregate: Messages_Aggregate;
   nick_name?: Maybe<Scalars['String']['output']>;
+  /** 推广者的唯一推广码 */
+  referral_code?: Maybe<Scalars['String']['output']>;
+  /** 推荐人用户ID（通过推广链接注册的用户） */
+  referred_by?: Maybe<Scalars['String']['output']>;
   /** An array relationship */
   reports: Array<Reports>;
   /** An aggregate relationship */
@@ -7742,6 +7783,8 @@ export type Users = {
   total_fish_created?: Maybe<Scalars['Int']['output']>;
   total_votes_received?: Maybe<Scalars['Int']['output']>;
   updated_at?: Maybe<Scalars['timestamp']['output']>;
+  /** An object relationship */
+  user_affiliate?: Maybe<Users>;
   /** 用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean */
   user_language?: Maybe<Scalars['String']['output']>;
   /** An array relationship */
@@ -7752,6 +7795,46 @@ export type Users = {
   votes: Array<Votes>;
   /** An aggregate relationship */
   votes_aggregate: Votes_Aggregate;
+};
+
+
+/** columns and relationships of "users" */
+export type UsersAffiliate_PaymentsArgs = {
+  distinct_on?: InputMaybe<Array<Payment_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Payment_Order_By>>;
+  where?: InputMaybe<Payment_Bool_Exp>;
+};
+
+
+/** columns and relationships of "users" */
+export type UsersAffiliate_Payments_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Payment_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Payment_Order_By>>;
+  where?: InputMaybe<Payment_Bool_Exp>;
+};
+
+
+/** columns and relationships of "users" */
+export type UsersAffiliate_UsersArgs = {
+  distinct_on?: InputMaybe<Array<Users_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Users_Order_By>>;
+  where?: InputMaybe<Users_Bool_Exp>;
+};
+
+
+/** columns and relationships of "users" */
+export type UsersAffiliate_Users_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Users_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Users_Order_By>>;
+  where?: InputMaybe<Users_Bool_Exp>;
 };
 
 
@@ -7921,6 +8004,33 @@ export type Users_Aggregate = {
   nodes: Array<Users>;
 };
 
+export type Users_Aggregate_Bool_Exp = {
+  bool_and?: InputMaybe<Users_Aggregate_Bool_Exp_Bool_And>;
+  bool_or?: InputMaybe<Users_Aggregate_Bool_Exp_Bool_Or>;
+  count?: InputMaybe<Users_Aggregate_Bool_Exp_Count>;
+};
+
+export type Users_Aggregate_Bool_Exp_Bool_And = {
+  arguments: Users_Select_Column_Users_Aggregate_Bool_Exp_Bool_And_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Users_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type Users_Aggregate_Bool_Exp_Bool_Or = {
+  arguments: Users_Select_Column_Users_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Users_Bool_Exp>;
+  predicate: Boolean_Comparison_Exp;
+};
+
+export type Users_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Users_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Users_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
 /** aggregate fields of "users" */
 export type Users_Aggregate_Fields = {
   __typename?: 'users_aggregate_fields';
@@ -7944,12 +8054,45 @@ export type Users_Aggregate_FieldsCountArgs = {
   distinct?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** order by aggregate values of table "users" */
+export type Users_Aggregate_Order_By = {
+  avg?: InputMaybe<Users_Avg_Order_By>;
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Users_Max_Order_By>;
+  min?: InputMaybe<Users_Min_Order_By>;
+  stddev?: InputMaybe<Users_Stddev_Order_By>;
+  stddev_pop?: InputMaybe<Users_Stddev_Pop_Order_By>;
+  stddev_samp?: InputMaybe<Users_Stddev_Samp_Order_By>;
+  sum?: InputMaybe<Users_Sum_Order_By>;
+  var_pop?: InputMaybe<Users_Var_Pop_Order_By>;
+  var_samp?: InputMaybe<Users_Var_Samp_Order_By>;
+  variance?: InputMaybe<Users_Variance_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "users" */
+export type Users_Arr_Rel_Insert_Input = {
+  data: Array<Users_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Users_On_Conflict>;
+};
+
 /** aggregate avg on columns */
 export type Users_Avg_Fields = {
   __typename?: 'users_avg_fields';
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: Maybe<Scalars['Float']['output']>;
   reputation_score?: Maybe<Scalars['Float']['output']>;
   total_fish_created?: Maybe<Scalars['Float']['output']>;
   total_votes_received?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by avg() on columns of table "users" */
+export type Users_Avg_Order_By = {
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: InputMaybe<Order_By>;
+  reputation_score?: InputMaybe<Order_By>;
+  total_fish_created?: InputMaybe<Order_By>;
+  total_votes_received?: InputMaybe<Order_By>;
 };
 
 /** Boolean expression to filter rows from the table "users". All fields are combined with a logical 'AND'. */
@@ -7958,9 +8101,14 @@ export type Users_Bool_Exp = {
   _not?: InputMaybe<Users_Bool_Exp>;
   _or?: InputMaybe<Array<Users_Bool_Exp>>;
   about_me?: InputMaybe<String_Comparison_Exp>;
+  affiliate_payments?: InputMaybe<Payment_Bool_Exp>;
+  affiliate_payments_aggregate?: InputMaybe<Payment_Aggregate_Bool_Exp>;
+  affiliate_users?: InputMaybe<Users_Bool_Exp>;
+  affiliate_users_aggregate?: InputMaybe<Users_Aggregate_Bool_Exp>;
   avatar_url?: InputMaybe<String_Comparison_Exp>;
   ban_reason?: InputMaybe<String_Comparison_Exp>;
   banned_until?: InputMaybe<Timestamp_Comparison_Exp>;
+  commission_rate?: InputMaybe<Numeric_Comparison_Exp>;
   conversations?: InputMaybe<Conversations_Bool_Exp>;
   conversations_aggregate?: InputMaybe<Conversations_Aggregate_Bool_Exp>;
   created_at?: InputMaybe<Timestamp_Comparison_Exp>;
@@ -7978,12 +8126,15 @@ export type Users_Bool_Exp = {
   messagesBySenderId_aggregate?: InputMaybe<Messages_Aggregate_Bool_Exp>;
   messages_aggregate?: InputMaybe<Messages_Aggregate_Bool_Exp>;
   nick_name?: InputMaybe<String_Comparison_Exp>;
+  referral_code?: InputMaybe<String_Comparison_Exp>;
+  referred_by?: InputMaybe<String_Comparison_Exp>;
   reports?: InputMaybe<Reports_Bool_Exp>;
   reports_aggregate?: InputMaybe<Reports_Aggregate_Bool_Exp>;
   reputation_score?: InputMaybe<Int_Comparison_Exp>;
   total_fish_created?: InputMaybe<Int_Comparison_Exp>;
   total_votes_received?: InputMaybe<Int_Comparison_Exp>;
   updated_at?: InputMaybe<Timestamp_Comparison_Exp>;
+  user_affiliate?: InputMaybe<Users_Bool_Exp>;
   user_language?: InputMaybe<String_Comparison_Exp>;
   user_subscriptions?: InputMaybe<User_Subscriptions_Bool_Exp>;
   user_subscriptions_aggregate?: InputMaybe<User_Subscriptions_Aggregate_Bool_Exp>;
@@ -7996,11 +8147,15 @@ export enum Users_Constraint {
   /** unique or primary key constraint on columns "email" */
   UsersEmailKey = 'users_email_key',
   /** unique or primary key constraint on columns "id" */
-  UsersPkey = 'users_pkey'
+  UsersPkey = 'users_pkey',
+  /** unique or primary key constraint on columns "referral_code" */
+  UsersReferralCodeKey = 'users_referral_code_key'
 }
 
 /** input type for incrementing numeric columns in table "users" */
 export type Users_Inc_Input = {
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: InputMaybe<Scalars['numeric']['input']>;
   reputation_score?: InputMaybe<Scalars['Int']['input']>;
   total_fish_created?: InputMaybe<Scalars['Int']['input']>;
   total_votes_received?: InputMaybe<Scalars['Int']['input']>;
@@ -8009,9 +8164,13 @@ export type Users_Inc_Input = {
 /** input type for inserting data into table "users" */
 export type Users_Insert_Input = {
   about_me?: InputMaybe<Scalars['String']['input']>;
+  affiliate_payments?: InputMaybe<Payment_Arr_Rel_Insert_Input>;
+  affiliate_users?: InputMaybe<Users_Arr_Rel_Insert_Input>;
   avatar_url?: InputMaybe<Scalars['String']['input']>;
   ban_reason?: InputMaybe<Scalars['String']['input']>;
   banned_until?: InputMaybe<Scalars['timestamp']['input']>;
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: InputMaybe<Scalars['numeric']['input']>;
   conversations?: InputMaybe<Conversations_Arr_Rel_Insert_Input>;
   created_at?: InputMaybe<Scalars['timestamp']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
@@ -8024,11 +8183,16 @@ export type Users_Insert_Input = {
   messages?: InputMaybe<Messages_Arr_Rel_Insert_Input>;
   messagesBySenderId?: InputMaybe<Messages_Arr_Rel_Insert_Input>;
   nick_name?: InputMaybe<Scalars['String']['input']>;
+  /** 推广者的唯一推广码 */
+  referral_code?: InputMaybe<Scalars['String']['input']>;
+  /** 推荐人用户ID（通过推广链接注册的用户） */
+  referred_by?: InputMaybe<Scalars['String']['input']>;
   reports?: InputMaybe<Reports_Arr_Rel_Insert_Input>;
   reputation_score?: InputMaybe<Scalars['Int']['input']>;
   total_fish_created?: InputMaybe<Scalars['Int']['input']>;
   total_votes_received?: InputMaybe<Scalars['Int']['input']>;
   updated_at?: InputMaybe<Scalars['timestamp']['input']>;
+  user_affiliate?: InputMaybe<Users_Obj_Rel_Insert_Input>;
   /** 用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean */
   user_language?: InputMaybe<Scalars['String']['input']>;
   user_subscriptions?: InputMaybe<User_Subscriptions_Arr_Rel_Insert_Input>;
@@ -8042,17 +8206,48 @@ export type Users_Max_Fields = {
   avatar_url?: Maybe<Scalars['String']['output']>;
   ban_reason?: Maybe<Scalars['String']['output']>;
   banned_until?: Maybe<Scalars['timestamp']['output']>;
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: Maybe<Scalars['numeric']['output']>;
   created_at?: Maybe<Scalars['timestamp']['output']>;
   email?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['String']['output']>;
   last_active?: Maybe<Scalars['timestamp']['output']>;
   nick_name?: Maybe<Scalars['String']['output']>;
+  /** 推广者的唯一推广码 */
+  referral_code?: Maybe<Scalars['String']['output']>;
+  /** 推荐人用户ID（通过推广链接注册的用户） */
+  referred_by?: Maybe<Scalars['String']['output']>;
   reputation_score?: Maybe<Scalars['Int']['output']>;
   total_fish_created?: Maybe<Scalars['Int']['output']>;
   total_votes_received?: Maybe<Scalars['Int']['output']>;
   updated_at?: Maybe<Scalars['timestamp']['output']>;
   /** 用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean */
   user_language?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "users" */
+export type Users_Max_Order_By = {
+  about_me?: InputMaybe<Order_By>;
+  avatar_url?: InputMaybe<Order_By>;
+  ban_reason?: InputMaybe<Order_By>;
+  banned_until?: InputMaybe<Order_By>;
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  email?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  last_active?: InputMaybe<Order_By>;
+  nick_name?: InputMaybe<Order_By>;
+  /** 推广者的唯一推广码 */
+  referral_code?: InputMaybe<Order_By>;
+  /** 推荐人用户ID（通过推广链接注册的用户） */
+  referred_by?: InputMaybe<Order_By>;
+  reputation_score?: InputMaybe<Order_By>;
+  total_fish_created?: InputMaybe<Order_By>;
+  total_votes_received?: InputMaybe<Order_By>;
+  updated_at?: InputMaybe<Order_By>;
+  /** 用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean */
+  user_language?: InputMaybe<Order_By>;
 };
 
 /** aggregate min on columns */
@@ -8062,17 +8257,48 @@ export type Users_Min_Fields = {
   avatar_url?: Maybe<Scalars['String']['output']>;
   ban_reason?: Maybe<Scalars['String']['output']>;
   banned_until?: Maybe<Scalars['timestamp']['output']>;
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: Maybe<Scalars['numeric']['output']>;
   created_at?: Maybe<Scalars['timestamp']['output']>;
   email?: Maybe<Scalars['String']['output']>;
   id?: Maybe<Scalars['String']['output']>;
   last_active?: Maybe<Scalars['timestamp']['output']>;
   nick_name?: Maybe<Scalars['String']['output']>;
+  /** 推广者的唯一推广码 */
+  referral_code?: Maybe<Scalars['String']['output']>;
+  /** 推荐人用户ID（通过推广链接注册的用户） */
+  referred_by?: Maybe<Scalars['String']['output']>;
   reputation_score?: Maybe<Scalars['Int']['output']>;
   total_fish_created?: Maybe<Scalars['Int']['output']>;
   total_votes_received?: Maybe<Scalars['Int']['output']>;
   updated_at?: Maybe<Scalars['timestamp']['output']>;
   /** 用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean */
   user_language?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "users" */
+export type Users_Min_Order_By = {
+  about_me?: InputMaybe<Order_By>;
+  avatar_url?: InputMaybe<Order_By>;
+  ban_reason?: InputMaybe<Order_By>;
+  banned_until?: InputMaybe<Order_By>;
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  email?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  last_active?: InputMaybe<Order_By>;
+  nick_name?: InputMaybe<Order_By>;
+  /** 推广者的唯一推广码 */
+  referral_code?: InputMaybe<Order_By>;
+  /** 推荐人用户ID（通过推广链接注册的用户） */
+  referred_by?: InputMaybe<Order_By>;
+  reputation_score?: InputMaybe<Order_By>;
+  total_fish_created?: InputMaybe<Order_By>;
+  total_votes_received?: InputMaybe<Order_By>;
+  updated_at?: InputMaybe<Order_By>;
+  /** 用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean */
+  user_language?: InputMaybe<Order_By>;
 };
 
 /** response of any mutation on the table "users" */
@@ -8101,9 +8327,12 @@ export type Users_On_Conflict = {
 /** Ordering options when selecting data from "users". */
 export type Users_Order_By = {
   about_me?: InputMaybe<Order_By>;
+  affiliate_payments_aggregate?: InputMaybe<Payment_Aggregate_Order_By>;
+  affiliate_users_aggregate?: InputMaybe<Users_Aggregate_Order_By>;
   avatar_url?: InputMaybe<Order_By>;
   ban_reason?: InputMaybe<Order_By>;
   banned_until?: InputMaybe<Order_By>;
+  commission_rate?: InputMaybe<Order_By>;
   conversations_aggregate?: InputMaybe<Conversations_Aggregate_Order_By>;
   created_at?: InputMaybe<Order_By>;
   email?: InputMaybe<Order_By>;
@@ -8116,11 +8345,14 @@ export type Users_Order_By = {
   messagesBySenderId_aggregate?: InputMaybe<Messages_Aggregate_Order_By>;
   messages_aggregate?: InputMaybe<Messages_Aggregate_Order_By>;
   nick_name?: InputMaybe<Order_By>;
+  referral_code?: InputMaybe<Order_By>;
+  referred_by?: InputMaybe<Order_By>;
   reports_aggregate?: InputMaybe<Reports_Aggregate_Order_By>;
   reputation_score?: InputMaybe<Order_By>;
   total_fish_created?: InputMaybe<Order_By>;
   total_votes_received?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
+  user_affiliate?: InputMaybe<Users_Order_By>;
   user_language?: InputMaybe<Order_By>;
   user_subscriptions_aggregate?: InputMaybe<User_Subscriptions_Aggregate_Order_By>;
   votes_aggregate?: InputMaybe<Votes_Aggregate_Order_By>;
@@ -8142,6 +8374,8 @@ export enum Users_Select_Column {
   /** column name */
   BannedUntil = 'banned_until',
   /** column name */
+  CommissionRate = 'commission_rate',
+  /** column name */
   CreatedAt = 'created_at',
   /** column name */
   Email = 'email',
@@ -8156,6 +8390,10 @@ export enum Users_Select_Column {
   /** column name */
   NickName = 'nick_name',
   /** column name */
+  ReferralCode = 'referral_code',
+  /** column name */
+  ReferredBy = 'referred_by',
+  /** column name */
   ReputationScore = 'reputation_score',
   /** column name */
   TotalFishCreated = 'total_fish_created',
@@ -8167,12 +8405,30 @@ export enum Users_Select_Column {
   UserLanguage = 'user_language'
 }
 
+/** select "users_aggregate_bool_exp_bool_and_arguments_columns" columns of table "users" */
+export enum Users_Select_Column_Users_Aggregate_Bool_Exp_Bool_And_Arguments_Columns {
+  /** column name */
+  FishTalk = 'fish_talk',
+  /** column name */
+  IsBanned = 'is_banned'
+}
+
+/** select "users_aggregate_bool_exp_bool_or_arguments_columns" columns of table "users" */
+export enum Users_Select_Column_Users_Aggregate_Bool_Exp_Bool_Or_Arguments_Columns {
+  /** column name */
+  FishTalk = 'fish_talk',
+  /** column name */
+  IsBanned = 'is_banned'
+}
+
 /** input type for updating data in table "users" */
 export type Users_Set_Input = {
   about_me?: InputMaybe<Scalars['String']['input']>;
   avatar_url?: InputMaybe<Scalars['String']['input']>;
   ban_reason?: InputMaybe<Scalars['String']['input']>;
   banned_until?: InputMaybe<Scalars['timestamp']['input']>;
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: InputMaybe<Scalars['numeric']['input']>;
   created_at?: InputMaybe<Scalars['timestamp']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
   fish_talk?: InputMaybe<Scalars['Boolean']['input']>;
@@ -8180,6 +8436,10 @@ export type Users_Set_Input = {
   is_banned?: InputMaybe<Scalars['Boolean']['input']>;
   last_active?: InputMaybe<Scalars['timestamp']['input']>;
   nick_name?: InputMaybe<Scalars['String']['input']>;
+  /** 推广者的唯一推广码 */
+  referral_code?: InputMaybe<Scalars['String']['input']>;
+  /** 推荐人用户ID（通过推广链接注册的用户） */
+  referred_by?: InputMaybe<Scalars['String']['input']>;
   reputation_score?: InputMaybe<Scalars['Int']['input']>;
   total_fish_created?: InputMaybe<Scalars['Int']['input']>;
   total_votes_received?: InputMaybe<Scalars['Int']['input']>;
@@ -8191,25 +8451,58 @@ export type Users_Set_Input = {
 /** aggregate stddev on columns */
 export type Users_Stddev_Fields = {
   __typename?: 'users_stddev_fields';
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: Maybe<Scalars['Float']['output']>;
   reputation_score?: Maybe<Scalars['Float']['output']>;
   total_fish_created?: Maybe<Scalars['Float']['output']>;
   total_votes_received?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev() on columns of table "users" */
+export type Users_Stddev_Order_By = {
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: InputMaybe<Order_By>;
+  reputation_score?: InputMaybe<Order_By>;
+  total_fish_created?: InputMaybe<Order_By>;
+  total_votes_received?: InputMaybe<Order_By>;
 };
 
 /** aggregate stddev_pop on columns */
 export type Users_Stddev_Pop_Fields = {
   __typename?: 'users_stddev_pop_fields';
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: Maybe<Scalars['Float']['output']>;
   reputation_score?: Maybe<Scalars['Float']['output']>;
   total_fish_created?: Maybe<Scalars['Float']['output']>;
   total_votes_received?: Maybe<Scalars['Float']['output']>;
 };
 
+/** order by stddev_pop() on columns of table "users" */
+export type Users_Stddev_Pop_Order_By = {
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: InputMaybe<Order_By>;
+  reputation_score?: InputMaybe<Order_By>;
+  total_fish_created?: InputMaybe<Order_By>;
+  total_votes_received?: InputMaybe<Order_By>;
+};
+
 /** aggregate stddev_samp on columns */
 export type Users_Stddev_Samp_Fields = {
   __typename?: 'users_stddev_samp_fields';
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: Maybe<Scalars['Float']['output']>;
   reputation_score?: Maybe<Scalars['Float']['output']>;
   total_fish_created?: Maybe<Scalars['Float']['output']>;
   total_votes_received?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by stddev_samp() on columns of table "users" */
+export type Users_Stddev_Samp_Order_By = {
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: InputMaybe<Order_By>;
+  reputation_score?: InputMaybe<Order_By>;
+  total_fish_created?: InputMaybe<Order_By>;
+  total_votes_received?: InputMaybe<Order_By>;
 };
 
 /** Streaming cursor of the table "users" */
@@ -8226,6 +8519,8 @@ export type Users_Stream_Cursor_Value_Input = {
   avatar_url?: InputMaybe<Scalars['String']['input']>;
   ban_reason?: InputMaybe<Scalars['String']['input']>;
   banned_until?: InputMaybe<Scalars['timestamp']['input']>;
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: InputMaybe<Scalars['numeric']['input']>;
   created_at?: InputMaybe<Scalars['timestamp']['input']>;
   email?: InputMaybe<Scalars['String']['input']>;
   fish_talk?: InputMaybe<Scalars['Boolean']['input']>;
@@ -8233,6 +8528,10 @@ export type Users_Stream_Cursor_Value_Input = {
   is_banned?: InputMaybe<Scalars['Boolean']['input']>;
   last_active?: InputMaybe<Scalars['timestamp']['input']>;
   nick_name?: InputMaybe<Scalars['String']['input']>;
+  /** 推广者的唯一推广码 */
+  referral_code?: InputMaybe<Scalars['String']['input']>;
+  /** 推荐人用户ID（通过推广链接注册的用户） */
+  referred_by?: InputMaybe<Scalars['String']['input']>;
   reputation_score?: InputMaybe<Scalars['Int']['input']>;
   total_fish_created?: InputMaybe<Scalars['Int']['input']>;
   total_votes_received?: InputMaybe<Scalars['Int']['input']>;
@@ -8244,9 +8543,20 @@ export type Users_Stream_Cursor_Value_Input = {
 /** aggregate sum on columns */
 export type Users_Sum_Fields = {
   __typename?: 'users_sum_fields';
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: Maybe<Scalars['numeric']['output']>;
   reputation_score?: Maybe<Scalars['Int']['output']>;
   total_fish_created?: Maybe<Scalars['Int']['output']>;
   total_votes_received?: Maybe<Scalars['Int']['output']>;
+};
+
+/** order by sum() on columns of table "users" */
+export type Users_Sum_Order_By = {
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: InputMaybe<Order_By>;
+  reputation_score?: InputMaybe<Order_By>;
+  total_fish_created?: InputMaybe<Order_By>;
+  total_votes_received?: InputMaybe<Order_By>;
 };
 
 /** update columns of table "users" */
@@ -8259,6 +8569,8 @@ export enum Users_Update_Column {
   BanReason = 'ban_reason',
   /** column name */
   BannedUntil = 'banned_until',
+  /** column name */
+  CommissionRate = 'commission_rate',
   /** column name */
   CreatedAt = 'created_at',
   /** column name */
@@ -8273,6 +8585,10 @@ export enum Users_Update_Column {
   LastActive = 'last_active',
   /** column name */
   NickName = 'nick_name',
+  /** column name */
+  ReferralCode = 'referral_code',
+  /** column name */
+  ReferredBy = 'referred_by',
   /** column name */
   ReputationScore = 'reputation_score',
   /** column name */
@@ -8297,25 +8613,58 @@ export type Users_Updates = {
 /** aggregate var_pop on columns */
 export type Users_Var_Pop_Fields = {
   __typename?: 'users_var_pop_fields';
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: Maybe<Scalars['Float']['output']>;
   reputation_score?: Maybe<Scalars['Float']['output']>;
   total_fish_created?: Maybe<Scalars['Float']['output']>;
   total_votes_received?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by var_pop() on columns of table "users" */
+export type Users_Var_Pop_Order_By = {
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: InputMaybe<Order_By>;
+  reputation_score?: InputMaybe<Order_By>;
+  total_fish_created?: InputMaybe<Order_By>;
+  total_votes_received?: InputMaybe<Order_By>;
 };
 
 /** aggregate var_samp on columns */
 export type Users_Var_Samp_Fields = {
   __typename?: 'users_var_samp_fields';
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: Maybe<Scalars['Float']['output']>;
   reputation_score?: Maybe<Scalars['Float']['output']>;
   total_fish_created?: Maybe<Scalars['Float']['output']>;
   total_votes_received?: Maybe<Scalars['Float']['output']>;
 };
 
+/** order by var_samp() on columns of table "users" */
+export type Users_Var_Samp_Order_By = {
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: InputMaybe<Order_By>;
+  reputation_score?: InputMaybe<Order_By>;
+  total_fish_created?: InputMaybe<Order_By>;
+  total_votes_received?: InputMaybe<Order_By>;
+};
+
 /** aggregate variance on columns */
 export type Users_Variance_Fields = {
   __typename?: 'users_variance_fields';
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: Maybe<Scalars['Float']['output']>;
   reputation_score?: Maybe<Scalars['Float']['output']>;
   total_fish_created?: Maybe<Scalars['Float']['output']>;
   total_votes_received?: Maybe<Scalars['Float']['output']>;
+};
+
+/** order by variance() on columns of table "users" */
+export type Users_Variance_Order_By = {
+  /** 推广者佣金比例（百分比） */
+  commission_rate?: InputMaybe<Order_By>;
+  reputation_score?: InputMaybe<Order_By>;
+  total_fish_created?: InputMaybe<Order_By>;
+  total_votes_received?: InputMaybe<Order_By>;
 };
 
 /** Boolean expression to compare columns of type "uuid". All fields are combined with logical 'AND'. */

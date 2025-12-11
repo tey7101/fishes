@@ -40,7 +40,7 @@ body {
 
 /* 提交按钮容器 */
 .submit-button-container {
-    margin: 35px 0 30px; /* 增加与上下组件的距离 */
+    margin: 18px 0 30px; /* 上边距减半 */
     text-align: center;
 }
 
@@ -359,7 +359,7 @@ body {
 /* ===== 工具栏样式优化 ===== */
 #paint-bar {
     max-width: 800px !important;
-    margin: 20px auto !important;
+    margin: 20px auto 40px auto !important;
     padding: 20px !important;
     background: white;
     border-radius: 20px;
@@ -455,9 +455,9 @@ body {
 
 /* ===== 鱼概率显示优化 ===== */
 #fish-probability {
-    display: inline-block;
+    display: none; /* Hidden by default, shown via JS */
     padding: 12px 24px;
-    margin: 15px 0;
+    margin: 5px auto;
     background: white;
     border-radius: 20px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -466,6 +466,16 @@ body {
     transition: all 0.3s ease;
     border: 3px solid;
     animation: fadeInUp 0.5s ease;
+    text-align: center;
+}
+
+#fish-probability[style*="display: inline-flex"],
+#fish-probability[style*="display: flex"],
+#fish-probability:not([style*="display: none"]):not([style=""]) {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 #fish-probability.high-probability {

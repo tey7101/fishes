@@ -81,25 +81,29 @@
 
         .auth-tabs {
             margin-top: 24px;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
             display: flex;
             gap: 10px;
+            justify-content: center;
+            padding: 0 40px;
         }
 
         .auth-tab-btn {
-            flex: 1;
+            flex: 0 0 auto;
+            width: calc(50% * 0.75 * 1.25);
             padding: 12px 20px;
             border: none;
-            background: linear-gradient(180deg, #FFFFFF 0%, #F0F0F0 50%, #D0D0D0 100%);
-            border-bottom: 3px solid #A0A0A0;
+            background: linear-gradient(180deg, #B8C4E0 0%, #9AADCF 50%, #7A8FB8 100%);
+            border-bottom: 3px solid #5A6F8F;
             cursor: pointer;
             border-radius: 24px;
             font-weight: 700;
+            font-size: 16px;
             transition: all 0.15s ease;
-            color: #4A90E2;
+            color: #2D3A4F;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
             transform: translateY(0);
         }
 
@@ -110,19 +114,20 @@
             left: 0;
             right: 0;
             height: 50%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
             border-radius: 24px 24px 0 0;
             pointer-events: none;
         }
 
         .auth-tab-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3);
+            background: linear-gradient(180deg, #A0B0D0 0%, #8A9DC0 50%, #6A7FA8 100%);
         }
 
         .auth-tab-btn:active {
             transform: translateY(2px);
-            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
         }
 
         .auth-tab-btn.active {
@@ -130,6 +135,24 @@
             color: white;
             border-bottom: 3px solid #2A5F8F;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .auth-tabs-hint {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 16px;
+            padding: 0 40px;
+        }
+
+        .auth-tabs-hint p {
+            color: #E65100;
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+            border-radius: 8px;
+            border: 1px solid #FFCC80;
         }
 
         .auth-form {
@@ -303,30 +326,32 @@
             box-shadow: none;
         }
 
-        .home-btn-container {
-            text-align: center;
-            margin: 20px 0;
+        .back-btn {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 10;
         }
 
-        .home-btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background: white;
-            border: 2px solid #C7D2FE;
-            color: #6366F1;
-            text-decoration: none;
-            border-radius: 15px;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
         }
 
-        .home-btn:hover {
-            background: linear-gradient(135deg, #EEF2FF, #E0E7FF);
-            border-color: #6366F1;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        .back-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: white;
         }
     </style>
 </head>
@@ -334,12 +359,20 @@
 <body>
     <div class="login-container">
         <div class="login-header">
+            <a href="index.html" class="back-btn" title="Back to Draw">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </a>
             Login with Email
         </div>
 
         <div class="auth-tabs">
             <button type="button" class="auth-tab-btn active" onclick="showAuthForm('signin')">Sign In</button>
             <button type="button" class="auth-tab-btn" onclick="showAuthForm('signup')">Sign Up</button>
+        </div>
+        <div class="auth-tabs-hint">
+            <p>🐟 New? Click "Sign Up" first!</p>
         </div>
 
         <!-- Sign In Form -->
@@ -392,10 +425,6 @@
             <a href="#" onclick="showAuthForm('signin')">Back to Sign In</a>
         </form>
 
-        <div class="divider">
-            <span>or</span>
-        </div>
-
         <div id="g_id_signin"></div>
 
         <div id="loading" class="loading">
@@ -420,9 +449,7 @@
         </div>
     </div>
 
-    <div class="home-btn-container">
-        <a href="index.html" class="home-btn">Back To Draw</a>
-    </div>
+
 
     <!-- Load Google's auth2 -->
     <script src="src/js/footer-utils.js"></script>
@@ -435,6 +462,7 @@
     
     <script src="src/js/fish-utils.js"></script>
     <script src="src/js/fishtank-favorites.js"></script>
+    <script src="src/js/affiliate-tracking.js?v=1.0"></script>
     <script src="src/js/login.js"></script>
 </body>
 

@@ -70,11 +70,47 @@ class AuthUI {
     this.createLoginModal();
     this.createUserMenu();
     
+    // 绑定 Dashboard 下拉菜单事件
+    this.bindDashboardMenuEvents();
+    
     // 立即显示登录按钮（默认状态）
     this.showLoginButton();
     
     // 异步等待Supabase初始化并更新UI
     this.initializeAsync();
+  }
+  
+  /**
+   * 绑定 Dashboard 下拉菜单事件
+   */
+  bindDashboardMenuEvents() {
+    const dashboardDropdown = document.getElementById('nav-dashboard-btn');
+    if (!dashboardDropdown) return;
+    
+    const dropdownBtn = dashboardDropdown.querySelector('.dashboard-dropdown-btn');
+    const dropdownMenu = dashboardDropdown.querySelector('.dashboard-dropdown-menu');
+    
+    if (dropdownBtn && dropdownMenu) {
+      // 点击按钮切换下拉菜单
+      dropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dashboardDropdown.classList.toggle('open');
+      });
+      
+      // 点击菜单项时关闭下拉菜单
+      dropdownMenu.addEventListener('click', () => {
+        dashboardDropdown.classList.remove('open');
+      });
+      
+      // 点击外部关闭下拉菜单
+      document.addEventListener('click', (e) => {
+        if (!dashboardDropdown.contains(e.target)) {
+          dashboardDropdown.classList.remove('open');
+        }
+      });
+      
+      console.log('✅ Dashboard dropdown events bound');
+    }
   }
   
   /**
@@ -547,8 +583,10 @@ class AuthUI {
 
   /**
    * 显示登录模态框
+   * @param {string} customMessage - 可选的自定义提示文本
+   * @param {boolean} emphasize - 是否强调文本（加大加粗）
    */
-  showLoginModal() {
+  showLoginModal(customMessage = null, emphasize = false) {
     console.log('🔐 showLoginModal() called');
     console.log('Modal element:', this.modal);
     
@@ -568,6 +606,19 @@ class AuthUI {
     }
     
     if (this.modal) {
+      // 更新提示文本
+      const headerText = this.modal.querySelector('.auth-modal-header p');
+      if (headerText) {
+        headerText.textContent = customMessage || 'Choose your preferred sign-in method';
+        
+        // 根据 emphasize 参数添加或移除强调样式
+        if (emphasize) {
+          headerText.classList.add('emphasis');
+        } else {
+          headerText.classList.remove('emphasis');
+        }
+      }
+      
       console.log('Setting modal display to flex');
       this.modal.style.display = 'flex';
       document.body.style.overflow = 'hidden';
@@ -584,6 +635,19 @@ class AuthUI {
       this.modal.style.display = 'none';
       document.body.style.overflow = '';
     }
+    
+    // 🔧 修复：同时关闭 Fish Group Chat 提醒弹窗（动态创建的 .modal 弹窗）
+    const fishChatModals = document.querySelectorAll('.modal');
+    fishChatModals.forEach(modal => {
+      // 检查是否是 Fish Group Chat 提醒弹窗（包含 "Fish Group Chat" 文本）
+      if (modal.textContent && modal.textContent.includes('Fish Group Chat')) {
+        console.log('🔧 Closing Fish Group Chat reminder modal');
+        modal.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => {
+          modal.remove();
+        }, 300);
+      }
+    });
   }
 
   /**
@@ -878,6 +942,8 @@ class AuthUI {
     
     if (user) {
       console.log('✅ 用户已登录:', user.email);
+      // 🔧 修复：登录成功后关闭登录弹窗
+      this.hideLoginModal();
       // 已登录：显示用户信息并保存到localStorage
       await this.saveUserToLocalStorage(user);
       // 确保用户在数据库中存在
@@ -1400,11 +1466,14 @@ class AuthUI {
   }
 
   /**
-   * 更新 Test 按钮显示状态（仅管理员可见）
+   * 更新 Dashboard 下拉菜单显示状态
+   * - 管理员：显示所有三个入口（Admin Center, Affiliate Center, Test Center）
+   * - 推广者：仅显示 Affiliate Center
+   * - 普通用户：隐藏整个下拉菜单
    */
-  async updateTestButtonVisibility(user) {
+  async updateDashboardMenuVisibility(user) {
     try {
-      console.log('🔍 [Test Button] 开始检查管理员权限，用户:', user?.email || user?.id || '未提供');
+      console.log('🔍 [Dashboard] 开始检查权限，用户:', user?.email || user?.id || '未提供');
       
       // 等待 admin-auth.js 加载（最多等待5秒）
       let attempts = 0;
@@ -1416,62 +1485,143 @@ class AuthUI {
 
       // 检查 admin-auth.js 是否已加载
       if (!window.adminAuth) {
-        console.warn('⚠️ [Test Button] admin-auth.js not loaded after 5 seconds, hiding test button');
-        this.hideTestButton();
-        // 延迟重试一次
+        console.warn('⚠️ [Dashboard] admin-auth.js not loaded after 5 seconds, hiding dashboard menu');
+        this.hideDashboardMenu();
         setTimeout(() => {
           if (window.adminAuth) {
-            console.log('🔄 [Test Button] admin-auth.js 已加载，重试检查');
-            this.updateTestButtonVisibility(user);
+            console.log('🔄 [Dashboard] admin-auth.js 已加载，重试检查');
+            this.updateDashboardMenuVisibility(user);
           }
         }, 1000);
         return;
       }
 
-      console.log('✅ [Test Button] admin-auth.js 已加载，开始检查管理员权限');
+      console.log('✅ [Dashboard] admin-auth.js 已加载，开始检查权限');
       
-      // 检查管理员权限
+      // 检查管理员和推广者权限
       const isAdmin = await window.adminAuth.checkAdminAccess(user);
+      const isAffiliate = await window.adminAuth.checkAffiliateAccess(user);
       
-      console.log('🔐 [Test Button] 管理员权限检查结果:', isAdmin);
+      console.log('🔐 [Dashboard] 权限检查结果:', { isAdmin, isAffiliate });
       
       if (isAdmin) {
-        this.showTestButton();
-        console.log('✅ [Test Button] 管理员已确认，显示Test按钮');
+        // 管理员：显示 Admin Center, My Referrals (如果是推广者), Test Center
+        this.showDashboardMenu({ 
+          showAdminCenter: true, 
+          showAffiliateCenter: isAffiliate,    // 管理员如果是推广者，显示我的推广
+          showTestCenter: true 
+        });
+        console.log('✅ [Dashboard] 管理员已确认，显示完整Dashboard菜单');
+      } else if (isAffiliate) {
+        // 推广者：显示 My Referrals
+        this.showDashboardMenu({ 
+          showAdminCenter: false, 
+          showAffiliateCenter: true, 
+          showTestCenter: false 
+        });
+        console.log('✅ [Dashboard] 推广者已确认，显示我的推广入口');
       } else {
-        this.hideTestButton();
-        console.log('ℹ️ [Test Button] 非管理员，隐藏Test按钮');
+        // 普通用户（free）和未登录用户：隐藏 Dashboard 菜单
+        this.hideDashboardMenu();
+        console.log('ℹ️ [Dashboard] 普通用户或未登录，隐藏Dashboard菜单');
       }
     } catch (error) {
-      console.error('❌ [Test Button] 更新Test按钮显示状态失败:', error);
-      // 出错时默认隐藏
-      this.hideTestButton();
+      console.error('❌ [Dashboard] 更新Dashboard菜单显示状态失败:', error);
+      this.hideDashboardMenu();
     }
   }
 
   /**
-   * 显示 Test 按钮
+   * 显示 Dashboard 下拉菜单
+   * @param {Object} options - 显示选项
    */
-  showTestButton() {
+  showDashboardMenu(options = { 
+    showAdminCenter: true, 
+    showAffiliateCenter: true, 
+    showTestCenter: true 
+  }) {
+    const dashboardBtn = document.getElementById('nav-dashboard-btn');
+    if (dashboardBtn) {
+      dashboardBtn.style.setProperty('display', 'flex', 'important');
+      
+      // 更新下拉菜单项的显示状态
+      const adminCenterItem = dashboardBtn.querySelector('[data-menu="admin-center"]');
+      const affiliateCenterItem = dashboardBtn.querySelector('[data-menu="affiliate-center"]');
+      const testCenterItem = dashboardBtn.querySelector('[data-menu="test-center"]');
+      const affiliateDivider = dashboardBtn.querySelector('[data-menu="affiliate-divider"]');
+      const testDivider = dashboardBtn.querySelector('[data-menu="test-divider"]');
+      
+      // 隐藏已废弃的 affiliate-register 菜单项
+      const affiliateRegisterItem = dashboardBtn.querySelector('[data-menu="affiliate-register"]');
+      if (affiliateRegisterItem) {
+        affiliateRegisterItem.style.display = 'none';
+      }
+      
+      if (adminCenterItem) {
+        adminCenterItem.style.display = options.showAdminCenter ? 'flex' : 'none';
+      }
+      if (affiliateCenterItem) {
+        affiliateCenterItem.style.display = options.showAffiliateCenter ? 'flex' : 'none';
+      }
+      if (testCenterItem) {
+        testCenterItem.style.display = options.showTestCenter ? 'flex' : 'none';
+      }
+      // 分隔线显示逻辑
+      if (affiliateDivider) {
+        affiliateDivider.style.display = (options.showAdminCenter && options.showAffiliateCenter) ? 'block' : 'none';
+      }
+      if (testDivider) {
+        testDivider.style.display = (options.showAffiliateCenter && options.showTestCenter) ? 'block' : 'none';
+      }
+      
+      console.log('✅ [Dashboard] 菜单已显示:', options);
+    }
+    
+    // 兼容旧版 Test 按钮（如果存在）
     const testBtns = document.querySelectorAll('a[href="test-center.html"].game-btn-white, #nav-test-btn');
     testBtns.forEach(btn => {
-      // 使用!important覆盖CSS规则
-      btn.style.setProperty('display', 'flex', 'important');
-      console.log('✅ [Test Button] 按钮已显示:', btn.id || btn.href);
+      if (btn.id !== 'nav-dashboard-btn') {
+        btn.style.setProperty('display', 'none', 'important');
+      }
     });
-    console.log('✅ [Test Button] 找到', testBtns.length, '个Test按钮');
   }
 
   /**
-   * 隐藏 Test 按钮
+   * 隐藏 Dashboard 下拉菜单
    */
-  hideTestButton() {
+  hideDashboardMenu() {
+    const dashboardBtn = document.getElementById('nav-dashboard-btn');
+    if (dashboardBtn) {
+      dashboardBtn.style.setProperty('display', 'none', 'important');
+    }
+    
+    // 兼容旧版 Test 按钮
     const testBtns = document.querySelectorAll('a[href="test-center.html"].game-btn-white, #nav-test-btn');
     testBtns.forEach(btn => {
-      // 使用!important覆盖CSS规则
       btn.style.setProperty('display', 'none', 'important');
     });
-    console.log('ℹ️ [Test Button] Test按钮已隐藏');
+    console.log('ℹ️ [Dashboard] Dashboard菜单已隐藏');
+  }
+
+  /**
+   * 兼容旧版：更新 Test 按钮显示状态（调用新的Dashboard方法）
+   */
+  async updateTestButtonVisibility(user) {
+    return this.updateDashboardMenuVisibility(user);
+  }
+
+  /**
+   * 兼容旧版：显示 Test 按钮
+   */
+  showTestButton() {
+    this.showDashboardMenu({ showAdminCenter: true, showAffiliateCenter: true, showTestCenter: true });
+  }
+
+  /**
+   * 兼容旧版：隐藏 Test 按钮
+   */
+  hideTestButton() {
+    this.hideDashboardMenu();
   }
 
   /**

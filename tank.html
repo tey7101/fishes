@@ -616,6 +616,34 @@
             display: block !important;
             visibility: visible !important;
         }
+        
+        /* Mobile chat panel fix - prevent overflow */
+        @media (max-width: 768px) {
+            #chat-panel {
+                width: calc(100vw - 20px) !important;
+                max-width: 400px !important;
+                left: 10px !important;
+                right: 10px !important;
+            }
+            
+            #chat-panel.show {
+                right: 10px !important;
+                left: auto !important;
+            }
+            
+            /* Language selector fix - prevent overflow */
+            #language-selection-container {
+                flex-wrap: nowrap !important;
+                overflow: hidden !important;
+            }
+            
+            #user-language-select {
+                min-width: 80px !important;
+                max-width: 100px !important;
+                font-size: 12px !important;
+                padding: 4px 6px !important;
+            }
+        }
     </style>
     
     <!-- Meta Pixel Code -->

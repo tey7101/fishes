@@ -479,13 +479,18 @@ button.game-btn {
 .canvas-hint {
   position: absolute;
   top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 100%;
+  padding: 0 10px;
+  box-sizing: border-box;
   z-index: 2;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
   pointer-events: none;  /* 不阻挡鼠标事件 */
   color: rgba(139, 90, 43, 0.5);  /* 木质色调，半透明 */
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
@@ -552,17 +557,13 @@ button.game-btn {
 .game-probability.high {
   border-color: var(--game-green);
   color: #2E8B3A;
-  box-shadow: 
-    var(--shadow-btn),
-    0 0 20px rgba(76, 217, 100, 0.5);
+  box-shadow: var(--shadow-btn);
 }
 
 .game-probability.low {
   border-color: var(--game-red);
   color: #991F19;
-  box-shadow: 
-    var(--shadow-btn),
-    0 0 20px rgba(255, 59, 48, 0.5);
+  box-shadow: var(--shadow-btn);
 }
 
 /* ===== 工具栏 - 3D效果 ===== */

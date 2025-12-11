@@ -2197,7 +2197,7 @@ function createPaintOptions() {
     controlsContainer.style.gap = '8px';
     controlsContainer.style.alignItems = 'center';
     controlsContainer.style.justifyContent = 'center';
-    controlsContainer.style.marginTop = '8px';
+    controlsContainer.style.marginTop = '4px';
 
     // Line width container - moved to the front
     const widthContainer = document.createElement('div');

@@ -351,9 +351,14 @@ async function loadMemberTypes() {
         
         // 过滤套餐：
         // 1. 始终过滤掉 admin 计划
-        // 2. 如果不是测试用户，过滤掉测试套餐（test_plus, test_premium）
+        // 2. 始终过滤掉 affiliate 计划（内部使用）
+        // 3. 如果不是测试用户，过滤掉测试套餐（test_plus, test_premium）
         memberTypes = memberTypes.filter(type => {
             if (type.id === 'admin') return false;
+            if (type.id === 'affiliate') {
+                console.log(`🔒 隐藏 affiliate 套餐（内部使用）`);
+                return false;
+            }
             if (!isTestUser && type.id.startsWith('test_')) {
                 console.log(`🔒 隐藏测试套餐: ${type.id}（仅测试用户可见）`);
                 return false;

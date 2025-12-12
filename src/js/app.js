@@ -2511,8 +2511,9 @@ let isModelLoading = false;
 let modelLoadPromise = null;
 
 // Cache API 配置
-const ONNX_CACHE_NAME = 'onnx-model-cache-v1';
-const MODEL_URL = 'fish_doodle_classifier.onnx';
+const ONNX_CACHE_NAME = 'onnx-model-cache-v2'; // 更新版本以使用新的 CDN URL
+// 使用七牛云 CDN 加速模型加载
+const MODEL_URL = 'https://cdn.fishart.online/fishart_web/ONNX/fish_doodle_classifier.onnx';
 
 // 初始化 Cache API
 async function initModelCache() {

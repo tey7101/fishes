@@ -2554,17 +2554,21 @@ async function downloadWithProgress(url, onProgress) {
     }
     
     const contentLength = response.headers.get('content-length');
-    const total = contentLength ? parseInt(contentLength, 10) : 0;
+    // 如果服务器没有返回 Content-Length，使用已知的模型大小（约 43MB）
+    const KNOWN_MODEL_SIZE = 44700000; // ~43MB
+    const total = contentLength ? parseInt(contentLength, 10) : KNOWN_MODEL_SIZE;
     
-    if (!response.body || !total) {
-        // 无法获取进度，直接返回
-        console.log('📦 Downloading model (size unknown)...');
+    if (!response.body) {
+        // 不支持 ReadableStream，直接返回
+        console.log('📦 Downloading model (streaming not supported)...');
         return await response.arrayBuffer();
     }
     
     const reader = response.body.getReader();
     const chunks = [];
     let received = 0;
+    
+    console.log(`📥 Starting download, expected size: ${(total / 1024 / 1024).toFixed(1)} MB`);
     
     while (true) {
         const { done, value } = await reader.read();
@@ -2573,11 +2577,14 @@ async function downloadWithProgress(url, onProgress) {
         chunks.push(value);
         received += value.length;
         
-        if (onProgress && total) {
-            const percent = Math.round((received / total) * 100);
+        if (onProgress) {
+            // 使用实际接收的数据计算进度，但限制最大为 99%（直到完成）
+            const percent = Math.min(99, Math.round((received / total) * 100));
             onProgress(percent, received, total);
         }
     }
+    
+    console.log(`✅ Download complete: ${(received / 1024 / 1024).toFixed(1)} MB`);
     
     // 合并所有 chunks
     const arrayBuffer = new Uint8Array(received);

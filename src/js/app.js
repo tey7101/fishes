@@ -2527,18 +2527,91 @@ async function initModelCache() {
     return null;
 }
 
+// 带超时的 fetch
+async function fetchWithTimeout(url, timeout = 60000) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    
+    try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        return response;
+    } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+            throw new Error('Download timeout - please check your network connection');
+        }
+        throw error;
+    }
+}
+
+// 带进度的下载
+async function downloadWithProgress(url, onProgress) {
+    const response = await fetchWithTimeout(url, 120000); // 2分钟超时
+    
+    if (!response.ok) {
+        throw new Error(`Failed to fetch: ${response.status}`);
+    }
+    
+    const contentLength = response.headers.get('content-length');
+    const total = contentLength ? parseInt(contentLength, 10) : 0;
+    
+    if (!response.body || !total) {
+        // 无法获取进度，直接返回
+        console.log('📦 Downloading model (size unknown)...');
+        return await response.arrayBuffer();
+    }
+    
+    const reader = response.body.getReader();
+    const chunks = [];
+    let received = 0;
+    
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        chunks.push(value);
+        received += value.length;
+        
+        if (onProgress && total) {
+            const percent = Math.round((received / total) * 100);
+            onProgress(percent, received, total);
+        }
+    }
+    
+    // 合并所有 chunks
+    const arrayBuffer = new Uint8Array(received);
+    let position = 0;
+    for (const chunk of chunks) {
+        arrayBuffer.set(chunk, position);
+        position += chunk.length;
+    }
+    
+    return arrayBuffer.buffer;
+}
+
 // 从缓存加载模型，如果不存在则下载并缓存
 async function loadModelWithCache() {
     const cache = await initModelCache();
+    
+    // 更新进度条的辅助函数
+    const updateProgress = (percent, text) => {
+        const progressBar = document.getElementById('onnx-progress-bar');
+        const progressText = document.getElementById('onnx-progress-text');
+        if (progressBar) progressBar.style.width = percent + '%';
+        if (progressText) progressText.textContent = text || (percent + '%');
+    };
     
     if (cache) {
         // 检查缓存中是否有模型
         const cachedResponse = await cache.match(MODEL_URL);
         if (cachedResponse) {
             console.log('📦 Loading ONNX model from cache...');
+            updateProgress(50, 'Loading from cache...');
             try {
                 // 从缓存获取 ArrayBuffer
                 const arrayBuffer = await cachedResponse.arrayBuffer();
+                updateProgress(70, 'Initializing AI...');
                 // ONNX Runtime 支持从 ArrayBuffer 加载
                 const session = await window.ort.InferenceSession.create(arrayBuffer);
                 console.log('✅ ONNX model loaded from cache');
@@ -2552,27 +2625,47 @@ async function loadModelWithCache() {
         }
         
         // 缓存中没有或加载失败，从网络下载
-        console.log('⬇️ Downloading ONNX model (will be cached)...');
+        console.log('⬇️ Downloading ONNX model (~43MB, will be cached)...');
+        updateProgress(5, 'Downloading AI model...');
+        
         try {
-            const response = await fetch(MODEL_URL);
-            if (response.ok) {
-                // 将响应克隆并存入缓存
-                await cache.put(MODEL_URL, response.clone());
-                // 从响应获取 ArrayBuffer
-                const arrayBuffer = await response.arrayBuffer();
-                const session = await window.ort.InferenceSession.create(arrayBuffer);
-                console.log('✅ ONNX model downloaded and cached');
-                return session;
-            } else {
-                throw new Error(`Failed to fetch model: ${response.status}`);
+            const arrayBuffer = await downloadWithProgress(MODEL_URL, (percent, received, total) => {
+                const mb = (received / 1024 / 1024).toFixed(1);
+                const totalMb = (total / 1024 / 1024).toFixed(1);
+                console.log(`📥 Download progress: ${percent}% (${mb}/${totalMb} MB)`);
+                // 下载占 0-80%，初始化占 80-100%
+                updateProgress(Math.round(percent * 0.8), `Downloading ${mb}/${totalMb} MB`);
+            });
+            
+            console.log('✅ Download complete, caching...');
+            updateProgress(82, 'Caching model...');
+            
+            // 缓存模型
+            try {
+                const responseToCache = new Response(arrayBuffer.slice(0), {
+                    headers: { 'Content-Type': 'application/octet-stream' }
+                });
+                await cache.put(MODEL_URL, responseToCache);
+                console.log('✅ Model cached successfully');
+            } catch (cacheError) {
+                console.warn('Failed to cache model:', cacheError);
             }
+            
+            console.log('🔧 Initializing ONNX session...');
+            updateProgress(85, 'Initializing AI...');
+            
+            const session = await window.ort.InferenceSession.create(arrayBuffer);
+            console.log('✅ ONNX model downloaded and initialized');
+            return session;
         } catch (error) {
             console.error('Failed to download model:', error);
+            updateProgress(0, 'Download failed');
             throw error;
         }
     } else {
         // 不支持 Cache API，直接加载（浏览器会自动使用 HTTP 缓存）
         console.log('⚠️ Cache API not available, loading model directly...');
+        updateProgress(50, 'Loading AI model...');
         return await window.ort.InferenceSession.create(MODEL_URL);
     }
 }
@@ -2602,21 +2695,9 @@ async function loadFishModel() {
         progressContainer.style.display = 'block';
     }
     
-    // 模拟进度更新（因为 ONNX 加载没有实际的进度事件）
-    let progress = 0;
-    const progressInterval = setInterval(() => {
-        if (progress < 90) {
-            progress += Math.random() * 15; // 随机增加进度，让进度条更自然
-            if (progress > 90) progress = 90;
-            
-            if (progressBar) {
-                progressBar.style.width = progress + '%';
-            }
-            if (progressText) {
-                progressText.textContent = Math.round(progress) + '%';
-            }
-        }
-    }, 200);
+    // 初始化进度条
+    if (progressBar) progressBar.style.width = '0%';
+    if (progressText) progressText.textContent = 'Starting...';
     
     modelLoadPromise = (async () => {
         try {
@@ -2624,7 +2705,6 @@ async function loadFishModel() {
             console.log('✅ ONNX model loaded successfully');
             
             // 完成进度条
-            clearInterval(progressInterval);
             if (progressBar) {
                 progressBar.style.width = '100%';
             }

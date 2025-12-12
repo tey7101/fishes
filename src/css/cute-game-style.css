@@ -532,6 +532,7 @@ button.game-btn {
   transition: all 0.3s ease;
   animation: fadeInUp 0.5s ease;
   color: #333;
+  position: relative; /* 确保 ::before 伪元素相对于此元素定位 */
 }
 
 .game-probability.high {
@@ -909,8 +910,8 @@ button.game-btn {
   }
   
   .game-btn-big {
-    padding: 16px 36px;
-    font-size: 18px;
+    padding: 24px 54px;
+    font-size: 26px;
   }
   
   .game-btn-group {
@@ -994,21 +995,21 @@ button.game-btn {
   
   .game-btn {
     width: calc(50% - 5px) !important;  /* 每行2个，减去间隔 */
-    max-width: 180px !important;         /* 限制最大宽度 */
-    min-width: 140px !important;         /* 设置最小宽度 */
+    max-width: 145px !important;         /* 缩小20%: 180 -> 145 */
+    min-width: 112px !important;         /* 缩小20%: 140 -> 112 */
     display: flex !important;
-    padding: 10px 16px !important;       /* 调整内边距 */
-    font-size: 14px !important;          /* 调整字体大小 */
+    padding: 8px 12px !important;        /* 缩小20%: 10px 16px -> 8px 12px */
+    font-size: 11px !important;          /* 缩小20%: 14px -> 11px */
   }
   
   /* 确保 button 元素也应用相同的宽度 */
   button.game-btn {
     width: calc(50% - 5px) !important;
-    max-width: 180px !important;
-    min-width: 140px !important;
+    max-width: 145px !important;
+    min-width: 112px !important;
     display: flex !important;
-    padding: 10px 16px !important;
-    font-size: 14px !important;
+    padding: 8px 12px !important;
+    font-size: 11px !important;
   }
   
   /* 大按钮在移动端也居中 */

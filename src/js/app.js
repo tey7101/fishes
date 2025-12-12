@@ -4,6 +4,7 @@ const ctx = canvas.getContext('2d', { willReadFrequently: true }); // 性能优�
 ctx.lineWidth = 6; // Make lines thicker for better visibility
 let drawing = false;
 let canvasRect = null; // Cache canvas rect to prevent layout thrashing
+let isNotFishModalShowing = false; // 防止"不是鱼"弹窗重复显示
 
 // ===== 画布提示文字控制 =====
 const canvasHint = document.getElementById('canvas-hint');
@@ -324,6 +325,7 @@ function showModal(html, onClose) {
     modal.appendChild(modalContent);
     
     // 绑定关闭按钮事件
+    let isClosing = false;
     setTimeout(() => {
         const closeBtn = modalContent.querySelector('.modal-close-btn');
         if (closeBtn) {
@@ -334,7 +336,10 @@ function showModal(html, onClose) {
     }, 0);
     
     function close() {
+        if (isClosing) return; // Prevent double-close
+        isClosing = true;
         modal.style.animation = 'fadeOut 0.3s ease';
+        modal.style.pointerEvents = 'none'; // Disable clicks during animation
         setTimeout(() => {
             if (modal.parentNode) {
                 document.body.removeChild(modal);
@@ -1351,83 +1356,35 @@ async function submitFish(artist, needsModeration = false, fishName = null, pers
 }
 
 swimBtn.addEventListener('click', async () => {
-    // 检查登录状态
-    const isLoggedIn = window.supabaseAuth ? await window.supabaseAuth.isLoggedIn() : false;
-    
-    if (!isLoggedIn) {
-        // 未登录：保存画布数据到sessionStorage
-        const canvasData = canvas.toDataURL('image/png');
-        sessionStorage.setItem('pendingFishCanvas', canvasData);
-        sessionStorage.setItem('pendingFishSubmit', 'true');
-        
-        // 🔧 修复：设置登录后重定向回当前页面，以便处理画布数据
-        // 不设置loginRedirect，让用户登录后回到画鱼页面完成提交流程
-        localStorage.removeItem('loginRedirect'); // 确保清除任何现有的重定向
-        
-        // 显示登录弹窗（带自定义提示文本，加大加粗）
-        if (window.authUI && window.authUI.showLoginModal) {
-            window.authUI.showLoginModal('Your fish is saved! Sign in to make it swim.', true);
-        } else {
-            showUserAlert({
-                type: 'warning',
-                title: 'Login Required',
-                message: 'Please refresh the page and try again, or check if the login function is loading properly.',
-                buttons: [{ text: 'OK', action: 'close' }]
-            });
+    // 首先检查ONNX模型是否已加载（优先于其他检查）
+    if (!ortSession) {
+        // 在相似度组件中显示等待AI加载的提示
+        const probDiv = document.getElementById('fish-probability');
+        if (probDiv) {
+            probDiv.innerHTML = `
+                <span>⏳</span>
+                <span>AI is loading, please wait...</span>
+            `;
+            probDiv.className = 'game-probability low';
+            probDiv.style.display = 'inline-flex';
+            probDiv.style.opacity = '1';
         }
-        return; // 中断流程
+        return; // 中断流程，等待AI加载完成
     }
     
-    // 已登录：继续现有的鱼检测和提交流程
-    // Check fish validity for warning purposes
+    // 第二步：检查鱼的相似度（优先于登录检查）
     const isFish = await verifyFishDoodle(canvas);
     lastFishCheck = isFish;
     showFishWarning(!isFish);
     
-    // Get saved artist name or user profile name or use Anonymous
-    const savedArtist = localStorage.getItem('artistName');
-    let defaultName = (savedArtist && savedArtist !== 'Anonymous') ? savedArtist : 'Anonymous';
-    let defaultUserInfo = localStorage.getItem('userInfo') || '';
-    
-    // Try to get user profile name and about_me if logged in
-    if (window.supabaseAuth) {
-        try {
-            const user = await window.supabaseAuth.getUser();
-            if (user) {
-                const backendUrl = window.BACKEND_URL || '';
-                const userId = user.id;
-                const profileResponse = await fetch(`${backendUrl}/api/profile/${encodeURIComponent(userId)}`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('userToken')}`
-                    }
-                });
-                
-                if (profileResponse.ok) {
-                    const profileData = await profileResponse.json();
-                    if (profileData.user) {
-                        if (profileData.user.nick_name) {
-                            defaultName = profileData.user.nick_name;
-                        }
-                        // Load about_me as default value for user-info
-                        if (profileData.user.about_me) {
-                            defaultUserInfo = profileData.user.about_me;
-                        }
-                    }
-                }
-            }
-        } catch (error) {
-            console.log('Could not fetch user profile, using saved/default values:', error);
-        }
-    }
-    
-    // 移除概率低时的蒙板提示，直接允许提交
-    // Show different modal based on fish validity
-    if (false && !isFish) {
-        // Show encouragement modal for low-scoring fish - no submission (Fish Group Chat style)
+    // 如果不是鱼，显示提示弹窗，不进行登录检查
+    if (!isFish && !isNotFishModalShowing) {
+        // 防止弹窗重复显示
+        isNotFishModalShowing = true;
+        // Show fun encouragement modal for low-scoring fish - no submission
         const notFishModal = `
             <div class="modal-title-banner">
-                <h2>⚠️ Not a Fish Detected</h2>
+                <h2>🤔 Hmm, Is That a Fish?</h2>
             </div>
             <button class="modal-close-btn" aria-label="Close">&times;</button>
             <div class="modal-content-area" style="text-align: center; padding: 40px; padding-top: 32px;">
@@ -1479,7 +1436,7 @@ swimBtn.addEventListener('click', async () => {
                     line-height: 1.6;
                     padding: 0 10px;
                 ">
-                    The AI couldn't recognize fish features. Please try:
+                    That doesn't look quite like a fish yet! 🎨 Let's make it more fishy:
                 </p>
                 
                 <!-- Tips Card -->
@@ -1529,8 +1486,8 @@ swimBtn.addEventListener('click', async () => {
                         padding: 16px 28px;
                         border: none;
                         border-radius: 24px;
-                        background: linear-gradient(180deg, #FFB340 0%, #FF9500 50%, #E67E00 100%);
-                        border-bottom: 3px solid #CC6F00;
+                        background: linear-gradient(180deg, #FF9500 0%, #FF8800 50%, #E67700 100%);
+                        border-bottom: 3px solid #CC6600;
                         color: white;
                         font-size: 18px;
                         font-weight: 700;
@@ -1548,61 +1505,97 @@ swimBtn.addEventListener('click', async () => {
             </div>
         `;
         
-        showModal(notFishModal, () => { });
+        const { close } = showModal(notFishModal, () => {
+            isNotFishModalShowing = false;
+        });
         
-        // Add button interactions
+        // Add button event listeners
         setTimeout(() => {
             const tryAgainBtn = document.getElementById('try-again-fish');
             const cancelBtn = document.getElementById('cancel-fish');
             
             if (tryAgainBtn) {
-                tryAgainBtn.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 6px 0 rgba(0, 0, 0, 0.25)';
+                tryAgainBtn.addEventListener('click', () => {
+                    close();
                 });
-                tryAgainBtn.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = '0 4px 0 rgba(0, 0, 0, 0.25)';
-                });
-                tryAgainBtn.addEventListener('mousedown', function() {
-                    this.style.transform = 'translateY(2px)';
-                    this.style.boxShadow = '0 2px 0 rgba(0, 0, 0, 0.25)';
-                });
-                tryAgainBtn.addEventListener('mouseup', function() {
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 6px 0 rgba(0, 0, 0, 0.25)';
-                });
-                tryAgainBtn.onclick = () => {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    document.querySelector('div[style*="z-index: 9999"]')?.remove();
-                };
             }
-            
             if (cancelBtn) {
-                cancelBtn.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 6px 0 rgba(0, 0, 0, 0.25)';
+                cancelBtn.addEventListener('click', () => {
+                    close();
                 });
-                cancelBtn.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = '0 4px 0 rgba(0, 0, 0, 0.25)';
-                });
-                cancelBtn.addEventListener('mousedown', function() {
-                    this.style.transform = 'translateY(2px)';
-                    this.style.boxShadow = '0 2px 0 rgba(0, 0, 0, 0.25)';
-                });
-                cancelBtn.addEventListener('mouseup', function() {
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 6px 0 rgba(0, 0, 0, 0.25)';
-                });
-                cancelBtn.onclick = () => {
-                    document.querySelector('div[style*="z-index: 9999"]')?.remove();
-                };
             }
-        }, 100);
+        }, 0);
         
-        return; // 不继续执行提交流程
-    } else {
+        return; // 中断流程，等待用户修改画作
+    }
+    
+    // 第三步：检查登录状态（鱼相似度合格后）
+    const isLoggedIn = window.supabaseAuth ? await window.supabaseAuth.isLoggedIn() : false;
+    
+    if (!isLoggedIn) {
+        // 未登录：保存画布数据到sessionStorage
+        const canvasData = canvas.toDataURL('image/png');
+        sessionStorage.setItem('pendingFishCanvas', canvasData);
+        sessionStorage.setItem('pendingFishSubmit', 'true');
+        
+        // 🔧 修复：设置登录后重定向回当前页面，以便处理画布数据
+        // 不设置loginRedirect，让用户登录后回到画鱼页面完成提交流程
+        localStorage.removeItem('loginRedirect'); // 确保清除任何现有的重定向
+        
+        // 显示登录弹窗（带自定义提示文本，加大加粗）
+        if (window.authUI && window.authUI.showLoginModal) {
+            window.authUI.showLoginModal('Your fish is saved! Sign in to make it swim.', true);
+        } else {
+            showUserAlert({
+                type: 'warning',
+                title: 'Login Required',
+                message: 'Please refresh the page and try again, or check if the login function is loading properly.',
+                buttons: [{ text: 'OK', action: 'close' }]
+            });
+        }
+        return; // 中断流程
+    }
+    
+    // 已登录且鱼相似度合格：继续提交流程
+    {
+        // 只有在是鱼的情况下才获取用户资料（用于预填表单）
+        // Get saved artist name or user profile name or use Anonymous
+        const savedArtist = localStorage.getItem('artistName');
+        let defaultName = (savedArtist && savedArtist !== 'Anonymous') ? savedArtist : 'Anonymous';
+        let defaultUserInfo = localStorage.getItem('userInfo') || '';
+        
+        // Try to get user profile name and about_me if logged in
+        if (window.supabaseAuth) {
+            try {
+                const user = await window.supabaseAuth.getUser();
+                if (user) {
+                    const backendUrl = window.BACKEND_URL || '';
+                    const userId = user.id;
+                    const profileResponse = await fetch(`${backendUrl}/api/profile/${encodeURIComponent(userId)}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('userToken')}`
+                        }
+                    });
+                    
+                    if (profileResponse.ok) {
+                        const profileData = await profileResponse.json();
+                        if (profileData.user) {
+                            if (profileData.user.nick_name) {
+                                defaultName = profileData.user.nick_name;
+                            }
+                            // Load about_me as default value for user-info
+                            if (profileData.user.about_me) {
+                                defaultUserInfo = profileData.user.about_me;
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('Could not fetch user profile, using saved/default values:', error);
+            }
+        }
+        
         // Show normal submission modal for good fish with fish name and personality
         showModal(`<div class="modal-title-banner">
             <h2>🐟 Name Your Fish!</h2>
@@ -2212,9 +2205,21 @@ function createPaintOptions() {
     }
     
     const widthLabel = document.createElement('span');
-    widthLabel.textContent = 'Size:';
+    widthLabel.textContent = 'Brush Size:';
     widthLabel.style.fontSize = '16px';
     widthContainer.appendChild(widthLabel);
+    
+    // Minus button
+    const minusBtn = document.createElement('button');
+    minusBtn.textContent = '−';
+    minusBtn.style.cssText = 'width: 22px; height: 22px; border: none; background: #6366F1; color: white; border-radius: 4px; cursor: pointer; font-size: 22px; font-weight: bold; display: flex; align-items: center; justify-content: center; line-height: 1;';
+    minusBtn.onclick = () => {
+        if (currentLineWidth > 1) {
+            currentLineWidth = parseInt(currentLineWidth) - 1;
+            widthSlider.value = currentLineWidth;
+        }
+    };
+    widthContainer.appendChild(minusBtn);
     
     const widthSlider = document.createElement('input');
     widthSlider.type = 'range';
@@ -2226,6 +2231,19 @@ function createPaintOptions() {
         currentLineWidth = widthSlider.value;
     };
     widthContainer.appendChild(widthSlider);
+    
+    // Plus button
+    const plusBtn = document.createElement('button');
+    plusBtn.textContent = '+';
+    plusBtn.style.cssText = 'width: 22px; height: 22px; border: none; background: #6366F1; color: white; border-radius: 4px; cursor: pointer; font-size: 22px; font-weight: bold; display: flex; align-items: center; justify-content: center; line-height: 1;';
+    plusBtn.onclick = () => {
+        if (currentLineWidth < 20) {
+            currentLineWidth = parseInt(currentLineWidth) + 1;
+            widthSlider.value = currentLineWidth;
+        }
+    };
+    widthContainer.appendChild(plusBtn);
+    
     controlsContainer.appendChild(widthContainer);
 
     // Eraser
@@ -2621,6 +2639,12 @@ async function loadFishModel() {
                 }
             }, 500);
             
+            // 清除fish-probability组件中的"AI is loading"提示
+            const probDiv = document.getElementById('fish-probability');
+            if (probDiv && probDiv.textContent.includes('AI is loading')) {
+                probDiv.style.display = 'none';
+            }
+            
             return ortSession;
         } catch (error) {
             console.error('Failed to load fish model:', error);
@@ -2984,50 +3008,15 @@ async function setupAuthListener() {
                     lastFishCheck = isFish;
                     showFishWarning(!isFish);
                     
-                    // 获取保存的艺术家名称或用户资料名称
-                    const savedArtist = localStorage.getItem('artistName');
-                    let defaultName = (savedArtist && savedArtist !== 'Anonymous') ? savedArtist : 'Anonymous';
-                    let defaultUserInfo = localStorage.getItem('userInfo') || '';
-                    
-                    // Try to get user profile name and about_me if logged in
-                    if (window.supabaseAuth) {
-                        try {
-                            const user = await window.supabaseAuth.getUser();
-                            if (user) {
-                                const backendUrl = window.BACKEND_URL || '';
-                                const userId = user.id;
-                                const profileResponse = await fetch(`${backendUrl}/api/profile/${encodeURIComponent(userId)}`, {
-                                    method: 'GET',
-                                    headers: {
-                                        'Authorization': `Bearer ${localStorage.getItem('userToken')}`
-                                    }
-                                });
-                                
-                                if (profileResponse.ok) {
-                                    const profileData = await profileResponse.json();
-                                    if (profileData.user) {
-                                        if (profileData.user.nick_name) {
-                                            defaultName = profileData.user.nick_name;
-                                        }
-                                        // Load about_me as default value for user-info
-                                        if (profileData.user.about_me) {
-                                            defaultUserInfo = profileData.user.about_me;
-                                        }
-                                    }
-                                }
-                            }
-                        } catch (error) {
-                            console.log('Could not fetch user profile, using saved/default values:', error);
-                        }
-                    }
-                    
-                    // 移除概率低时的蒙板提示，直接允许提交
-                    // 显示命名modal
-                    if (false && !isFish) {
+                    // Re-enabled fish probability check with fun messaging
+                    // 如果不是鱼，立即显示弹窗，不需要等待获取用户资料
+                    if (!isFish && !isNotFishModalShowing) {
+                        // 防止弹窗重复显示
+                        isNotFishModalShowing = true;
                         // 显示警告modal（低分鱼）- Fish Group Chat style
                         const notFishModal = `
                             <div class="modal-title-banner">
-                                <h2>⚠️ Not a Fish Detected</h2>
+                                <h2>🤔 Hmm, Is That a Fish?</h2>
                             </div>
                             <button class="modal-close-btn" aria-label="Close">&times;</button>
                             <div class="modal-content-area" style="text-align: center; padding: 40px; padding-top: 32px;">
@@ -3079,7 +3068,7 @@ async function setupAuthListener() {
                                     line-height: 1.6;
                                     padding: 0 10px;
                                 ">
-                                    The AI couldn't recognize fish features. Please try:
+                                    That doesn't look quite like a fish yet! 🎨 Let's make it more fishy:
                                 </p>
                                 
                                 <!-- Tips Card -->
@@ -3148,7 +3137,7 @@ async function setupAuthListener() {
                             </div>
                         `;
                         
-                        showModal(notFishModal, () => { });
+                        showModal(notFishModal, () => { isNotFishModalShowing = false; });
                         
                         // Add button interactions
                         setTimeout(() => {
@@ -3174,6 +3163,7 @@ async function setupAuthListener() {
                                 });
                                 tryAgainBtn.onclick = () => {
                                     ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                    isNotFishModalShowing = false; // 重置标志
                                     document.querySelector('div[style*="z-index: 9999"]')?.remove();
                                 };
                             }
@@ -3196,11 +3186,50 @@ async function setupAuthListener() {
                                     this.style.boxShadow = '0 6px 0 rgba(0, 0, 0, 0.25)';
                                 });
                                 cancelBtn.onclick = () => {
+                                    isNotFishModalShowing = false; // 重置标志
                                     document.querySelector('div[style*="z-index: 9999"]')?.remove();
                                 };
                             }
                         }, 100);
                     } else {
+                        // 只有在是鱼的情况下才获取用户资料（用于预填表单）
+                        // 获取保存的艺术家名称或用户资料名称
+                        const savedArtist = localStorage.getItem('artistName');
+                        let defaultName = (savedArtist && savedArtist !== 'Anonymous') ? savedArtist : 'Anonymous';
+                        let defaultUserInfo = localStorage.getItem('userInfo') || '';
+                        
+                        // Try to get user profile name and about_me if logged in
+                        if (window.supabaseAuth) {
+                            try {
+                                const user = await window.supabaseAuth.getUser();
+                                if (user) {
+                                    const backendUrl = window.BACKEND_URL || '';
+                                    const userId = user.id;
+                                    const profileResponse = await fetch(`${backendUrl}/api/profile/${encodeURIComponent(userId)}`, {
+                                        method: 'GET',
+                                        headers: {
+                                            'Authorization': `Bearer ${localStorage.getItem('userToken')}`
+                                        }
+                                    });
+                                    
+                                    if (profileResponse.ok) {
+                                        const profileData = await profileResponse.json();
+                                        if (profileData.user) {
+                                            if (profileData.user.nick_name) {
+                                                defaultName = profileData.user.nick_name;
+                                            }
+                                            // Load about_me as default value for user-info
+                                            if (profileData.user.about_me) {
+                                                defaultUserInfo = profileData.user.about_me;
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (error) {
+                                console.log('Could not fetch user profile, using saved/default values:', error);
+                            }
+                        }
+                        
                         // 显示命名modal（好鱼）
                         showModal(`<div class="modal-title-banner">
                             <h2>🐟 Name Your Fish!</h2>

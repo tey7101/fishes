@@ -809,9 +809,23 @@ let favoritesData = [];
 async function loadUserFishCategories() {
     try {
         console.log('🐠 loadUserFishCategories: Starting...');
-        const user = await window.supabaseAuth.getCurrentUser();
+        
+        // Wait for auth to be ready if needed
+        let user = await window.supabaseAuth?.getCurrentUser();
+        
+        // If no user yet, wait a bit and retry (auth might still be initializing)
+        if (!user && window.supabaseAuth) {
+            console.log('🐠 loadUserFishCategories: No user yet, waiting for auth...');
+            let waitAttempts = 0;
+            while (!user && waitAttempts < 20) {
+                await new Promise(resolve => setTimeout(resolve, 200));
+                user = await window.supabaseAuth.getCurrentUser();
+                waitAttempts++;
+            }
+        }
+        
         if (!user) {
-            console.log('🐠 loadUserFishCategories: No user, skipping');
+            console.log('🐠 loadUserFishCategories: No user after waiting, skipping');
             return;
         }
         
@@ -1080,8 +1094,18 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // Load data based on initial category
     if (initialCategory === 'favorites') {
+        // If favoritesData is empty, try to reload it
+        if (favoritesData.length === 0) {
+            console.log('🐠 Favorites data empty, retrying load...');
+            await loadUserFishCategories();
+        }
         displayCategoryFish(favoritesData);
     } else if (initialCategory === 'my-fish') {
+        // If myFishData is empty, try to reload it
+        if (myFishData.length === 0) {
+            console.log('🐠 My fish data empty, retrying load...');
+            await loadUserFishCategories();
+        }
         displayCategoryFish(myFishData);
     } else {
         // Load rank data (all fish)

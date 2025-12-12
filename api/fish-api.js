@@ -27,7 +27,7 @@ const path = require('path');
 let listHandler, submitHandler, myTankHandler, favoriteHandler, unfavoriteHandler, uploadHandler;
 let updateInfoHandler, deleteHandler, updateChatSettingsHandler, getBattleFishHandler, communityChatHandler;
 let groupChatHandler, monologueHandler, chatUsageHandler, moderationCheckHandler, createHandler;
-let userChatMessageHandler;
+let userChatMessageHandler, migrateUserHandler;
 
 function loadHandler(relativePath) {
   try {
@@ -78,6 +78,7 @@ module.exports = async function handler(req, res) {
     moderationCheckHandler = loadHandler('../lib/api_handlers/fish/moderation/check.js');
     createHandler = loadHandler('../lib/api_handlers/fish/create.js');
     userChatMessageHandler = loadHandler('../lib/api_handlers/fish/chat/user-message.js');
+    migrateUserHandler = loadHandler('../lib/api_handlers/fish/migrate-user.js');
   }
   
   // 路由分发
@@ -145,6 +146,13 @@ module.exports = async function handler(req, res) {
         }
         console.log('[Fish API] ✅ userChatMessageHandler loaded, calling...');
         return await userChatMessageHandler(req, res);
+      case 'migrate-user':
+        console.log('[Fish API] 路由到 migrate-user handler');
+        if (!migrateUserHandler) {
+          console.error('[Fish API] ❌ migrateUserHandler not loaded!');
+          return res.status(500).json({ error: 'Migrate user handler not available' });
+        }
+        return await migrateUserHandler(req, res);
       default:
         return res.status(400).json({ 
           error: 'Invalid action',

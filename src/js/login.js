@@ -149,7 +149,18 @@ async function checkIfAlreadyLoggedIn() {
     const user = await window.supabaseAuth.getCurrentUser();
     
     if (user) {
-      // User is already logged in, show the "already logged in" section
+      // 检查是否为匿名用户 - 匿名用户允许继续登录/注册
+      const isAnonymous = window.supabaseAuth.isAnonymousUser?.(user) || 
+                          user.is_anonymous === true || 
+                          (!user.email && (!user.identities || user.identities.length === 0));
+      
+      if (isAnonymous) {
+        console.log('👤 匿名用户访问登录页面，允许登录/注册');
+        // 匿名用户可以继续登录/注册，不显示 "already logged in"
+        return false;
+      }
+      
+      // 正式用户已登录，显示 "already logged in" section
       showAlreadyLoggedInUI(user);
       return true;
     }

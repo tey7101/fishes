@@ -228,7 +228,6 @@ async function createTestUser(userId) {
           fish_talk: false
           is_banned: false
           reputation_score: 0
-          total_fish_created: 0
           total_votes_received: 0
           created_at: "now()"
         }

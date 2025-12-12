@@ -152,6 +152,13 @@ async function signInWithOAuth(provider) {
   }
   
   try {
+    // 🔧 在 OAuth 登录前，检查当前是否为匿名用户，保存其 ID 用于数据迁移
+    const currentUser = await getCurrentUser();
+    if (currentUser && isAnonymousUser(currentUser)) {
+      console.log('🔄 检测到匿名用户，保存 ID 用于数据迁移:', currentUser.id);
+      localStorage.setItem('pendingAnonymousUserId', currentUser.id);
+    }
+    
     // 获取正确的回调 URL
     // 在生产环境，使用当前域名；在开发环境，使用 localhost
     const isLocalhost = window.location.hostname === 'localhost' || 
@@ -249,7 +256,7 @@ function onAuthStateChange(callback) {
     return { data: { subscription: { unsubscribe: () => {} } } };
   }
   
-  const { data } = supabase.auth.onAuthStateChange((event, session) => {
+  const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
     console.log('🔔 认证状态变化:', event, session?.user?.email);
     
     // 更新缓存
@@ -264,6 +271,27 @@ function onAuthStateChange(callback) {
         window.authCache.syncLegacyStorage(session.user, session);
       } else if (event === 'SIGNED_OUT') {
         window.authCache.clear();
+      }
+    }
+    
+    // 🔧 检查是否需要迁移匿名用户数据
+    if (event === 'SIGNED_IN' && session?.user) {
+      const pendingAnonymousUserId = localStorage.getItem('pendingAnonymousUserId');
+      if (pendingAnonymousUserId && pendingAnonymousUserId !== session.user.id) {
+        console.log('🔄 检测到需要迁移匿名用户数据');
+        console.log('  匿名用户 ID:', pendingAnonymousUserId);
+        console.log('  新用户 ID:', session.user.id);
+        
+        // 执行数据迁移
+        try {
+          await migrateAnonymousUserData(pendingAnonymousUserId, session.user.id);
+          console.log('✅ 匿名用户数据迁移完成');
+        } catch (error) {
+          console.error('❌ 匿名用户数据迁移失败:', error);
+        }
+        
+        // 清除待迁移的匿名用户 ID
+        localStorage.removeItem('pendingAnonymousUserId');
       }
     }
     
@@ -328,9 +356,205 @@ async function getAccessToken() {
   return session?.access_token || null;
 }
 
+/**
+ * 匿名登录
+ * 创建一个临时匿名用户，无需邮箱或密码
+ * @returns {Promise<{data, error}>}
+ */
+async function signInAnonymously() {
+  if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
+  
+  try {
+    const { data, error } = await supabase.auth.signInAnonymously();
+    
+    if (error) throw error;
+    
+    console.log('✅ Anonymous login successful:', data.user?.id);
+    return { data, error: null };
+  } catch (error) {
+    console.error('❌ Anonymous login failed:', error.message);
+    return { data: null, error };
+  }
+}
+
+/**
+ * 升级匿名账号 - 邮箱方式
+ * @param {string} email - 邮箱
+ * @param {string} password - 密码
+ * @returns {Promise<{data, error}>}
+ */
+async function upgradeWithEmail(email, password) {
+  if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
+  
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+      return { data: null, error: new Error('User not logged in') };
+    }
+    
+    if (!isAnonymousUser(currentUser)) {
+      return { data: null, error: new Error('Current user is not anonymous') };
+    }
+    
+    const { data, error } = await supabase.auth.updateUser({
+      email: email,
+      password: password
+    });
+    
+    if (error) {
+      if (error.message.includes('already registered') || 
+          error.message.includes('already exists') ||
+          error.message.includes('duplicate')) {
+        throw new Error('This email is already registered');
+      }
+      throw error;
+    }
+    
+    console.log('✅ Account upgraded (email):', email);
+    return { data, error: null };
+  } catch (error) {
+    console.error('❌ Account upgrade failed:', error.message);
+    return { data: null, error };
+  }
+}
+
+/**
+ * 升级匿名账号 - OAuth 方式
+ * @param {string} provider - OAuth 提供商
+ * @returns {Promise<{data, error}>}
+ */
+async function upgradeWithOAuth(provider) {
+  if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
+  
+  const validProviders = ['google', 'twitter', 'facebook', 'discord', 'apple', 'reddit'];
+  if (!validProviders.includes(provider)) {
+    return { data: null, error: new Error(`Unsupported provider: ${provider}`) };
+  }
+  
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+      return { data: null, error: new Error('User not logged in') };
+    }
+    
+    if (!isAnonymousUser(currentUser)) {
+      return { data: null, error: new Error('Current user is not anonymous') };
+    }
+    
+    const isLocalhost = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1';
+    const redirectOrigin = isLocalhost ? 'http://localhost:3000' : window.location.origin;
+    const redirectTo = `${redirectOrigin}/index.html`;
+    
+    const { data, error } = await supabase.auth.linkIdentity({
+      provider: provider,
+      options: { redirectTo: redirectTo }
+    });
+    
+    if (error) throw error;
+    
+    console.log(`✅ Upgrading with ${provider}...`);
+    return { data, error: null };
+  } catch (error) {
+    console.error(`❌ ${provider} upgrade failed:`, error.message);
+    return { data: null, error };
+  }
+}
+
 // ====================================
 // 辅助函数
 // ====================================
+
+/**
+ * 检查用户是否为匿名用户
+ * @param {Object} user - 用户对象
+ * @returns {boolean}
+ */
+function isAnonymousUser(user) {
+  if (!user) return false;
+  return user.is_anonymous === true || 
+         (!user.email && (!user.identities || user.identities.length === 0));
+}
+
+/**
+ * 迁移匿名用户数据到新用户
+ * 当匿名用户通过 OAuth 登录后，将其创建的鱼迁移到新账号
+ * @param {string} anonymousUserId - 匿名用户 ID
+ * @param {string} newUserId - 新用户 ID
+ * @returns {Promise<void>}
+ */
+async function migrateAnonymousUserData(anonymousUserId, newUserId) {
+  if (!anonymousUserId || !newUserId) {
+    console.warn('⚠️ 迁移数据失败：缺少用户 ID');
+    return;
+  }
+  
+  if (anonymousUserId === newUserId) {
+    console.log('ℹ️ 用户 ID 相同，无需迁移');
+    return;
+  }
+  
+  console.log('🔄 开始迁移匿名用户数据...');
+  console.log('  从:', anonymousUserId);
+  console.log('  到:', newUserId);
+  
+  try {
+    // 调用后端 API 迁移鱼数据
+    const response = await fetch(`${window.BACKEND_URL || ''}/api/fish-api?action=migrate-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        fromUserId: anonymousUserId,
+        toUserId: newUserId
+      })
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`迁移 API 返回错误: ${response.status} - ${errorText}`);
+    }
+    
+    const result = await response.json();
+    console.log('✅ 数据迁移结果:', result);
+    
+    if (result.success) {
+      console.log(`✅ 成功迁移 ${result.migratedCount || 0} 条鱼数据`);
+    } else {
+      console.warn('⚠️ 迁移可能未完全成功:', result.message);
+    }
+  } catch (error) {
+    console.error('❌ 数据迁移失败:', error);
+    // 不抛出错误，避免影响登录流程
+  }
+}
+
+/**
+ * 获取用户显示信息
+ * @param {Object} user - 用户对象
+ * @returns {Object} { name, isAnonymous, upgradePrompt }
+ */
+function getUserDisplayInfo(user) {
+  if (!user) {
+    return { name: 'Not logged in', isAnonymous: false, upgradePrompt: false };
+  }
+  
+  const isAnon = isAnonymousUser(user);
+  
+  if (isAnon) {
+    // 匿名用户显示 User+ID后4位
+    const shortId = user.id ? user.id.slice(-4) : '0000';
+    return { name: `User${shortId}`, isAnonymous: true, upgradePrompt: true };
+  }
+  
+  const name = user.user_metadata?.name || 
+               user.user_metadata?.nick_name ||
+               user.email?.split('@')[0] || 
+               'User';
+  
+  return { name: name, isAnonymous: false, upgradePrompt: false };
+}
 
 /**
  * 检查用户是否已登录
@@ -396,6 +620,7 @@ window.supabaseAuth = {
   signUp,
   signIn,
   signInWithOAuth,
+  signInAnonymously,
   signOut,
   getCurrentUser,
   getUser: getCurrentUser, // 别名，兼容性
@@ -405,8 +630,14 @@ window.supabaseAuth = {
   updatePassword,
   getAccessToken,
   
+  // 账号升级函数
+  upgradeWithEmail,
+  upgradeWithOAuth,
+  
   // 辅助函数
   isLoggedIn,
+  isAnonymousUser,
+  getUserDisplayInfo,
   requireAuth,
   getUserDisplayName
 };

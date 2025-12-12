@@ -354,6 +354,15 @@
   border-bottom-color: #5865F2;
 }
 
+.oauth-btn-email {
+  color: #4A90E2;
+}
+
+.oauth-btn-email:hover {
+  background: linear-gradient(180deg, #F8F9FF 0%, #E8EBFF 50%, #D8DBFF 100%);
+  border-bottom-color: #4A90E2;
+}
+
 .oauth-btn-apple {
   color: #000000;
 }

@@ -32,7 +32,9 @@
         "handle_dialog",
         "new_page",
         "select_page",
-        "take_screenshot"
+        "take_screenshot",
+        "get_console_message",
+        "resize_page"
       ]
     }
   }

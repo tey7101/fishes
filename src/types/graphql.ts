@@ -7780,7 +7780,6 @@ export type Users = {
   /** An aggregate relationship */
   reports_aggregate: Reports_Aggregate;
   reputation_score?: Maybe<Scalars['Int']['output']>;
-  total_fish_created?: Maybe<Scalars['Int']['output']>;
   total_votes_received?: Maybe<Scalars['Int']['output']>;
   updated_at?: Maybe<Scalars['timestamp']['output']>;
   /** An object relationship */
@@ -8082,7 +8081,6 @@ export type Users_Avg_Fields = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: Maybe<Scalars['Float']['output']>;
   reputation_score?: Maybe<Scalars['Float']['output']>;
-  total_fish_created?: Maybe<Scalars['Float']['output']>;
   total_votes_received?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -8091,7 +8089,6 @@ export type Users_Avg_Order_By = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: InputMaybe<Order_By>;
   reputation_score?: InputMaybe<Order_By>;
-  total_fish_created?: InputMaybe<Order_By>;
   total_votes_received?: InputMaybe<Order_By>;
 };
 
@@ -8131,7 +8128,6 @@ export type Users_Bool_Exp = {
   reports?: InputMaybe<Reports_Bool_Exp>;
   reports_aggregate?: InputMaybe<Reports_Aggregate_Bool_Exp>;
   reputation_score?: InputMaybe<Int_Comparison_Exp>;
-  total_fish_created?: InputMaybe<Int_Comparison_Exp>;
   total_votes_received?: InputMaybe<Int_Comparison_Exp>;
   updated_at?: InputMaybe<Timestamp_Comparison_Exp>;
   user_affiliate?: InputMaybe<Users_Bool_Exp>;
@@ -8157,7 +8153,6 @@ export type Users_Inc_Input = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: InputMaybe<Scalars['numeric']['input']>;
   reputation_score?: InputMaybe<Scalars['Int']['input']>;
-  total_fish_created?: InputMaybe<Scalars['Int']['input']>;
   total_votes_received?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -8189,7 +8184,6 @@ export type Users_Insert_Input = {
   referred_by?: InputMaybe<Scalars['String']['input']>;
   reports?: InputMaybe<Reports_Arr_Rel_Insert_Input>;
   reputation_score?: InputMaybe<Scalars['Int']['input']>;
-  total_fish_created?: InputMaybe<Scalars['Int']['input']>;
   total_votes_received?: InputMaybe<Scalars['Int']['input']>;
   updated_at?: InputMaybe<Scalars['timestamp']['input']>;
   user_affiliate?: InputMaybe<Users_Obj_Rel_Insert_Input>;
@@ -8218,7 +8212,6 @@ export type Users_Max_Fields = {
   /** 推荐人用户ID（通过推广链接注册的用户） */
   referred_by?: Maybe<Scalars['String']['output']>;
   reputation_score?: Maybe<Scalars['Int']['output']>;
-  total_fish_created?: Maybe<Scalars['Int']['output']>;
   total_votes_received?: Maybe<Scalars['Int']['output']>;
   updated_at?: Maybe<Scalars['timestamp']['output']>;
   /** 用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean */
@@ -8243,7 +8236,6 @@ export type Users_Max_Order_By = {
   /** 推荐人用户ID（通过推广链接注册的用户） */
   referred_by?: InputMaybe<Order_By>;
   reputation_score?: InputMaybe<Order_By>;
-  total_fish_created?: InputMaybe<Order_By>;
   total_votes_received?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
   /** 用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean */
@@ -8269,7 +8261,6 @@ export type Users_Min_Fields = {
   /** 推荐人用户ID（通过推广链接注册的用户） */
   referred_by?: Maybe<Scalars['String']['output']>;
   reputation_score?: Maybe<Scalars['Int']['output']>;
-  total_fish_created?: Maybe<Scalars['Int']['output']>;
   total_votes_received?: Maybe<Scalars['Int']['output']>;
   updated_at?: Maybe<Scalars['timestamp']['output']>;
   /** 用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean */
@@ -8294,7 +8285,6 @@ export type Users_Min_Order_By = {
   /** 推荐人用户ID（通过推广链接注册的用户） */
   referred_by?: InputMaybe<Order_By>;
   reputation_score?: InputMaybe<Order_By>;
-  total_fish_created?: InputMaybe<Order_By>;
   total_votes_received?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
   /** 用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean */
@@ -8349,7 +8339,6 @@ export type Users_Order_By = {
   referred_by?: InputMaybe<Order_By>;
   reports_aggregate?: InputMaybe<Reports_Aggregate_Order_By>;
   reputation_score?: InputMaybe<Order_By>;
-  total_fish_created?: InputMaybe<Order_By>;
   total_votes_received?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
   user_affiliate?: InputMaybe<Users_Order_By>;
@@ -8396,8 +8385,6 @@ export enum Users_Select_Column {
   /** column name */
   ReputationScore = 'reputation_score',
   /** column name */
-  TotalFishCreated = 'total_fish_created',
-  /** column name */
   TotalVotesReceived = 'total_votes_received',
   /** column name */
   UpdatedAt = 'updated_at',
@@ -8441,7 +8428,6 @@ export type Users_Set_Input = {
   /** 推荐人用户ID（通过推广链接注册的用户） */
   referred_by?: InputMaybe<Scalars['String']['input']>;
   reputation_score?: InputMaybe<Scalars['Int']['input']>;
-  total_fish_created?: InputMaybe<Scalars['Int']['input']>;
   total_votes_received?: InputMaybe<Scalars['Int']['input']>;
   updated_at?: InputMaybe<Scalars['timestamp']['input']>;
   /** 用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean */
@@ -8454,7 +8440,6 @@ export type Users_Stddev_Fields = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: Maybe<Scalars['Float']['output']>;
   reputation_score?: Maybe<Scalars['Float']['output']>;
-  total_fish_created?: Maybe<Scalars['Float']['output']>;
   total_votes_received?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -8463,7 +8448,6 @@ export type Users_Stddev_Order_By = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: InputMaybe<Order_By>;
   reputation_score?: InputMaybe<Order_By>;
-  total_fish_created?: InputMaybe<Order_By>;
   total_votes_received?: InputMaybe<Order_By>;
 };
 
@@ -8473,7 +8457,6 @@ export type Users_Stddev_Pop_Fields = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: Maybe<Scalars['Float']['output']>;
   reputation_score?: Maybe<Scalars['Float']['output']>;
-  total_fish_created?: Maybe<Scalars['Float']['output']>;
   total_votes_received?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -8482,7 +8465,6 @@ export type Users_Stddev_Pop_Order_By = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: InputMaybe<Order_By>;
   reputation_score?: InputMaybe<Order_By>;
-  total_fish_created?: InputMaybe<Order_By>;
   total_votes_received?: InputMaybe<Order_By>;
 };
 
@@ -8492,7 +8474,6 @@ export type Users_Stddev_Samp_Fields = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: Maybe<Scalars['Float']['output']>;
   reputation_score?: Maybe<Scalars['Float']['output']>;
-  total_fish_created?: Maybe<Scalars['Float']['output']>;
   total_votes_received?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -8501,7 +8482,6 @@ export type Users_Stddev_Samp_Order_By = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: InputMaybe<Order_By>;
   reputation_score?: InputMaybe<Order_By>;
-  total_fish_created?: InputMaybe<Order_By>;
   total_votes_received?: InputMaybe<Order_By>;
 };
 
@@ -8533,7 +8513,6 @@ export type Users_Stream_Cursor_Value_Input = {
   /** 推荐人用户ID（通过推广链接注册的用户） */
   referred_by?: InputMaybe<Scalars['String']['input']>;
   reputation_score?: InputMaybe<Scalars['Int']['input']>;
-  total_fish_created?: InputMaybe<Scalars['Int']['input']>;
   total_votes_received?: InputMaybe<Scalars['Int']['input']>;
   updated_at?: InputMaybe<Scalars['timestamp']['input']>;
   /** 用户选择的语言（英文全称），用于群聊模式等场景。支持：English, French, Spanish, Chinese, Traditional Chinese, Japanese, Korean */
@@ -8546,7 +8525,6 @@ export type Users_Sum_Fields = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: Maybe<Scalars['numeric']['output']>;
   reputation_score?: Maybe<Scalars['Int']['output']>;
-  total_fish_created?: Maybe<Scalars['Int']['output']>;
   total_votes_received?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -8555,7 +8533,6 @@ export type Users_Sum_Order_By = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: InputMaybe<Order_By>;
   reputation_score?: InputMaybe<Order_By>;
-  total_fish_created?: InputMaybe<Order_By>;
   total_votes_received?: InputMaybe<Order_By>;
 };
 
@@ -8592,8 +8569,6 @@ export enum Users_Update_Column {
   /** column name */
   ReputationScore = 'reputation_score',
   /** column name */
-  TotalFishCreated = 'total_fish_created',
-  /** column name */
   TotalVotesReceived = 'total_votes_received',
   /** column name */
   UpdatedAt = 'updated_at',
@@ -8616,7 +8591,6 @@ export type Users_Var_Pop_Fields = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: Maybe<Scalars['Float']['output']>;
   reputation_score?: Maybe<Scalars['Float']['output']>;
-  total_fish_created?: Maybe<Scalars['Float']['output']>;
   total_votes_received?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -8625,7 +8599,6 @@ export type Users_Var_Pop_Order_By = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: InputMaybe<Order_By>;
   reputation_score?: InputMaybe<Order_By>;
-  total_fish_created?: InputMaybe<Order_By>;
   total_votes_received?: InputMaybe<Order_By>;
 };
 
@@ -8635,7 +8608,6 @@ export type Users_Var_Samp_Fields = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: Maybe<Scalars['Float']['output']>;
   reputation_score?: Maybe<Scalars['Float']['output']>;
-  total_fish_created?: Maybe<Scalars['Float']['output']>;
   total_votes_received?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -8644,7 +8616,6 @@ export type Users_Var_Samp_Order_By = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: InputMaybe<Order_By>;
   reputation_score?: InputMaybe<Order_By>;
-  total_fish_created?: InputMaybe<Order_By>;
   total_votes_received?: InputMaybe<Order_By>;
 };
 
@@ -8654,7 +8625,6 @@ export type Users_Variance_Fields = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: Maybe<Scalars['Float']['output']>;
   reputation_score?: Maybe<Scalars['Float']['output']>;
-  total_fish_created?: Maybe<Scalars['Float']['output']>;
   total_votes_received?: Maybe<Scalars['Float']['output']>;
 };
 
@@ -8663,7 +8633,6 @@ export type Users_Variance_Order_By = {
   /** 推广者佣金比例（百分比） */
   commission_rate?: InputMaybe<Order_By>;
   reputation_score?: InputMaybe<Order_By>;
-  total_fish_created?: InputMaybe<Order_By>;
   total_votes_received?: InputMaybe<Order_By>;
 };
 

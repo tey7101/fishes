@@ -674,3 +674,73 @@
         width: 100%;
     }
 }
+
+
+/* 匿名用户升级区域 */
+.anonymous-upgrade-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px dashed #FDE68A;
+}
+
+.upgrade-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    border-radius: 16px;
+    border: 2px solid #F59E0B;
+}
+
+.upgrade-icon {
+    font-size: 40px;
+    flex-shrink: 0;
+}
+
+.upgrade-content {
+    flex: 1;
+}
+
+.upgrade-content h3 {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    color: #92400E;
+    font-weight: 700;
+}
+
+.upgrade-content p {
+    margin: 0;
+    font-size: 14px;
+    color: #B45309;
+}
+
+.upgrade-action-btn {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.upgrade-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+}
+
+@media (max-width: 600px) {
+    .upgrade-banner {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .upgrade-action-btn {
+        width: 100%;
+    }
+}

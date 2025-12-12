@@ -25,7 +25,7 @@ function showContactModal() {
       <button class="modal-close-btn" aria-label="Close">&times;</button>
       <div class="modal-content-area">
         <div class="auth-modal-header">
-          <p>If you have any questions, please contact us.</p>
+          <p>If you have any questions, please contact us at <strong>tey7101@gmail.com</strong></p>
         </div>
         <div class="auth-modal-body">
           <a href="mailto:tey7101@gmail.com" class="oauth-btn email-login-btn" style="text-decoration: none; justify-content: center;">

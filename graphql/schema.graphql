@@ -9849,7 +9849,6 @@ type users {
     where: reports_bool_exp
   ): reports_aggregate!
   reputation_score: Int
-  total_fish_created: Int
   total_votes_received: Int
   updated_at: timestamp
 
@@ -10018,7 +10017,6 @@ type users_avg_fields {
   """推广者佣金比例（百分比）"""
   commission_rate: Float
   reputation_score: Float
-  total_fish_created: Float
   total_votes_received: Float
 }
 
@@ -10029,7 +10027,6 @@ input users_avg_order_by {
   """推广者佣金比例（百分比）"""
   commission_rate: order_by
   reputation_score: order_by
-  total_fish_created: order_by
   total_votes_received: order_by
 }
 
@@ -10071,7 +10068,6 @@ input users_bool_exp {
   reports: reports_bool_exp
   reports_aggregate: reports_aggregate_bool_exp
   reputation_score: Int_comparison_exp
-  total_fish_created: Int_comparison_exp
   total_votes_received: Int_comparison_exp
   updated_at: timestamp_comparison_exp
   user_affiliate: users_bool_exp
@@ -10109,7 +10105,6 @@ input users_inc_input {
   """推广者佣金比例（百分比）"""
   commission_rate: numeric
   reputation_score: Int
-  total_fish_created: Int
   total_votes_received: Int
 }
 
@@ -10146,7 +10141,6 @@ input users_insert_input {
   referred_by: String
   reports: reports_arr_rel_insert_input
   reputation_score: Int
-  total_fish_created: Int
   total_votes_received: Int
   updated_at: timestamp
   user_affiliate: users_obj_rel_insert_input
@@ -10180,7 +10174,6 @@ type users_max_fields {
   """推荐人用户ID（通过推广链接注册的用户）"""
   referred_by: String
   reputation_score: Int
-  total_fish_created: Int
   total_votes_received: Int
   updated_at: timestamp
 
@@ -10213,7 +10206,6 @@ input users_max_order_by {
   """推荐人用户ID（通过推广链接注册的用户）"""
   referred_by: order_by
   reputation_score: order_by
-  total_fish_created: order_by
   total_votes_received: order_by
   updated_at: order_by
 
@@ -10244,7 +10236,6 @@ type users_min_fields {
   """推荐人用户ID（通过推广链接注册的用户）"""
   referred_by: String
   reputation_score: Int
-  total_fish_created: Int
   total_votes_received: Int
   updated_at: timestamp
 
@@ -10277,7 +10268,6 @@ input users_min_order_by {
   """推荐人用户ID（通过推广链接注册的用户）"""
   referred_by: order_by
   reputation_score: order_by
-  total_fish_created: order_by
   total_votes_received: order_by
   updated_at: order_by
 
@@ -10342,7 +10332,6 @@ input users_order_by {
   referred_by: order_by
   reports_aggregate: reports_aggregate_order_by
   reputation_score: order_by
-  total_fish_created: order_by
   total_votes_received: order_by
   updated_at: order_by
   user_affiliate: users_order_by
@@ -10406,9 +10395,6 @@ enum users_select_column {
   reputation_score
 
   """column name"""
-  total_fish_created
-
-  """column name"""
   total_votes_received
 
   """column name"""
@@ -10465,7 +10451,6 @@ input users_set_input {
   """推荐人用户ID（通过推广链接注册的用户）"""
   referred_by: String
   reputation_score: Int
-  total_fish_created: Int
   total_votes_received: Int
   updated_at: timestamp
 
@@ -10480,7 +10465,6 @@ type users_stddev_fields {
   """推广者佣金比例（百分比）"""
   commission_rate: Float
   reputation_score: Float
-  total_fish_created: Float
   total_votes_received: Float
 }
 
@@ -10491,7 +10475,6 @@ input users_stddev_order_by {
   """推广者佣金比例（百分比）"""
   commission_rate: order_by
   reputation_score: order_by
-  total_fish_created: order_by
   total_votes_received: order_by
 }
 
@@ -10500,7 +10483,6 @@ type users_stddev_pop_fields {
   """推广者佣金比例（百分比）"""
   commission_rate: Float
   reputation_score: Float
-  total_fish_created: Float
   total_votes_received: Float
 }
 
@@ -10511,7 +10493,6 @@ input users_stddev_pop_order_by {
   """推广者佣金比例（百分比）"""
   commission_rate: order_by
   reputation_score: order_by
-  total_fish_created: order_by
   total_votes_received: order_by
 }
 
@@ -10520,7 +10501,6 @@ type users_stddev_samp_fields {
   """推广者佣金比例（百分比）"""
   commission_rate: Float
   reputation_score: Float
-  total_fish_created: Float
   total_votes_received: Float
 }
 
@@ -10531,7 +10511,6 @@ input users_stddev_samp_order_by {
   """推广者佣金比例（百分比）"""
   commission_rate: order_by
   reputation_score: order_by
-  total_fish_created: order_by
   total_votes_received: order_by
 }
 
@@ -10569,7 +10548,6 @@ input users_stream_cursor_value_input {
   """推荐人用户ID（通过推广链接注册的用户）"""
   referred_by: String
   reputation_score: Int
-  total_fish_created: Int
   total_votes_received: Int
   updated_at: timestamp
 
@@ -10584,7 +10562,6 @@ type users_sum_fields {
   """推广者佣金比例（百分比）"""
   commission_rate: numeric
   reputation_score: Int
-  total_fish_created: Int
   total_votes_received: Int
 }
 
@@ -10595,7 +10572,6 @@ input users_sum_order_by {
   """推广者佣金比例（百分比）"""
   commission_rate: order_by
   reputation_score: order_by
-  total_fish_created: order_by
   total_votes_received: order_by
 }
 
@@ -10649,9 +10625,6 @@ enum users_update_column {
   reputation_score
 
   """column name"""
-  total_fish_created
-
-  """column name"""
   total_votes_received
 
   """column name"""
@@ -10677,7 +10650,6 @@ type users_var_pop_fields {
   """推广者佣金比例（百分比）"""
   commission_rate: Float
   reputation_score: Float
-  total_fish_created: Float
   total_votes_received: Float
 }
 
@@ -10688,7 +10660,6 @@ input users_var_pop_order_by {
   """推广者佣金比例（百分比）"""
   commission_rate: order_by
   reputation_score: order_by
-  total_fish_created: order_by
   total_votes_received: order_by
 }
 
@@ -10697,7 +10668,6 @@ type users_var_samp_fields {
   """推广者佣金比例（百分比）"""
   commission_rate: Float
   reputation_score: Float
-  total_fish_created: Float
   total_votes_received: Float
 }
 
@@ -10708,7 +10678,6 @@ input users_var_samp_order_by {
   """推广者佣金比例（百分比）"""
   commission_rate: order_by
   reputation_score: order_by
-  total_fish_created: order_by
   total_votes_received: order_by
 }
 
@@ -10717,7 +10686,6 @@ type users_variance_fields {
   """推广者佣金比例（百分比）"""
   commission_rate: Float
   reputation_score: Float
-  total_fish_created: Float
   total_votes_received: Float
 }
 
@@ -10728,7 +10696,6 @@ input users_variance_order_by {
   """推广者佣金比例（百分比）"""
   commission_rate: order_by
   reputation_score: order_by
-  total_fish_created: order_by
   total_votes_received: order_by
 }
 

@@ -272,7 +272,7 @@ class SocialShare {
     contentDiv.style.cssText = 'position: relative; z-index: 1;';
     contentDiv.innerHTML = `
       <h2 style="color: #4A90E2; font-weight: 900; font-size: 28px; margin: 0 0 24px 0; text-shadow: 0 2px 4px rgba(74, 144, 226, 0.3);">
-        📤 Share FishTalk AI
+        📤 Share FishTalk
       </h2>
       <div id="share-buttons-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
     `;

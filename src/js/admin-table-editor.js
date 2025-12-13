@@ -407,7 +407,7 @@ function renderCell(row, col, rowId) {
   return `
     <td 
       class="${cellClass}"
-      ${!isReadOnly ? `onclick="startEdit('${rowId}', '${col}', event)"` : ''}
+      ${!isReadOnly ? `ondblclick="startEdit('${rowId}', '${col}', event)"` : ''}
       data-row-id="${rowId}"
       data-column="${col}"
     >
@@ -427,6 +427,21 @@ function formatValue(value, column) {
     return `<span class="boolean-badge ${value ? 'boolean-true' : 'boolean-false'}">
       ${value ? '✓ true' : '✗ false'}
     </span>`;
+  }
+
+  // URL字段：image_url 或其他以 _url 结尾的字段
+  const isUrlField = column === 'image_url' || column.endsWith('_url');
+  if (isUrlField && value && typeof value === 'string') {
+    const url = value.trim();
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      const displayUrl = url.length > 50 ? url.substring(0, 50) + '...' : url;
+      // 检查是否是图片URL（用于image_url字段的hover预览）
+      const isImageUrl = column === 'image_url' || /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(url);
+      const hoverEvents = isImageUrl 
+        ? `onmouseenter="showImagePreview('${url.replace(/'/g, "\\'")}', event)" onmouseleave="hideImagePreview()"`
+        : '';
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" ${hoverEvents} style="color: #667eea; text-decoration: underline;" title="${url}">🔗 ${displayUrl}</a>`;
+    }
   }
 
   // 时间字段：包括 _at 结尾的字段，以及特定的时间戳字段

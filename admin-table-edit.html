@@ -354,6 +354,39 @@
       margin: 1rem 0;
     }
 
+    /* 图片预览弹窗 */
+    .image-preview-popup {
+      position: fixed;
+      z-index: 1000;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      padding: 8px;
+      pointer-events: none;
+      max-width: 300px;
+      max-height: 300px;
+    }
+
+    .image-preview-popup img {
+      max-width: 100%;
+      max-height: 280px;
+      border-radius: 4px;
+      display: block;
+    }
+
+    .image-preview-popup .loading-text {
+      padding: 2rem;
+      color: #718096;
+      text-align: center;
+    }
+
+    .image-preview-popup .error-text {
+      padding: 1rem;
+      color: #e53e3e;
+      text-align: center;
+      font-size: 0.875rem;
+    }
+
   </style>
   <script src="public/supabase-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -468,7 +501,58 @@
     </div>
   </div>
 
+  <!-- 图片预览弹窗 -->
+  <div id="image-preview-popup" class="image-preview-popup" style="display: none;">
+    <div class="loading-text">加载中...</div>
+  </div>
+
   <script src="src/js/admin-table-editor.js"></script>
+  <script>
+    // 图片预览功能
+    (function() {
+      const popup = document.getElementById('image-preview-popup');
+      let hideTimeout = null;
+
+      // 显示预览
+      window.showImagePreview = function(url, event) {
+        if (hideTimeout) {
+          clearTimeout(hideTimeout);
+          hideTimeout = null;
+        }
+
+        // 设置位置
+        const x = event.clientX + 15;
+        const y = event.clientY + 15;
+        
+        // 确保不超出屏幕
+        const maxX = window.innerWidth - 320;
+        const maxY = window.innerHeight - 320;
+        
+        popup.style.left = Math.min(x, maxX) + 'px';
+        popup.style.top = Math.min(y, maxY) + 'px';
+        popup.style.display = 'block';
+        popup.innerHTML = '<div class="loading-text">🐟 加载中...</div>';
+
+        // 加载图片
+        const img = new Image();
+        img.onload = function() {
+          popup.innerHTML = '';
+          popup.appendChild(img);
+        };
+        img.onerror = function() {
+          popup.innerHTML = '<div class="error-text">❌ 图片加载失败</div>';
+        };
+        img.src = url;
+      };
+
+      // 隐藏预览
+      window.hideImagePreview = function() {
+        hideTimeout = setTimeout(() => {
+          popup.style.display = 'none';
+        }, 100);
+      };
+    })();
+  </script>
 </body>
 </html>
 

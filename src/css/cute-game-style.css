@@ -1143,11 +1143,16 @@ button.game-btn {
 
 /* 弹窗内容区域（有标题横幅时） - 压缩内边距 */
 .modal-content-area {
-  padding: 20px;
+  padding: 16px 10px;
   padding-top: 16px;
   position: relative;
   z-index: 1;
   height: auto; /* 高度自适应内容 */
+}
+
+/* 鱼详情弹窗内容区域 - 减少两侧空白 */
+.modal-content.wide .modal-content-area {
+  padding: 16px 12px !important;
 }
 
 /* 宽弹窗样式 - 自适应宽度和高度 */

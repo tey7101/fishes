@@ -1379,6 +1379,10 @@ swimBtn.addEventListener('click', async () => {
     
     // 如果不是鱼，显示提示弹窗，不进行登录检查
     if (!isFish && !isNotFishModalShowing) {
+        // 隐藏加载提示弹窗（如果有的话）
+        if (window.authUI && window.authUI.hideLoadingModal) {
+            window.authUI.hideLoadingModal();
+        }
         // 防止弹窗重复显示
         isNotFishModalShowing = true;
         // Show fun encouragement modal for low-scoring fish - no submission
@@ -1594,6 +1598,11 @@ swimBtn.addEventListener('click', async () => {
             } catch (error) {
                 console.log('Could not fetch user profile, using saved/default values:', error);
             }
+        }
+        
+        // 隐藏加载提示弹窗（如果有的话，来自 auth-ui.js 的 handleSkipLogin）
+        if (window.authUI && window.authUI.hideLoadingModal) {
+            window.authUI.hideLoadingModal();
         }
         
         // Show normal submission modal for good fish with fish name and personality

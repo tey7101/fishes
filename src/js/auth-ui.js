@@ -853,12 +853,20 @@ class AuthUI {
         const pendingSubmit = sessionStorage.getItem('pendingFishSubmit');
         if (pendingSubmit === 'true') {
           console.log('🐟 Found pending fish submission, triggering submit flow...');
+          
+          // 显示加载提示弹窗，避免用户看到空白页面
+          // 加载提示会在 app.js 的 swimBtn 点击事件中显示命名弹窗前被隐藏
+          this.showLoadingModal('🐟 Preparing your fish...', 'Just a moment!');
+          
           // 延迟一小段时间确保 UI 更新完成，然后触发提交流程
           setTimeout(() => {
             const swimBtn = document.getElementById('swim-btn');
             if (swimBtn) {
               console.log('🐟 Clicking swim button to continue submission...');
+              // 注意：不在这里隐藏加载提示，让 app.js 在显示命名弹窗前隐藏
               swimBtn.click();
+            } else {
+              this.hideLoadingModal();
             }
           }, 100);
         }
@@ -866,6 +874,7 @@ class AuthUI {
     } catch (error) {
       console.error('Anonymous sign-in exception:', error);
       restoreButton();
+      this.hideLoadingModal(); // 出错时隐藏加载提示
       this.showError(`Guest login failed: ${error.message || 'Unknown error'}`);
     }
   }
@@ -948,6 +957,71 @@ class AuthUI {
     overlay.onclick = (e) => {
       if (e.target === overlay) closeHandler();
     };
+  }
+
+  /**
+   * 显示加载提示弹窗
+   * @param {string} message - 加载提示文本
+   * @param {string} subMessage - 副标题文本
+   */
+  showLoadingModal(message = 'Loading...', subMessage = '') {
+    // 如果已经有加载弹窗，先移除
+    this.hideLoadingModal();
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'auth-loading-modal';
+    overlay.style.cssText = 'position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10002; backdrop-filter: blur(4px);';
+    
+    const isMobile = window.innerWidth <= 768;
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      background: linear-gradient(180deg, #FFF9E6 0%, #FFF5D6 50%, #FFEFB8 100%);
+      padding: 40px;
+      border-radius: 24px;
+      max-width: ${isMobile ? 'calc(100vw - 40px)' : '400px'};
+      width: ${isMobile ? 'calc(100vw - 40px)' : '90%'};
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 8px 0 rgba(0,0,0,0.15);
+      box-sizing: border-box;
+      text-align: center;
+      border: 3px solid rgba(255, 255, 255, 0.8);
+    `;
+    
+    modal.innerHTML = `
+      <div style="margin-bottom: 20px;">
+        <div style="
+          display: inline-block;
+          width: 50px;
+          height: 50px;
+          border: 4px solid #4A90E2;
+          border-top: 4px solid transparent;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        "></div>
+      </div>
+      <div style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 8px;">
+        ${message}
+      </div>
+      ${subMessage ? `<div style="font-size: 14px; color: #666;">${subMessage}</div>` : ''}
+      <style>
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      </style>
+    `;
+    
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+  }
+
+  /**
+   * 隐藏加载提示弹窗
+   */
+  hideLoadingModal() {
+    const overlay = document.getElementById('auth-loading-modal');
+    if (overlay) {
+      overlay.remove();
+    }
   }
 
   /**
@@ -1497,12 +1571,20 @@ class AuthUI {
         const pendingSubmit = sessionStorage.getItem('pendingFishSubmit');
         if (pendingSubmit === 'true') {
           console.log('🐟 Found pending fish submission, triggering submit flow...');
+          
+          // 显示加载提示弹窗，避免用户看到空白页面
+          // 加载提示会在 app.js 的 swimBtn 点击事件中显示命名弹窗前被隐藏
+          this.showLoadingModal('🐟 Preparing your fish...', 'Just a moment!');
+          
           // 延迟一小段时间确保 UI 更新完成，然后触发提交流程
           setTimeout(() => {
             const swimBtn = document.getElementById('swim-btn');
             if (swimBtn) {
               console.log('🐟 Clicking swim button to continue submission...');
+              // 注意：不在这里隐藏加载提示，让 app.js 在显示命名弹窗前隐藏
               swimBtn.click();
+            } else {
+              this.hideLoadingModal();
             }
           }, 100);
         }
@@ -1510,6 +1592,7 @@ class AuthUI {
     } catch (error) {
       console.error('Anonymous sign-in exception:', error);
       restoreButton();
+      this.hideLoadingModal(); // 出错时隐藏加载提示
     }
   }
 

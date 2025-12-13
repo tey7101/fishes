@@ -230,12 +230,6 @@
                 z-index: 10;
             }
             
-            /* 确保装饰元素在移动端也能显示 */
-            .tank-decorations {
-                position: fixed !important;
-                z-index: 5 !important;
-            }
-            
             .light-beams {
                 position: fixed !important;
                 z-index: 15 !important;
@@ -297,11 +291,7 @@
                 z-index: 10;
             }
             
-            /* 确保装饰元素在桌面端也能显示 */
-            .tank-decorations {
-                position: fixed !important;
-                z-index: 5 !important;
-            }
+
             
             .light-beams {
                 position: fixed !important;
@@ -624,11 +614,42 @@
                 max-width: 400px !important;
                 left: 10px !important;
                 right: 10px !important;
+                box-sizing: border-box !important;
+                overflow: hidden !important;
             }
             
             #chat-panel.show {
                 right: 10px !important;
                 left: auto !important;
+            }
+            
+            /* Chat input container fix */
+            #user-chat-input-container {
+                width: 100% !important;
+                box-sizing: border-box !important;
+                overflow: hidden !important;
+            }
+            
+            #user-chat-input-container > div {
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            
+            #user-chat-input {
+                min-width: 0 !important;
+                flex: 1 1 auto !important;
+            }
+            
+            #user-chat-send-btn {
+                min-width: 50px !important;
+                max-width: 60px !important;
+                padding: 8px 8px !important;
+                font-size: 11px !important;
+            }
+            
+            #clear-chat-btn {
+                padding: 6px 8px !important;
+                font-size: 10px !important;
             }
             
             /* Language selector fix - prevent overflow */
@@ -802,19 +823,6 @@
   <div style="position: relative; width: 100%;">
     <!-- 鱼缸容器 -->
     <div class="tank-wrapper" id="tank-wrapper-main" style="transition: margin-right 0.3s ease;">
-      <!-- 装饰�?-->
-      <div class="tank-decorations">
-        <!-- 水草 -->
-        <div class="seaweed seaweed-left"></div>
-        <div class="seaweed seaweed-right"></div>
-        <!-- 底部沙地 -->
-        <div class="sand-layer"></div>
-        <!-- 装饰�?-->
-        <div class="decoration shell"></div>
-        <div class="decoration starfish"></div>
-        <div class="decoration rock"></div>
-      </div>
-      
       <!-- 鱼缸画布 -->
       <canvas id="swim-canvas" width="800" height="400"></canvas>
       

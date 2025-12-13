@@ -201,7 +201,7 @@ const MessageUI = {
             class="message-submit-btn" 
             id="${formId}-submit"
           >
-            Send Message
+            Send
           </button>
         </div>
       </div>
@@ -290,7 +290,7 @@ const MessageUI = {
         } finally {
           // 恢复按钮
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Send Message';
+          submitBtn.textContent = 'Send';
         }
       });
     }

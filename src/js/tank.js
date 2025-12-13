@@ -2704,114 +2704,126 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 function showFishInfoModal(fish) {
     let imgDataUrl;
-    let modalWidth = 400; // 默认显示宽度
-    let modalHeight = 240; // 默认显示高度
+    let modalWidth = 400;
+    let modalHeight = 240;
     
     // 如果有原始图片 URL，直接使用原始图片以获得最佳清晰度
     if (fish.imageUrl) {
         imgDataUrl = fish.imageUrl;
-        // 使用更大的显示尺寸以充分利用原始图片质量
         modalWidth = 500;
         modalHeight = 300;
     } else {
-        // 备用方案：从 fishCanvas 生成（保持向后兼容）
+        // 备用方案：从 fishCanvas 生成
         const canvasScaleFactor = 6;
         const fishImgCanvas = document.createElement('canvas');
         fishImgCanvas.width = fish.width * canvasScaleFactor;
         fishImgCanvas.height = fish.height * canvasScaleFactor;
         const ctx = fishImgCanvas.getContext('2d');
-        
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
         ctx.scale(canvasScaleFactor, canvasScaleFactor);
         ctx.drawImage(fish.fishCanvas, 0, 0);
-        
         imgDataUrl = fishImgCanvas.toDataURL('image/png');
         const displayScaleFactor = 3;
-        const baseWidth = Math.min(200, fish.width);
-        const baseHeight = Math.min(150, fish.height);
-        modalWidth = baseWidth * displayScaleFactor;
-        modalHeight = baseHeight * displayScaleFactor;
+        modalWidth = Math.min(200, fish.width) * displayScaleFactor;
+        modalHeight = Math.min(150, fish.height) * displayScaleFactor;
     }
 
-    // Check if this is the user's fish
     const isCurrentUserFish = isUserFish(fish);
     const userToken = localStorage.getItem('userToken');
     const showFavoriteButton = userToken && !isCurrentUserFish;
 
-    // Make artist name a clickable link to their profile if userId exists
     const artistName = fish.artist || 'Anonymous';
     const userId = fish.userId;
     const artistLink = userId 
-        ? `<a href="profile.html?userId=${encodeURIComponent(userId)}" target="_blank" style="color: #4A90E2; text-decoration: none; font-weight: 700;">${escapeHtml(artistName)}</a>`
+        ? `<a href="profile.html?userId=${encodeURIComponent(userId)}" target="_blank" style="color: #4A90E2; text-decoration: none; font-weight: 600;">${escapeHtml(artistName)}</a>`
         : escapeHtml(artistName);
 
-    let info = `<div class="fish-info-modal" style="background: transparent; padding: 12px; border-radius: 12px; max-height: calc(85vh - 80px); overflow-y: auto;">`;
-
-    // Fish image (no frame, direct display) - 更精简的尺寸
-    const isMobile = window.innerWidth <= 768;
-    const imgContainerStyle = isMobile 
-        ? "display: flex; align-items: center; justify-content: center; margin-bottom: 8px; min-height: 70px;"
-        : "text-align: center; margin-bottom: 10px;";
-    const imgStyle = isMobile
-        ? `display: block; margin: 0 auto; max-width: min(${Math.min(modalWidth, 196)}px, 65vw); max-height: min(${Math.min(modalHeight, 119)}px, 22vh); width: auto; height: auto; image-rendering: auto; object-fit: contain;`
-        : `display: block; margin: 0 auto; max-width: ${Math.min(modalWidth, 224)}px; max-height: ${Math.min(modalHeight, 140)}px; width: auto; height: auto; image-rendering: auto; object-fit: contain;`;
-    
-    info += `<div style="${imgContainerStyle}">`;
-    info += `<img src='${imgDataUrl}' style='${imgStyle}' alt='Fish'>`;
-    info += `</div>`;
-
-    // Fish info section with fish name and artist - 单行显示
     const fishName = fish.fish_name || fish.fishName || fish.name || fish.title || `Fish #${fish.docId?.substring(0, 8) || 'Unknown'}`;
-    info += `<div style='margin-bottom: 10px; font-size: 15px; color: #333; line-height: 1.4; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'><strong style='color: #6366F1; font-size: 16px;'>${escapeHtml(fishName)}</strong> <span style='font-size: 14px; color: #666;'>by ${artistLink}</span></div>`;
+    const isMobile = window.innerWidth <= 768;
 
-    // Action buttons: Like, Favorite, Report (并列，样式一致，更精简)
-    info += `<div class="voting-controls modal-controls" style="display: flex; gap: 10px; justify-content: center; margin-bottom: 10px;">`;
+    // 统一按钮样式 - 白色圆角按钮带阴影，3个按钮一行
+    const btnStyle = `
+        flex: 1;
+        padding: 10px 8px;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        transition: all 0.2s ease;
+        background: linear-gradient(180deg, #FFFFFF 0%, #F5F5F5 100%);
+        color: #4A90E2;
+        box-shadow: 0 3px 0 rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        border-bottom: 2px solid #E0E0E0;
+    `;
+
+    // 使用与登录弹窗一致的风格
+    let info = `<div class="modal-title-banner">
+        <h2>🐟 ${escapeHtml(fishName)}</h2>
+    </div>
+    <button class="modal-close-btn" aria-label="Close">&times;</button>
+    <div class="modal-content-area" style="padding: 16px;">`;
+
+    // 鱼图片 - 加大显示
+    const imgStyle = isMobile
+        ? `display: block; margin: 0 auto 12px; max-width: min(${Math.min(modalWidth, 280)}px, 75vw); max-height: min(${Math.min(modalHeight, 180)}px, 30vh); width: auto; height: auto; object-fit: contain;`
+        : `display: block; margin: 0 auto 12px; max-width: ${Math.min(modalWidth, 320)}px; max-height: ${Math.min(modalHeight, 200)}px; width: auto; height: auto; object-fit: contain;`;
     
-    const btnStyle = "flex: 1; padding: 8px 0; border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 14px; font-weight: 700; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25); transition: all 0.15s ease; display: flex; align-items: center; justify-content: center; height: 40px;";
+    info += `<img src='${imgDataUrl}' style='${imgStyle}' alt='Fish'>`;
 
-    // Like button
-    info += `<button class="vote-btn upvote-btn" onclick="handleVote('${fish.docId}', 'up', this)" style="${btnStyle} background: linear-gradient(180deg, #6FE77D 0%, #4CD964 50%, #3CB54A 100%); border-bottom: 2px solid #2E8B3A;">`;
-    info += `👍 <span class="vote-count upvote-count" style="margin-left: 4px;">${fish.upvotes || 0}</span>`;
+    // 作者信息 - 压缩间距
+    info += `<p style="text-align: center; color: #888; margin-bottom: 12px; font-size: 13px;">by ${artistLink}</p>`;
+
+    // 按钮区域 - 3个按钮一行，颜色统一
+    info += `<div style="display: flex; gap: 8px; margin-bottom: 12px;">`;
+    
+    // Like button - 初始状态，稍后会检查用户是否已点赞
+    info += `<button class="vote-btn upvote-btn" id="upvote-btn-${fish.docId}" onclick="handleVote('${fish.docId}', 'up', this)" style="${btnStyle}">`;
+    info += `👍 <span class="vote-count upvote-count">${fish.upvotes || 0}</span>`;
     info += `</button>`;
     
-    // Add to My Tank button
+    // Add to My Tank button - 始终显示（如果用户已登录且不是自己的鱼）
     if (showFavoriteButton) {
-        info += `<button class="add-to-tank-btn" id="add-tank-btn-${fish.docId}" onclick="if(typeof handleAddToMyTank === 'function') handleAddToMyTank('${fish.docId}', event); else alert('Add to My Tank feature not yet implemented');" style="${btnStyle} background: linear-gradient(180deg, #FFD93D 0%, #FFC107 50%, #FF8F00 100%); border-bottom: 2px solid #E67E00;" title="Add this fish to your personal tank">`;
+        info += `<button class="add-to-tank-btn" id="add-tank-btn-${fish.docId}" onclick="if(typeof handleAddToMyTank === 'function') handleAddToMyTank('${fish.docId}', event);" style="${btnStyle}">`;
         info += `⭐`;
         info += `</button>`;
     }
     
     // Report button
-    info += `<button class="report-btn" onclick="handleReport('${fish.docId}')" style="${btnStyle} background: linear-gradient(180deg, #9E9E9E 0%, #757575 50%, #616161 100%); border-bottom: 2px solid #424242;" title="Report inappropriate content">`;
+    info += `<button class="report-btn" onclick="handleReport('${fish.docId}')" style="${btnStyle}">`;
     info += `🚩`;
     info += `</button>`;
     
     info += `</div>`;
 
-    // Add hover effects via CSS (will be handled by existing modal button styles)
-    info += `<style>
-        .modal-content .vote-btn:hover,
-        .modal-content .favorite-btn:hover,
-        .modal-content .report-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
-        }
-        .modal-content .vote-btn:active,
-        .modal-content .favorite-btn:active,
-        .modal-content .report-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
-        }
-    </style>`;
-
-    // Add messages section placeholder - 压缩间距
-    info += `<div id="fish-messages-container" style="margin-top: 12px; text-align: left;"></div>`;
+    // Messages section
+    info += `<div id="fish-messages-container" style="text-align: left;"></div>`;
 
     info += `</div>`;
 
     // 为鱼信息模态框添加更大的宽度类
     showModal(info, () => { }, { addWideClass: true });
+    
+    // 检查用户是否已经点赞，并更新按钮状态
+    if (fish.docId && typeof checkUserVote === 'function') {
+        checkUserVote(fish.docId).then(voteStatus => {
+            const upvoteBtn = document.getElementById(`upvote-btn-${fish.docId}`);
+            if (upvoteBtn && voteStatus.hasVoted) {
+                // 用户已点赞，更新按钮样式
+                upvoteBtn.style.background = 'linear-gradient(180deg, #4CAF50 0%, #45a049 100%)';
+                upvoteBtn.style.color = 'white';
+                upvoteBtn.dataset.hasVoted = 'true';
+                upvoteBtn.title = '点击取消点赞';
+            }
+        }).catch(err => {
+            console.warn('检查投票状态失败:', err);
+        });
+    }
     
     // Load messages after modal is shown (only if MessageUI is available)
     setTimeout(() => {
@@ -2861,6 +2873,29 @@ function handleVote(fishId, voteType, button) {
 
             if (upvoteCount) upvoteCount.textContent = fish.upvotes || 0;
             if (upvotesDisplay) upvotesDisplay.textContent = fish.upvotes || 0;
+            
+            // Update button style based on action
+            const upvoteBtn = document.getElementById(`upvote-btn-${fishId}`);
+            if (upvoteBtn) {
+                if (result.action === 'upvote') {
+                    // 用户刚点赞，更新为已点赞样式
+                    upvoteBtn.style.background = 'linear-gradient(180deg, #4CAF50 0%, #45a049 100%)';
+                    upvoteBtn.style.color = 'white';
+                    upvoteBtn.dataset.hasVoted = 'true';
+                    upvoteBtn.title = '点击取消点赞';
+                } else if (result.action === 'cancel_upvote') {
+                    // 用户取消点赞，恢复默认样式
+                    upvoteBtn.style.background = 'linear-gradient(180deg, #FFFFFF 0%, #F5F5F5 100%)';
+                    upvoteBtn.style.color = '#4A90E2';
+                    upvoteBtn.dataset.hasVoted = 'false';
+                    upvoteBtn.title = '点赞';
+                }
+                // 更新按钮内的计数
+                const countSpan = upvoteBtn.querySelector('.upvote-count');
+                if (countSpan) {
+                    countSpan.textContent = fish.upvotes || 0;
+                }
+            }
         }
     });
 }
@@ -3056,6 +3091,9 @@ function showModal(html, onClose, options = {}) {
     const modalContent = document.createElement('div');
     modalContent.className = 'modal-content';
     
+    // 检测HTML中是否包含标题横幅
+    const hasTitleBannerInHtml = html.includes('modal-title-banner');
+    
     // 如果提供了标题，添加标题横幅
     if (options.title) {
         modalContent.classList.add('has-title-banner');
@@ -3063,14 +3101,41 @@ function showModal(html, onClose, options = {}) {
         titleBanner.className = 'modal-title-banner';
         titleBanner.innerHTML = `<h2>${options.title}</h2>`;
         modalContent.appendChild(titleBanner);
+    } else if (hasTitleBannerInHtml) {
+        // 如果HTML中已包含标题横幅，也添加has-title-banner类
+        modalContent.classList.add('has-title-banner');
     }
     
     // 创建内容区域
     const contentArea = document.createElement('div');
-    if (options.title) {
+    if (options.title || hasTitleBannerInHtml) {
         contentArea.className = 'modal-content-area';
     } else {
         contentArea.style.cssText = 'padding: 32px; position: relative; z-index: 1;';
+    }
+    
+    // 如果HTML中包含标题横幅，需要把它提取出来放到modalContent顶部
+    let processedHtml = html;
+    if (hasTitleBannerInHtml && !options.title) {
+        // 提取标题横幅
+        const titleBannerMatch = html.match(/<div class="modal-title-banner">[\s\S]*?<\/div>/);
+        if (titleBannerMatch) {
+            // 创建标题横幅元素
+            const titleBanner = document.createElement('div');
+            titleBanner.innerHTML = titleBannerMatch[0];
+            modalContent.appendChild(titleBanner.firstChild);
+            // 从HTML中移除标题横幅
+            processedHtml = html.replace(titleBannerMatch[0], '');
+        }
+        
+        // 提取关闭按钮
+        const closeBtnMatch = processedHtml.match(/<button class="modal-close-btn"[\s\S]*?<\/button>/);
+        if (closeBtnMatch) {
+            const closeBtn = document.createElement('div');
+            closeBtn.innerHTML = closeBtnMatch[0];
+            modalContent.appendChild(closeBtn.firstChild);
+            processedHtml = processedHtml.replace(closeBtnMatch[0], '');
+        }
     }
     
     // Add close button if not already present in HTML
@@ -3079,10 +3144,10 @@ function showModal(html, onClose, options = {}) {
         closeBtn.className = 'modal-close-btn';
         closeBtn.innerHTML = '×';
         closeBtn.title = 'Close';
-        contentArea.appendChild(closeBtn);
+        modalContent.appendChild(closeBtn);
     }
     
-    contentArea.innerHTML += html;
+    contentArea.innerHTML = processedHtml;
     modalContent.appendChild(contentArea);
 
     // Add top gloss effect

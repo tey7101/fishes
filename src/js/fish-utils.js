@@ -179,6 +179,48 @@ async function sendReport(fishId, reason) {
     }
 }
 
+// Check if user has voted for a fish
+async function checkUserVote(fishId) {
+    try {
+        // 获取用户ID
+        let userId = null;
+        
+        if (window.supabaseAuth) {
+            const user = await window.supabaseAuth.getUser();
+            userId = user?.id;
+        }
+        
+        // 如果没有用户ID，检查localStorage
+        if (!userId) {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            userId = userInfo.userId;
+        }
+        
+        if (!userId) {
+            return { hasVoted: false, voteType: null };
+        }
+        
+        const response = await fetch(`${BACKEND_URL}/api/vote/check-vote?fishId=${fishId}&userId=${userId}`);
+        
+        if (!response.ok) {
+            console.warn('Check vote failed:', response.status);
+            return { hasVoted: false, voteType: null };
+        }
+        
+        const result = await response.json();
+        return {
+            hasVoted: result.hasVoted || false,
+            voteType: result.voteType || null
+        };
+    } catch (error) {
+        console.error('Error checking vote status:', error);
+        return { hasVoted: false, voteType: null };
+    }
+}
+
+// Export checkUserVote to window
+window.checkUserVote = checkUserVote;
+
 // Generic vote handler that can be used by both tank and rank
 async function handleVoteGeneric(fishId, voteType, button, updateCallback) {
     // Disable button temporarily

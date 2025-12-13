@@ -9,6 +9,18 @@
       "disabled": true,
       "autoApprove": []
     },
+    "render": {
+      "url": "https://mcp.render.com/mcp",
+      "headers": {
+        "Authorization": "Bearer rnd_POzKkdAKg62PkYh9knjIJo1QN3HY"
+      },
+      "autoApprove": [
+        "list_services",
+        "list_logs",
+        "list_deploys",
+        "get_deploy"
+      ]
+    },
     "chrome-devtools": {
       "command": "npx",
       "args": [

@@ -156,6 +156,24 @@ function handleVote(fishId, voteType, button) {
 
             // Update the display
             updateFishCard(fishId);
+            
+            // Update button style based on action
+            const upvoteBtn = document.getElementById(`upvote-btn-${fishId}`);
+            if (upvoteBtn) {
+                if (result.action === 'upvote') {
+                    // 用户刚点赞，更新为已点赞样式
+                    upvoteBtn.style.background = 'linear-gradient(180deg, #4CAF50 0%, #45a049 100%)';
+                    upvoteBtn.style.color = 'white';
+                    upvoteBtn.dataset.hasVoted = 'true';
+                    upvoteBtn.title = '点击取消点赞';
+                } else if (result.action === 'cancel_upvote') {
+                    // 用户取消点赞，恢复默认样式
+                    upvoteBtn.style.background = '';
+                    upvoteBtn.style.color = '';
+                    upvoteBtn.dataset.hasVoted = 'false';
+                    upvoteBtn.title = '点赞';
+                }
+            }
         } else {
             console.error(`Fish with ID ${fishId} not found in allFishData`);
         }
@@ -234,7 +252,7 @@ function createFishCard(fish) {
                 </div>
             </div>
             <div class="voting-controls">
-                <button class="vote-btn upvote-btn" onclick="handleVote('${fish.docId}', 'up', this)">
+                <button class="vote-btn upvote-btn" id="upvote-btn-${fish.docId}" onclick="handleVote('${fish.docId}', 'up', this)">
                     👍 <span class="vote-count upvote-count">${upvotes}</span>
                 </button>
                 ${showFavoriteButton ? `
@@ -309,6 +327,26 @@ function displayFish(fishData, append = false) {
             });
         }
     });
+    
+    // 检查用户对每条鱼的投票状态，并更新按钮样式
+    if (typeof checkUserVote === 'function') {
+        fishData.forEach(fish => {
+            if (fish.docId) {
+                checkUserVote(fish.docId).then(voteStatus => {
+                    const upvoteBtn = document.getElementById(`upvote-btn-${fish.docId}`);
+                    if (upvoteBtn && voteStatus.hasVoted) {
+                        // 用户已点赞，更新按钮样式
+                        upvoteBtn.style.background = 'linear-gradient(180deg, #4CAF50 0%, #45a049 100%)';
+                        upvoteBtn.style.color = 'white';
+                        upvoteBtn.dataset.hasVoted = 'true';
+                        upvoteBtn.title = '点击取消点赞';
+                    }
+                }).catch(err => {
+                    // 静默处理错误，不影响页面显示
+                });
+            }
+        });
+    }
 }
 
 // Sort and display fish

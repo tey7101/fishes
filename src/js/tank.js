@@ -163,16 +163,47 @@ function createFoodConsumptionEffect(x, y) {
 }
 
 function renderFoodPellets() {
-    if (foodPellets.length > 0) {
-        swimCtx.fillStyle = '#FF6B35'; // Orange color for better visibility
+    if (foodPellets.length === 0) return;
 
-        for (const pellet of foodPellets) {
-            if (!pellet.consumed) {
-                swimCtx.beginPath();
-                swimCtx.arc(pellet.x, pellet.y, pellet.size, 0, Math.PI * 2);
-                swimCtx.fill();
-            }
-        }
+    for (const pellet of foodPellets) {
+        if (pellet.consumed) continue;
+
+        const x = pellet.x;
+        const y = pellet.y;
+        const size = pellet.size;
+
+        swimCtx.save();
+
+        // 绘制鱼食颗粒 - 椭圆形状带渐变
+        // 主体渐变（橙红色到棕色，像真实鱼食）
+        const gradient = swimCtx.createRadialGradient(
+            x - size * 0.2, y - size * 0.3, 0,
+            x, y, size
+        );
+        gradient.addColorStop(0, '#FFB347');   // 亮橙色高光
+        gradient.addColorStop(0.4, '#FF8C42'); // 橙色
+        gradient.addColorStop(0.8, '#D2691E'); // 巧克力色
+        gradient.addColorStop(1, '#8B4513');   // 深棕色边缘
+
+        // 画椭圆形鱼食（稍微扁一点更像真实颗粒）
+        swimCtx.beginPath();
+        swimCtx.ellipse(x, y, size, size * 0.7, 0, 0, Math.PI * 2);
+        swimCtx.fillStyle = gradient;
+        swimCtx.fill();
+
+        // 添加高光点（让颗粒看起来有光泽）
+        swimCtx.beginPath();
+        swimCtx.ellipse(x - size * 0.25, y - size * 0.2, size * 0.3, size * 0.2, -0.5, 0, Math.PI * 2);
+        swimCtx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        swimCtx.fill();
+
+        // 添加小高光点
+        swimCtx.beginPath();
+        swimCtx.arc(x - size * 0.35, y - size * 0.35, size * 0.12, 0, Math.PI * 2);
+        swimCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        swimCtx.fill();
+
+        swimCtx.restore();
     }
 }
 
@@ -3212,17 +3243,7 @@ function handleTankTap(e) {
         tapY = e.clientY - rect.top;
     }
 
-    // Check if this is a feeding action (right click, or shift+click, or double tap)
-    const isFeeding = e.button === 2 || e.shiftKey || e.ctrlKey || e.metaKey;
-
-    if (isFeeding) {
-        // Drop food pellets
-        dropFoodPellet(tapX, tapY);
-        e.preventDefault(); // Prevent context menu on right click
-        return;
-    }
-
-    // 检查是否点击到了鱼，如果点击到了鱼就不执行移动逻辑
+    // 检查是否点击到了鱼，如果点击到了鱼就不执行喂食逻辑
     const time = Date.now() / 500;
     for (let i = fishes.length - 1; i >= 0; i--) {
         const fish = fishes[i];
@@ -3243,7 +3264,7 @@ function handleTankTap(e) {
             tapX >= fishX - padding && tapX <= fishX + fish.width + padding &&
             tapY >= fishY - padding && tapY <= fishY + fish.height + padding
         ) {
-            // 点击到了鱼，不执行移动逻辑，并阻止事件传播
+            // 点击到了鱼，不执行喂食逻辑，并阻止事件传播
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
@@ -3253,22 +3274,10 @@ function handleTankTap(e) {
         }
     }
 
-    // Original scare behavior - 只在没有点击到鱼时执行
-    const radius = 120;
-    fishes.forEach(fish => {
-        const fx = fish.x + fish.width / 2;
-        const fy = fish.y + fish.height / 2;
-        const dx = fx - tapX;
-        const dy = fy - tapY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < radius) {
-            const force = 16 * (1 - dist / radius);
-            const norm = Math.sqrt(dx * dx + dy * dy) || 1;
-            fish.vx = (dx / norm) * force;
-            fish.vy = (dy / norm) * force;
-            fish.direction = dx > 0 ? 1 : -1;
-        }
-    });
+    // 点击空白处 → 在点击位置投放食物，最近的鱼会游过来吃
+    // Drop food at click position - nearest fish will swim towards it
+    dropFoodPellet(tapX, tapY);
+    e.preventDefault();
 }
 
 function handleFishTap(e) {

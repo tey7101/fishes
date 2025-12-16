@@ -83,6 +83,24 @@ async function signUp(email, password) {
     
     if (error) throw error;
     
+    // 检测重复注册：
+    // 1. identities 为空数组（Supabase 默认安全行为）
+    // 2. created_at 时间早于当前时间超过 1 分钟（说明是已存在的用户）
+    if (data.user) {
+      const identitiesEmpty = data.user.identities && data.user.identities.length === 0;
+      const createdAt = new Date(data.user.created_at);
+      const now = new Date();
+      const isOldUser = (now - createdAt) > 60000; // 超过 1 分钟
+      
+      if (identitiesEmpty || isOldUser) {
+        console.warn('⚠️ 邮箱已被注册:', email);
+        return { 
+          data: null, 
+          error: new Error('This email is already registered. Please sign in instead.') 
+        };
+      }
+    }
+    
     console.log('✅ 注册成功:', data.user?.email);
     return { data, error: null };
   } catch (error) {

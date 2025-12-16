@@ -372,6 +372,14 @@ async function handleSignUp(event) {
     }
     
     if (data) {
+      // Track registration completion with Google Analytics (GA4)
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'sign_up', {
+          method: 'email'
+        });
+        console.log('[GA4] sign_up event sent');
+      }
+      
       // Track registration completion with Meta Pixel
       if (typeof fbq !== 'undefined') {
         fbq('track', 'CompleteRegistration', {

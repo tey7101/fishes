@@ -2649,7 +2649,6 @@ async function loadModelWithCache() {
             const arrayBuffer = await downloadWithProgress(MODEL_URL, (percent, received, total) => {
                 const mb = (received / 1024 / 1024).toFixed(1);
                 const totalMb = (total / 1024 / 1024).toFixed(1);
-                console.log(`📥 Download progress: ${percent}% (${mb}/${totalMb} MB)`);
                 // 下载占 0-80%，初始化占 80-100%
                 updateProgress(Math.round(percent * 0.8), `Downloading ${mb}/${totalMb} MB`);
             });

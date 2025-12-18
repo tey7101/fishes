@@ -6,6 +6,13 @@
 // 根据fish_talk字段直接控制聊天面板的显示
 window.updateChatPanelVisibility = async function() {
   console.log('🔍 updateChatPanelVisibility 被调用');
+  
+  // 教程期间不自动显示聊天面板，避免干扰教程
+  if (window.onboardingManager && window.onboardingManager.isOnboarding && window.onboardingManager.isOnboarding()) {
+    console.log('⏸️ 教程进行中，跳过聊天面板显示');
+    return;
+  }
+  
   const chatPanel = document.getElementById('chat-panel');
   const chatReopenBtn = document.getElementById('chat-reopen-btn');
   

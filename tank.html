@@ -21,9 +21,52 @@
     <link rel="stylesheet" href="src/css/style.css?v=2.0">
     <link rel="stylesheet" href="src/css/auth-ui.css?v=2.3">
     <link rel="stylesheet" href="src/css/hamburger-menu.css?v=1.0">
+    <link rel="stylesheet" href="src/css/onboarding.css?v=1.3">
     <link rel="icon" type="image/png" href="/fish_logo.png?v=2.0">
     
+    <!-- Driver.js for onboarding tutorial - lazy loaded only for first-time visitors -->
+    
     <style>
+        /* Our Tank 信息栏响应式样式 - 移动端和汉堡菜单同一行 */
+        @media (max-width: 768px) {
+            #our-tank-header {
+                left: 55px !important;
+                right: 10px !important;
+                top: 8px !important;
+                padding: 4px 8px !important;
+                background: transparent !important;
+            }
+            
+            #our-tank-header > div {
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 6px !important;
+                flex-wrap: nowrap !important;
+            }
+            
+            /* 隐藏鱼缸名称，只保留按钮 */
+            #our-tank-header > div > div:first-child {
+                display: none !important;
+            }
+            
+            #our-tank-header button,
+            #our-tank-header a {
+                padding: 4px 8px !important;
+                font-size: 11px !important;
+                border-radius: 6px !important;
+            }
+            
+            #our-tank-name {
+                font-size: 14px !important;
+            }
+        }
+        
+        /* Our Tank 模态框鱼项目悬停效果 */
+        .fish-item-for-tank:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
         /* Tank selection in modal - 游戏风格优化 */
         .tank-selection-grid {
             display: grid;
@@ -667,6 +710,12 @@
         }
     </style>
     
+    <!-- Onboarding Tutorial Config -->
+    <script>
+      // 推广教程延迟时间（毫秒），可通过服务端注入覆盖
+      window.TANK_PROMOTE_TUTORIAL_TIME = 30 * 1000; // 30秒（测试），正式环境设为 2 * 60 * 1000
+    </script>
+    
     <!-- Meta Pixel Code -->
     <script>
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
@@ -782,6 +831,10 @@
         </a>
       </div>
       
+      <a href="#" id="sidebar-tutorial-btn" class="sidebar-link" onclick="if(window.onboardingManager){window.onboardingManager.startTutorial(true);document.getElementById('sidebar-menu').classList.remove('open');document.getElementById('sidebar-overlay').classList.remove('active');}return false;">
+        <span class="sidebar-icon">📖</span>
+        <span>Tutorial</span>
+      </a>
       <a href="index.html" class="sidebar-link">
         <span class="sidebar-icon">🎨</span>
         <span>Draw Fish</span>
@@ -793,6 +846,10 @@
       <a href="tank.html?view=my" class="sidebar-link">
         <span class="sidebar-icon">🏠</span>
         <span>My Tank</span>
+      </a>
+      <a href="our-tank-list.html" class="sidebar-link" onclick="return window.checkOurTankAccess?window.checkOurTankAccess(event):true;">
+        <span class="sidebar-icon">👥</span>
+        <span>Our Tank</span>
       </a>
       <a href="rank.html" class="sidebar-link">
         <span class="sidebar-icon">🏆</span>
@@ -813,8 +870,36 @@
     </nav>
   </div>
   
-  <!-- 侧边栏遮�?-->
+  <!-- 侧边栏遮罩 -->
   <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+  <!-- Our Tank Header (compact single row) -->
+  <div id="our-tank-header" style="display: none; position: fixed; top: 10px; left: 70px; right: 15px; z-index: 100; background: transparent; padding: 6px 16px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <!-- Tank Name -->
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 18px;">👥</span>
+        <h2 id="our-tank-name" style="margin: 0; color: white; font-size: 16px; font-weight: 900; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);">Friend Tank</h2>
+      </div>
+      <!-- Action Buttons -->
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <!-- Add Fish Button -->
+        <button id="our-tank-add-fish-btn" onclick="showAddFishModal()" style="padding: 5px 12px; background: linear-gradient(180deg, #4CD964 0%, #3CB54A 50%, #2E8B3A 100%); color: white; border: none; border-bottom: 2px solid #1F6B2A; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">
+          ➕ Add Fish
+        </button>
+        <!-- Members Button (shows count) -->
+        <button id="our-tank-members-btn" onclick="showMembersModal()" style="padding: 5px 12px; background: linear-gradient(180deg, #63A4E8 0%, #4A90E2 50%, #357ABD 100%); color: white; border: none; border-bottom: 2px solid #2C5F8F; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">
+          👥 <span id="our-tank-member-count">0</span> Members
+        </button>
+        <!-- Share Button -->
+        <button id="our-tank-share-btn" onclick="showShareModal()" style="padding: 5px 12px; background: linear-gradient(180deg, #A78BFA 0%, #8B5CF6 50%, #7C3AED 100%); color: white; border: none; border-bottom: 2px solid #5B21B6; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">
+          📤 Share
+        </button>
+      </div>
+    </div>
+    <!-- Hidden elements for JS compatibility -->
+    <span id="our-tank-fish-count" style="display: none;">0</span>
+  </div>
 
   <!-- 海洋风格背景气泡 -->
   <div class="background-bubbles"></div>
@@ -897,19 +982,73 @@
     
     <!-- 聊天面板重新打开按钮 -->
     <div id="chat-reopen-btn" style="position: fixed; right: 20px; bottom: 20px; width: 42px; height: 42px; background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%); border-radius: 50%; display: none; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2), 0 6px 14px rgba(0, 0, 0, 0.3); transition: all 0.3s ease; z-index: 998; border: 2px solid #A5B4FC;" title="Open Chat Panel">
-      <svg width="22" height="22" viewBox="0 0 1024 1024" style="filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));">
-        <path d="M229.333333 321.194667a236.373333 236.373333 0 1 0 118.186667-204.16 235.136 235.136 0 0 0-118.186667 204.16z m0 0" fill="white"></path>
-        <path d="M469.333333 597.12c-186.624 0-345.088 129.578667-383.402666 272.512a57.685333 57.685333 0 0 0 57.429333 68.821333h655.232a52.736 52.736 0 0 0 52.650667-68.821333c-37.930667-142.762667-195.285333-272.512-381.909334-272.512z" fill="white"></path>
-        <path d="M725.333333 512h170.666667a42.666667 42.666667 0 0 1 0 85.333333h-170.666667a44.288 44.288 0 0 1-42.666666-42.666666 42.282667 42.282667 0 0 1 42.666666-42.666667z" fill="white"></path>
-        <path d="M810.666667 256h85.333333a42.666667 42.666667 0 0 1 0 85.333333h-85.333333a44.288 44.288 0 0 1-42.666667-42.666666 42.282667 42.282667 0 0 1 42.666667-42.666667z" fill="white"></path>
-        <path d="M768 384h128a42.666667 42.666667 0 0 1 0 85.333333h-128a44.288 44.288 0 0 1-42.666667-42.666666 42.282667 42.282667 0 0 1 42.666667-42.666667z" fill="white"></path>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));">
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" fill="white" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
   </div>
   
-  <!-- 加载指示�?-->
+  <!-- 加载指示器 -->
   <div id="loading-indicator" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; z-index: 1000; background: rgba(255, 255, 255, 0.95); padding: 20px 40px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);">
     <div style="text-align: center; color: #6366F1; font-weight: 600;">Loading...</div>
+  </div>
+
+  <!-- Our Tank Add Fish Modal -->
+  <div id="our-tank-add-fish-modal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px; background: linear-gradient(180deg, #FFF9E6 0%, #FFF4D6 100%); border-radius: 24px; border: 3px solid #A5B4FC; box-shadow: 0 8px 0 rgba(0, 0, 0, 0.2), 0 16px 40px rgba(0, 0, 0, 0.4);">
+      <div style="background: linear-gradient(#1A1A1D 0%, #0F0F0F 50%, #050505 100%); padding: 16px 20px; border-radius: 20px 20px 0 0; display: flex; align-items: center; justify-content: space-between;">
+        <h3 style="margin: 0; color: white; font-size: 18px; font-weight: 900;">➕ Add Fish to Tank</h3>
+        <button onclick="closeAddFishModal()" style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(#FC5C65 0%, #EB3B5A 50%, #C0392B 100%); border: none; color: white; font-size: 18px; cursor: pointer;">×</button>
+      </div>
+      <div style="padding: 20px;">
+        <p style="color: #666; margin-bottom: 16px; font-size: 14px;">Select your fish to add to the tank:</p>
+        <div id="my-fish-list-for-tank" style="max-height: 300px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px;">
+          <!-- Fish list loaded via JS -->
+          <div style="text-align: center; color: #999; padding: 40px;">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Our Tank Members Modal -->
+  <div id="our-tank-members-modal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 450px; background: linear-gradient(180deg, #FFF9E6 0%, #FFF4D6 100%); border-radius: 24px; border: 3px solid #A5B4FC; box-shadow: 0 8px 0 rgba(0, 0, 0, 0.2), 0 16px 40px rgba(0, 0, 0, 0.4);">
+      <div style="background: linear-gradient(#1A1A1D 0%, #0F0F0F 50%, #050505 100%); padding: 16px 20px; border-radius: 20px 20px 0 0; display: flex; align-items: center; justify-content: space-between;">
+        <h3 style="margin: 0; color: white; font-size: 18px; font-weight: 900;">👥 Tank Members</h3>
+        <button onclick="closeMembersModal()" style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(#FC5C65 0%, #EB3B5A 50%, #C0392B 100%); border: none; color: white; font-size: 18px; cursor: pointer;">×</button>
+      </div>
+      <div style="padding: 20px;">
+        <div id="our-tank-members-list" style="max-height: 350px; overflow-y: auto;">
+          <!-- Members list loaded via JS -->
+          <div style="text-align: center; color: #999; padding: 40px;">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Our Tank Share Modal -->
+  <div id="our-tank-share-modal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 400px; background: linear-gradient(180deg, #FFF9E6 0%, #FFF4D6 100%); border-radius: 24px; border: 3px solid #A5B4FC; box-shadow: 0 8px 0 rgba(0, 0, 0, 0.2), 0 16px 40px rgba(0, 0, 0, 0.4);">
+      <div style="background: linear-gradient(#1A1A1D 0%, #0F0F0F 50%, #050505 100%); padding: 16px 20px; border-radius: 20px 20px 0 0; display: flex; align-items: center; justify-content: space-between;">
+        <h3 style="margin: 0; color: white; font-size: 18px; font-weight: 900;">📤 Share Tank</h3>
+        <button onclick="closeShareModal()" style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(#FC5C65 0%, #EB3B5A 50%, #C0392B 100%); border: none; color: white; font-size: 18px; cursor: pointer;">×</button>
+      </div>
+      <div style="padding: 20px; text-align: center;">
+        <p style="color: #666; margin-bottom: 16px; font-size: 14px;">Share the invite code or link with friends to join your tank:</p>
+        <div style="background: white; border: 2px dashed #A5B4FC; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+          <div style="font-size: 32px; font-weight: 900; color: #6366F1; letter-spacing: 4px;" id="our-tank-invite-code">------</div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+          <button onclick="copyInviteCode()" style="flex: 1; padding: 12px 16px; background: linear-gradient(180deg, #4CD964 0%, #3CB54A 50%, #2E8B3A 100%); color: white; border: none; border-bottom: 3px solid #1F6B2A; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);">
+            📋 Copy Code
+          </button>
+          <button onclick="copyInviteLink()" style="flex: 1; padding: 12px 16px; background: linear-gradient(180deg, #63A4E8 0%, #4A90E2 50%, #357ABD 100%); color: white; border: none; border-bottom: 3px solid #2C5F8F; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);">
+            🔗 Copy Link
+          </button>
+        </div>
+        <div id="share-copy-success" style="display: none; color: #2E8B3A; margin-top: 12px; font-weight: 600;">✅ Copied to clipboard!</div>
+      </div>
+    </div>
   </div>
   <script src="src/js/footer-utils.js"></script>
   <!-- Supabase SDK -->
@@ -934,411 +1073,13 @@
     <script src="src/js/tank-layout-manager.js?v=1.5"></script>
   <script src="src/js/community-chat-manager.js?v=2.7"></script>
   <script src="src/js/tank-chat-panel-manager.js?v=1.0"></script>
+  <script src="src/js/onboarding.js?v=1.1"></script>
     <script src="src/js/tank.js?v=5.7"></script>
     <script>
       // Initialize navigation authentication
       if (typeof initializeAuthNavigation === 'function') {
         initializeAuthNavigation();
       }
-      
-      // Remind user to login for Fish Talk feature after 10 seconds
-      (async function() {
-        // Wait for auth modules to be ready
-        await new Promise(resolve => {
-          if (window.supabaseAuth && window.authUI) {
-            resolve();
-          } else {
-            const checkInterval = setInterval(() => {
-              if (window.supabaseAuth && window.authUI) {
-                clearInterval(checkInterval);
-                resolve();
-              }
-            }, 100);
-            // Timeout after 5 seconds
-            setTimeout(() => {
-              clearInterval(checkInterval);
-              resolve();
-            }, 5000);
-          }
-        });
-        
-        // Check if user is logged in
-        try {
-          const user = await window.supabaseAuth?.getCurrentUser();
-          if (!user) {
-            // User is not logged in, show reminder after 10 seconds
-            setTimeout(() => {
-              // Check again to make sure user still not logged in
-              window.supabaseAuth?.getCurrentUser().then(currentUser => {
-                if (!currentUser) {
-                  // Show centered modal reminder - Game Style
-                  if (window.authUI && window.authUI.showLoginModal) {
-                    // Create modal overlay
-                    const overlay = document.createElement('div');
-                    overlay.className = 'modal';
-                    overlay.style.cssText = `
-                      display: flex;
-                      position: fixed;
-                      top: 0;
-                      left: 0;
-                      width: 100%;
-                      height: 100%;
-                      background: rgba(0, 0, 0, 0.7);
-                      backdrop-filter: blur(8px);
-                      z-index: 10001;
-                      align-items: center;
-                      justify-content: center;
-                      animation: fadeIn 0.3s ease;
-                    `;
-                    
-                    // Create modal content with game style - redesigned with stone banner
-                    const modal = document.createElement('div');
-                    modal.className = 'modal-content';
-                    modal.style.cssText = `
-                      background: linear-gradient(180deg, #FFF9E6 0%, #FFF4D6 100%);
-                      border-radius: 32px;
-                      padding: 0;
-                      width: 460px;
-                      max-width: 90vw;
-                      box-shadow: 
-                        0 8px 0 rgba(0, 0, 0, 0.2),
-                        0 16px 40px rgba(0, 0, 0, 0.4);
-                      border: 3px solid #A5B4FC;
-                      position: relative;
-                      animation: modalBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-                      text-align: center;
-                      overflow: hidden;
-                    `;
-                    
-                    // Create stone-style title banner at top
-                    const titleBanner = document.createElement('div');
-                    titleBanner.style.cssText = `
-                      background: linear-gradient(180deg, #1A1A1D 0%, #0F0F0F 50%, #050505 100%);
-                      padding: 16px 24px;
-                      border-bottom: 2px solid #000000;
-                      position: relative;
-                      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), 0 2px 0 rgba(255, 255, 255, 0.1);
-                    `;
-                    titleBanner.innerHTML = `
-                      <h2 style="
-                        color: #FFFFFF;
-                        margin: 0;
-                        font-size: 24px;
-                        font-weight: 900;
-                        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, 0.2);
-                        letter-spacing: 1px;
-                      ">Fish Group Chat</h2>
-                    `;
-                    modal.appendChild(titleBanner);
-                    
-                    // Create main content area
-                    const contentArea = document.createElement('div');
-                    contentArea.style.cssText = `
-                      padding: 40px;
-                      padding-top: 32px;
-                    `;
-                    contentArea.innerHTML = `
-                      <button id="close-reminder-modal" class="modal-close-btn" style="
-                        position: absolute;
-                        top: 20px;
-                        right: 20px;
-                        width: 36px;
-                        height: 36px;
-                        border-radius: 50%;
-                        background: linear-gradient(180deg, #4CD964 0%, #3CB54A 50%, #2E8B3A 100%);
-                        border: none;
-                        border-bottom: 3px solid #1F6B2A;
-                        color: white;
-                        font-size: 20px;
-                        font-weight: 700;
-                        cursor: pointer;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.3);
-                        transition: all 0.15s ease;
-                        z-index: 10;
-                        line-height: 1;
-                        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-                      " title="Close">×</button>
-                      <div style="
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 20px;
-                        margin-bottom: 24px;
-                        padding: 20px 0;
-                      ">
-                        <div style="
-                          font-size: 72px;
-                          text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                          animation: float 2s ease-in-out infinite;
-                        ">🐠</div>
-                        <div style="
-                          background: linear-gradient(180deg, #D4A574 0%, #C8965A 50%, #B8854A 100%);
-                          border: 3px solid #8B6F3D;
-                          border-radius: 12px;
-                          padding: 16px 20px;
-                          box-shadow: 
-                            0 4px 0 rgba(0, 0, 0, 0.2),
-                            inset 0 2px 4px rgba(255, 255, 255, 0.3);
-                          position: relative;
-                        ">
-                          <div style="
-                            color: #5D4037;
-                            font-size: 14px;
-                            font-weight: 700;
-                            margin-bottom: 4px;
-                            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-                          ">Unlock Feature</div>
-                          <div style="
-                            color: #3E2723;
-                            font-size: 18px;
-                            font-weight: 900;
-                            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-                          ">Group Chat</div>
-                        </div>
-                      </div>
-                      <p style="
-                        color: #666;
-                        margin: 0 0 32px 0;
-                        font-size: 16px;
-                        line-height: 1.6;
-                        padding: 0 10px;
-                      ">
-                        Sign in to unlock the Fish Group Chat feature and watch your fish come alive with conversations!
-                      </p>
-                      <div style="
-                        display: flex;
-                        flex-direction: column;
-                        gap: 12px;
-                        width: 100%;
-                      ">
-                        <button id="login-from-reminder" class="game-btn game-btn-blue" style="
-                          width: 100%;
-                          padding: 16px 28px;
-                          border: none;
-                          border-radius: 24px;
-                          background: linear-gradient(180deg, #63A4E8 0%, #4A90E2 50%, #357ABD 100%);
-                          border-bottom: 3px solid #2A5F8F;
-                          color: white;
-                          font-size: 18px;
-                          font-weight: 700;
-                          cursor: pointer;
-                          position: relative;
-                          overflow: hidden;
-                          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-                          box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
-                          transition: all 0.15s ease;
-                          transform: translateY(0);
-                        ">
-                          <span style="position: relative; z-index: 1;">Sign In</span>
-                        </button>
-                        <button id="maybe-later-btn" class="game-btn game-btn-orange" style="
-                          width: 100%;
-                          padding: 16px 28px;
-                          border: none;
-                          border-radius: 24px;
-                          background: linear-gradient(180deg, #FFB340 0%, #FF9500 50%, #E67E00 100%);
-                          border-bottom: 3px solid #CC6F00;
-                          color: white;
-                          font-size: 18px;
-                          font-weight: 700;
-                          cursor: pointer;
-                          position: relative;
-                          overflow: hidden;
-                          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-                          box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
-                          transition: all 0.15s ease;
-                          transform: translateY(0);
-                        ">
-                          <span style="position: relative; z-index: 1;">Maybe Later</span>
-                        </button>
-                      </div>
-                    `;
-                    modal.appendChild(contentArea);
-                    
-                    // Add top gloss effect
-                    const gloss = document.createElement('div');
-                    gloss.style.cssText = `
-                      position: absolute;
-                      top: 0;
-                      left: 0;
-                      right: 0;
-                      height: 50%;
-                      background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
-                      border-radius: 32px 32px 0 0;
-                      pointer-events: none;
-                      z-index: 1;
-                    `;
-                    modal.appendChild(gloss);
-                    
-                    // Add animations
-                    const style = document.createElement('style');
-                    style.textContent = `
-                      @keyframes fadeIn {
-                        from { opacity: 0; }
-                        to { opacity: 1; }
-                      }
-                      @keyframes modalBounce {
-                        0% { 
-                          transform: scale(0.8) translateY(-30px); 
-                          opacity: 0; 
-                        }
-                        50% { 
-                          transform: scale(1.05) translateY(5px); 
-                        }
-                        100% { 
-                          transform: scale(1) translateY(0); 
-                          opacity: 1; 
-                        }
-                      }
-                      @keyframes fadeOut {
-                        from { opacity: 1; }
-                        to { opacity: 0; }
-                      }
-                      @keyframes float {
-                        0%, 100% { 
-                          transform: translateY(0px); 
-                        }
-                        50% { 
-                          transform: translateY(-10px); 
-                        }
-                      }
-                      .game-btn::before {
-                        content: '';
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        right: 0;
-                        height: 50%;
-                        background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
-                        border-radius: 24px 24px 0 0;
-                        pointer-events: none;
-                      }
-                      .game-btn:hover {
-                        transform: translateY(-2px);
-                        box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
-                      }
-                      .game-btn:active {
-                        transform: translateY(2px);
-                        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
-                      }
-                      .modal-close-btn::before {
-                        content: '';
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        right: 0;
-                        height: 50%;
-                        background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
-                        border-radius: 50% 50% 0 0;
-                        pointer-events: none;
-                      }
-                      .modal-close-btn:hover {
-                        transform: scale(1.1);
-                        box-shadow: 0 5px 0 rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.4);
-                      }
-                      .modal-close-btn:active {
-                        transform: scale(0.95);
-                        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.3);
-                      }
-                    `;
-                    document.head.appendChild(style);
-                    
-                    overlay.appendChild(modal);
-                    document.body.appendChild(overlay);
-                    
-                    // Close modal function
-                    const closeModal = () => {
-                      overlay.style.animation = 'fadeOut 0.3s ease';
-                      setTimeout(() => {
-                        overlay.remove();
-                      }, 300);
-                    };
-                    
-                    // Close button handler
-                    const closeBtn = modal.querySelector('#close-reminder-modal');
-                    closeBtn.addEventListener('click', closeModal);
-                    
-                    // Maybe later button handler
-                    const maybeLaterBtn = modal.querySelector('#maybe-later-btn');
-                    maybeLaterBtn.addEventListener('click', closeModal);
-                    
-                    // Login button handler
-                    const loginBtn = modal.querySelector('#login-from-reminder');
-                    loginBtn.addEventListener('click', () => {
-                      closeModal();
-                      setTimeout(() => {
-                        if (window.authUI && window.authUI.showLoginModal) {
-                          window.authUI.showLoginModal();
-                        }
-                      }, 300);
-                    });
-                    
-                    // Click overlay to close
-                    overlay.addEventListener('click', (e) => {
-                      if (e.target === overlay) {
-                        closeModal();
-                      }
-                    });
-                    
-                    // 3D Button hover effects - Game Style
-                    loginBtn.addEventListener('mouseenter', () => {
-                      loginBtn.style.transform = 'translateY(-2px)';
-                      loginBtn.style.boxShadow = '0 6px 0 rgba(0, 0, 0, 0.25)';
-                    });
-                    loginBtn.addEventListener('mouseleave', () => {
-                      loginBtn.style.transform = 'translateY(0)';
-                      loginBtn.style.boxShadow = '0 4px 0 rgba(0, 0, 0, 0.25)';
-                    });
-                    loginBtn.addEventListener('mousedown', () => {
-                      loginBtn.style.transform = 'translateY(2px)';
-                      loginBtn.style.boxShadow = '0 2px 0 rgba(0, 0, 0, 0.25)';
-                    });
-                    loginBtn.addEventListener('mouseup', () => {
-                      loginBtn.style.transform = 'translateY(-2px)';
-                      loginBtn.style.boxShadow = '0 6px 0 rgba(0, 0, 0, 0.25)';
-                    });
-                    
-                    maybeLaterBtn.addEventListener('mouseenter', () => {
-                      maybeLaterBtn.style.transform = 'translateY(-2px)';
-                      maybeLaterBtn.style.boxShadow = '0 6px 0 rgba(0, 0, 0, 0.25)';
-                    });
-                    maybeLaterBtn.addEventListener('mouseleave', () => {
-                      maybeLaterBtn.style.transform = 'translateY(0)';
-                      maybeLaterBtn.style.boxShadow = '0 4px 0 rgba(0, 0, 0, 0.25)';
-                    });
-                    maybeLaterBtn.addEventListener('mousedown', () => {
-                      maybeLaterBtn.style.transform = 'translateY(2px)';
-                      maybeLaterBtn.style.boxShadow = '0 2px 0 rgba(0, 0, 0, 0.25)';
-                    });
-                    maybeLaterBtn.addEventListener('mouseup', () => {
-                      maybeLaterBtn.style.transform = 'translateY(-2px)';
-                      maybeLaterBtn.style.boxShadow = '0 6px 0 rgba(0, 0, 0, 0.25)';
-                    });
-                    
-                    closeBtn.addEventListener('mouseenter', () => {
-                      closeBtn.style.transform = 'translateY(-2px) rotate(90deg) scale(1.1)';
-                      closeBtn.style.boxShadow = '0 6px 0 rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.4)';
-                    });
-                    closeBtn.addEventListener('mouseleave', () => {
-                      closeBtn.style.transform = 'translateY(0) rotate(0deg) scale(1)';
-                      closeBtn.style.boxShadow = '0 4px 0 rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.3)';
-                    });
-                    closeBtn.addEventListener('mousedown', () => {
-                      closeBtn.style.transform = 'translateY(2px) rotate(90deg) scale(1.05)';
-                      closeBtn.style.boxShadow = '0 2px 0 rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.3)';
-                    });
-                  }
-                }
-              });
-            }, 10000); // 10 seconds
-          }
-        } catch (error) {
-          console.error('Error checking login status:', error);
-        }
-      })();
       
       // Sidebar controls - independent functionality
     (function() {
@@ -1651,6 +1392,21 @@
       
       // Debug: Verify sidebar controls when sidebar opens
       document.addEventListener('DOMContentLoaded', function() {
+        // 🎓 初始化新手引导系统
+        if (window.onboardingManager) {
+          console.log('[Tank] Initializing onboarding from DOMContentLoaded');
+          window.onboardingManager.init();
+        } else {
+          console.log('[Tank] onboardingManager not ready, will retry');
+          // 如果 onboardingManager 还没加载，等待后重试
+          setTimeout(() => {
+            if (window.onboardingManager) {
+              console.log('[Tank] Initializing onboarding (delayed)');
+              window.onboardingManager.init();
+            }
+          }, 1000);
+        }
+        
         const sidebarMenu = document.getElementById('sidebar-menu');
         const hamburgerBtn = document.getElementById('hamburger-menu-btn');
         

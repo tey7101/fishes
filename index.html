@@ -34,6 +34,7 @@
     <link rel="stylesheet" href="src/css/traffic.css?v=2.0">
     <link rel="stylesheet" href="src/css/auth-ui.css?v=2.3">
     <link rel="stylesheet" href="src/css/hamburger-menu.css?v=1.2">
+    <link rel="stylesheet" href="src/css/onboarding.css?v=1.3">
     <link rel="icon" type="image/png" href="/fish_logo.png?v=2.0">
     
     <!-- Meta Pixel Code -->
@@ -174,6 +175,8 @@
       }
     }
     </script>
+    
+    <!-- Driver.js for onboarding tutorial - lazy loaded only for first-time visitors -->
 </head>
 <body class="game-style">
   <!-- 加载状态提示 -->
@@ -251,6 +254,10 @@
       <button id="close-sidebar-btn" class="close-sidebar-btn" aria-label="Close menu">&times;</button>
     </div>
     <nav class="sidebar-nav">
+      <a href="#" id="sidebar-tutorial-btn" class="sidebar-link" onclick="if(window.onboardingManager){window.onboardingManager.startTutorial(true);document.getElementById('sidebar-menu').classList.remove('open');document.getElementById('sidebar-overlay').classList.remove('active');}return false;">
+        <span class="sidebar-icon">📖</span>
+        <span>Tutorial</span>
+      </a>
       <a href="index.html" class="sidebar-link">
         <span class="sidebar-icon">🎨</span>
         <span>Draw Fish</span>
@@ -262,6 +269,10 @@
       <a href="tank.html?view=my" class="sidebar-link">
         <span class="sidebar-icon">🏠</span>
         <span>My Tank</span>
+      </a>
+      <a href="our-tank-list.html" class="sidebar-link" onclick="return window.checkOurTankAccess?window.checkOurTankAccess(event):true;">
+        <span class="sidebar-icon">👥</span>
+        <span>Our Tank</span>
       </a>
       <a href="rank.html" class="sidebar-link">
         <span class="sidebar-icon">🏆</span>
@@ -295,14 +306,19 @@
       </div>
       
       <!-- SEO-optimized hero section -->
-      <section class="hero-intro" style="text-align: center; max-width: 1000px; margin: 0 auto 20px; padding: 0 20px;">
-        <p style="font-size: 18px; line-height: 1.6; color: #ffffff; font-weight: 700; margin-bottom: 15px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6), 0 0 10px rgba(0, 0, 0, 0.3);">
-          Welcome to <strong>fishtalk.app</strong>! <strong>Draw a fish</strong> powered by AI and create <strong>talking fish</strong> that chat in the <a href="tank.html" style="display: inline; background: linear-gradient(180deg, #FFD700 0%, #FFA500 100%); color: #333; padding: 1px 8px; border-radius: 10px; text-decoration: none; font-weight: 700; box-shadow: 0 1px 4px rgba(255, 165, 0, 0.4); transition: all 0.2s ease; text-shadow: none; font-size: 16px;" onmouseover="this.style.background='linear-gradient(180deg, #FFE44D 0%, #FFB347 100%)';" onmouseout="this.style.background='linear-gradient(180deg, #FFD700 0%, #FFA500 100%)';">global tank</a> with 50K+ doodles 🐠
+      <style>
+        .hero-intro-text { font-size: 17px; line-height: 1.6; color: #ffffff; font-weight: 700; margin-bottom: 15px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6), 0 0 10px rgba(0, 0, 0, 0.3); }
+        @media (min-width: 1024px) { .hero-intro-text { white-space: nowrap; } }
+        @media (max-width: 768px) { .hero-intro-text { font-size: 15px; } }
+      </style>
+      <section class="hero-intro" style="text-align: center; max-width: 1200px; margin: 0 auto 20px; padding: 0 20px;">
+        <p class="hero-intro-text">
+          Welcome to <strong>fishtalk.app</strong>! <strong>Draw a fish</strong> powered by AI and create <strong>talking fish</strong> that chat in the <a href="tank.html" style="display: inline; background: linear-gradient(180deg, #FFD700 0%, #FFA500 100%); color: #333; padding: 1px 8px; border-radius: 10px; text-decoration: none; font-weight: 700; box-shadow: 0 1px 4px rgba(255, 165, 0, 0.4); transition: all 0.2s ease; text-shadow: none; font-size: 15px;" onmouseover="this.style.background='linear-gradient(180deg, #FFE44D 0%, #FFB347 100%)';" onmouseout="this.style.background='linear-gradient(180deg, #FFD700 0%, #FFA500 100%)';">global tank</a> with 50K+ doodles 🐠
         </p>
       </section>
       
       <section id="drawing-section">
-        <h1 class="game-title"><span style="display: inline-block; transform: scaleX(-1);">🐠</span> fishtalk.app – Draw Your Talking Fish</h1>
+        <h1 class="game-title" style="color: white;"><span style="display: inline-block; transform: scaleX(-1);">🐠</span> Draw Your Talking Fish</h1>
         
         <!-- 画布容器 -->
         <div class="game-canvas-wrapper">
@@ -353,9 +369,9 @@
           <a href="tank.html?view=my" id="my-tanks-link" class="game-btn game-btn-blue" title="Create custom fish tanks">
             <span class="sidebar-icon">🏠</span> <span>My Tank</span>
           </a>
-          <button id="main-share-btn" class="game-btn game-btn-blue" title="Share this tool">
-            <span class="sidebar-icon">📤</span> <span>Share</span>
-          </button>
+          <a href="our-tank-list.html" class="game-btn game-btn-blue" title="Create your own tank with friends" onclick="return window.checkOurTankAccess?window.checkOurTankAccess(event):true;">
+            <span class="sidebar-icon">👥</span> <span>Our Tank</span>
+          </a>
         </nav>
       </section>
     </div>
@@ -363,17 +379,6 @@
 
   <!-- Bottom Info Bar -->
   <footer class="game-footer">
-    <!-- SEO Content Section -->
-    <div style="max-width: 1000px; margin: 4px auto; padding: 6px 16px; background: rgba(255, 255, 255, 0.08); border-radius: 12px; text-align: center;">
-      <p style="font-size: 12px; line-height: 1.4; color: rgba(255, 255, 255, 0.9); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-        <strong>fishtalk.app</strong> - <strong>Draw a fish</strong> online with AI technology! Create <strong>talking fish</strong> & <strong>AI fish</strong> that chat in our <strong>global tank</strong> with 50,000+ doodles. <strong>fishtalk.app</strong> is the best free online <strong>talking fish</strong> app for global artists.
-      </p>
-    </div>
-    
-    <p style="margin: 8px 0 4px; color: rgba(255, 255, 255, 0.7); font-size: 11px;">
-      © 2024-2025 fishtalk.app - All Rights Reserved
-    </p>
-    
     <div class="game-footer-links">
       <a href="tank.html" class="game-footer-link">Global Fish Tank</a>
       <a href="talking-fish.html" class="game-footer-link">Talking Fish</a>
@@ -386,13 +391,18 @@
       <a href="javascript:void(0)" onclick="showContactModal()" class="game-footer-link">Contact Us</a>
     </div>
     
-    <p style="margin: 6px 0 4px; color: rgba(255, 255, 255, 0.9); font-size: 12px;">
-      🎨 Based on 
+    <!-- SEO Content Section - 移到按钮下方，去掉背景 -->
+    <p style="max-width: 1400px; margin: 4px auto; padding: 2px 16px; font-size: 11px; line-height: 1.3; color: rgba(255, 255, 255, 0.7); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+      <strong>fishtalk.app</strong> - <strong>Draw a fish</strong> online with AI technology! Create <strong>talking fish</strong> & <strong>AI fish</strong> that chat in our <strong>global tank</strong> with 50,000+ doodles. <strong>fishtalk.app</strong> is the best free online <strong>talking fish</strong> app for global artists.
+    </p>
+    
+    <p style="margin: 4px 0 4px; color: rgba(255, 255, 255, 0.7); font-size: 11px;">
+      © 2024-2025 fishtalk.app - All Rights Reserved | 🎨 Based on 
       <a href="https://github.com/aldenhallak/fishes" target="_blank" rel="noopener noreferrer" 
-         style="color: white; font-weight: 700; text-decoration: underline;">DrawAFish</a>
+         style="color: rgba(255, 255, 255, 0.9); font-weight: 600; text-decoration: underline;">DrawAFish</a>
       by
       <a href="https://github.com/aldenhallak" target="_blank" rel="noopener noreferrer"
-         style="color: white; font-weight: 700; text-decoration: underline;">aldenhallak</a>
+         style="color: rgba(255, 255, 255, 0.9); font-weight: 600; text-decoration: underline;">aldenhallak</a>
     </p>
   </footer>
 
@@ -606,6 +616,7 @@
   <script src="src/js/contact-modal.js?v=1.0"></script>
   <script src="src/js/hamburger-menu.js?v=1.0"></script>
   <script src="src/js/dashboard-dropdown.js?v=1.0"></script>
+  <script src="src/js/onboarding.js?v=1.0"></script>
   <script src="src/js/app.js?v=2.3"></script>
   <script>
     // Initialize social links for footer and mobile

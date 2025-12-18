@@ -918,6 +918,42 @@ type fish {
     where: messages_bool_exp
   ): messages_aggregate!
 
+  """An array relationship"""
+  our_tank_fishes(
+    """distinct select on columns"""
+    distinct_on: [our_tank_fish_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tank_fish_order_by!]
+
+    """filter the rows returned"""
+    where: our_tank_fish_bool_exp
+  ): [our_tank_fish!]!
+
+  """An aggregate relationship"""
+  our_tank_fishes_aggregate(
+    """distinct select on columns"""
+    distinct_on: [our_tank_fish_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tank_fish_order_by!]
+
+    """filter the rows returned"""
+    where: our_tank_fish_bool_exp
+  ): our_tank_fish_aggregate!
+
   """鱼的个性描述 - 支持自定义输入（如cheerful, shy, brave, lazy或其他）"""
   personality: String
   report_count: Int
@@ -1115,6 +1151,8 @@ input fish_bool_exp {
   is_approved: Boolean_comparison_exp
   messages: messages_bool_exp
   messages_aggregate: messages_aggregate_bool_exp
+  our_tank_fishes: our_tank_fish_bool_exp
+  our_tank_fishes_aggregate: our_tank_fish_aggregate_bool_exp
   personality: String_comparison_exp
   report_count: Int_comparison_exp
   reported: Boolean_comparison_exp
@@ -1439,6 +1477,7 @@ input fish_insert_input {
   image_url: String
   is_approved: Boolean
   messages: messages_arr_rel_insert_input
+  our_tank_fishes: our_tank_fish_arr_rel_insert_input
 
   """鱼的个性描述 - 支持自定义输入（如cheerful, shy, brave, lazy或其他）"""
   personality: String
@@ -1819,6 +1858,7 @@ input fish_order_by {
   image_url: order_by
   is_approved: order_by
   messages_aggregate: messages_aggregate_order_by
+  our_tank_fishes_aggregate: our_tank_fish_aggregate_order_by
   personality: order_by
   report_count: order_by
   reported: order_by
@@ -2714,6 +2754,12 @@ type group_chat {
   id: uuid!
   initiator_user_id: String
 
+  """An object relationship"""
+  our_tank: our_tanks
+
+  """关联的好友鱼缸ID（NULL表示Global/My Tank群聊）"""
+  our_tank_id: uuid
+
   """Array of fish IDs that participated in this chat"""
   participant_fish_ids: [uuid!]!
 
@@ -2831,6 +2877,8 @@ input group_chat_bool_exp {
   expires_at: timestamp_comparison_exp
   id: uuid_comparison_exp
   initiator_user_id: String_comparison_exp
+  our_tank: our_tanks_bool_exp
+  our_tank_id: uuid_comparison_exp
   participant_fish_ids: uuid_array_comparison_exp
   time_of_day: String_comparison_exp
   topic: String_comparison_exp
@@ -2909,6 +2957,10 @@ input group_chat_insert_input {
   expires_at: timestamp
   id: uuid
   initiator_user_id: String
+  our_tank: our_tanks_obj_rel_insert_input
+
+  """关联的好友鱼缸ID（NULL表示Global/My Tank群聊）"""
+  our_tank_id: uuid
 
   """Array of fish IDs that participated in this chat"""
   participant_fish_ids: [uuid!]
@@ -2938,6 +2990,9 @@ type group_chat_max_fields {
   expires_at: timestamp
   id: uuid
   initiator_user_id: String
+
+  """关联的好友鱼缸ID（NULL表示Global/My Tank群聊）"""
+  our_tank_id: uuid
 
   """Array of fish IDs that participated in this chat"""
   participant_fish_ids: [uuid!]
@@ -2969,6 +3024,9 @@ input group_chat_max_order_by {
   id: order_by
   initiator_user_id: order_by
 
+  """关联的好友鱼缸ID（NULL表示Global/My Tank群聊）"""
+  our_tank_id: order_by
+
   """Array of fish IDs that participated in this chat"""
   participant_fish_ids: order_by
 
@@ -2996,6 +3054,9 @@ type group_chat_min_fields {
   expires_at: timestamp
   id: uuid
   initiator_user_id: String
+
+  """关联的好友鱼缸ID（NULL表示Global/My Tank群聊）"""
+  our_tank_id: uuid
 
   """Array of fish IDs that participated in this chat"""
   participant_fish_ids: [uuid!]
@@ -3026,6 +3087,9 @@ input group_chat_min_order_by {
   expires_at: order_by
   id: order_by
   initiator_user_id: order_by
+
+  """关联的好友鱼缸ID（NULL表示Global/My Tank群聊）"""
+  our_tank_id: order_by
 
   """Array of fish IDs that participated in this chat"""
   participant_fish_ids: order_by
@@ -3071,6 +3135,8 @@ input group_chat_order_by {
   expires_at: order_by
   id: order_by
   initiator_user_id: order_by
+  our_tank: our_tanks_order_by
+  our_tank_id: order_by
   participant_fish_ids: order_by
   time_of_day: order_by
   topic: order_by
@@ -3120,6 +3186,9 @@ enum group_chat_select_column {
   initiator_user_id
 
   """column name"""
+  our_tank_id
+
+  """column name"""
   participant_fish_ids
 
   """column name"""
@@ -3153,6 +3222,9 @@ input group_chat_set_input {
   expires_at: timestamp
   id: uuid
   initiator_user_id: String
+
+  """关联的好友鱼缸ID（NULL表示Global/My Tank群聊）"""
+  our_tank_id: uuid
 
   """Array of fish IDs that participated in this chat"""
   participant_fish_ids: [uuid!]
@@ -3240,6 +3312,9 @@ input group_chat_stream_cursor_value_input {
   id: uuid
   initiator_user_id: String
 
+  """关联的好友鱼缸ID（NULL表示Global/My Tank群聊）"""
+  our_tank_id: uuid
+
   """Array of fish IDs that participated in this chat"""
   participant_fish_ids: [uuid!]
 
@@ -3294,6 +3369,9 @@ enum group_chat_update_column {
 
   """column name"""
   initiator_user_id
+
+  """column name"""
+  our_tank_id
 
   """column name"""
   participant_fish_ids
@@ -3446,6 +3524,9 @@ type member_types {
   """会员类型名称（显示用）"""
   name: String!
 
+  """用户可创建的好友鱼缸数量上限"""
+  our_tank_limit: Int
+
   """该会员类型的鱼宣传主人的频率（每小时次数）"""
   promote_owner_frequency: Int!
   updated_at: timestamp
@@ -3520,6 +3601,9 @@ type member_types_avg_fields {
   """该会员类型的鱼主导话题的频率（每小时次数）"""
   lead_topic_frequency: Float
 
+  """用户可创建的好友鱼缸数量上限"""
+  our_tank_limit: Float
+
   """该会员类型的鱼宣传主人的频率（每小时次数）"""
   promote_owner_frequency: Float
 }
@@ -3543,6 +3627,7 @@ input member_types_bool_exp {
   id: String_comparison_exp
   lead_topic_frequency: Int_comparison_exp
   name: String_comparison_exp
+  our_tank_limit: Int_comparison_exp
   promote_owner_frequency: Int_comparison_exp
   updated_at: timestamp_comparison_exp
   user_subscriptions: user_subscriptions_bool_exp
@@ -3573,6 +3658,9 @@ input member_types_inc_input {
 
   """该会员类型的鱼主导话题的频率（每小时次数）"""
   lead_topic_frequency: Int
+
+  """用户可创建的好友鱼缸数量上限"""
+  our_tank_limit: Int
 
   """该会员类型的鱼宣传主人的频率（每小时次数）"""
   promote_owner_frequency: Int
@@ -3607,6 +3695,9 @@ input member_types_insert_input {
   """会员类型名称（显示用）"""
   name: String
 
+  """用户可创建的好友鱼缸数量上限"""
+  our_tank_limit: Int
+
   """该会员类型的鱼宣传主人的频率（每小时次数）"""
   promote_owner_frequency: Int
   updated_at: timestamp
@@ -3631,6 +3722,9 @@ type member_types_max_fields {
   """会员类型名称（显示用）"""
   name: String
 
+  """用户可创建的好友鱼缸数量上限"""
+  our_tank_limit: Int
+
   """该会员类型的鱼宣传主人的频率（每小时次数）"""
   promote_owner_frequency: Int
   updated_at: timestamp
@@ -3653,6 +3747,9 @@ type member_types_min_fields {
 
   """会员类型名称（显示用）"""
   name: String
+
+  """用户可创建的好友鱼缸数量上限"""
+  our_tank_limit: Int
 
   """该会员类型的鱼宣传主人的频率（每小时次数）"""
   promote_owner_frequency: Int
@@ -3703,6 +3800,7 @@ input member_types_order_by {
   id: order_by
   lead_topic_frequency: order_by
   name: order_by
+  our_tank_limit: order_by
   promote_owner_frequency: order_by
   updated_at: order_by
   user_subscriptions_aggregate: user_subscriptions_aggregate_order_by
@@ -3755,6 +3853,9 @@ enum member_types_select_column {
   name
 
   """column name"""
+  our_tank_limit
+
+  """column name"""
   promote_owner_frequency
 
   """column name"""
@@ -3790,6 +3891,9 @@ input member_types_set_input {
   """会员类型名称（显示用）"""
   name: String
 
+  """用户可创建的好友鱼缸数量上限"""
+  our_tank_limit: Int
+
   """该会员类型的鱼宣传主人的频率（每小时次数）"""
   promote_owner_frequency: Int
   updated_at: timestamp
@@ -3803,6 +3907,9 @@ type member_types_stddev_fields {
   """该会员类型的鱼主导话题的频率（每小时次数）"""
   lead_topic_frequency: Float
 
+  """用户可创建的好友鱼缸数量上限"""
+  our_tank_limit: Float
+
   """该会员类型的鱼宣传主人的频率（每小时次数）"""
   promote_owner_frequency: Float
 }
@@ -3815,6 +3922,9 @@ type member_types_stddev_pop_fields {
   """该会员类型的鱼主导话题的频率（每小时次数）"""
   lead_topic_frequency: Float
 
+  """用户可创建的好友鱼缸数量上限"""
+  our_tank_limit: Float
+
   """该会员类型的鱼宣传主人的频率（每小时次数）"""
   promote_owner_frequency: Float
 }
@@ -3826,6 +3936,9 @@ type member_types_stddev_samp_fields {
 
   """该会员类型的鱼主导话题的频率（每小时次数）"""
   lead_topic_frequency: Float
+
+  """用户可创建的好友鱼缸数量上限"""
+  our_tank_limit: Float
 
   """该会员类型的鱼宣传主人的频率（每小时次数）"""
   promote_owner_frequency: Float
@@ -3869,6 +3982,9 @@ input member_types_stream_cursor_value_input {
   """会员类型名称（显示用）"""
   name: String
 
+  """用户可创建的好友鱼缸数量上限"""
+  our_tank_limit: Int
+
   """该会员类型的鱼宣传主人的频率（每小时次数）"""
   promote_owner_frequency: Int
   updated_at: timestamp
@@ -3881,6 +3997,9 @@ type member_types_sum_fields {
 
   """该会员类型的鱼主导话题的频率（每小时次数）"""
   lead_topic_frequency: Int
+
+  """用户可创建的好友鱼缸数量上限"""
+  our_tank_limit: Int
 
   """该会员类型的鱼宣传主人的频率（每小时次数）"""
   promote_owner_frequency: Int
@@ -3927,6 +4046,9 @@ enum member_types_update_column {
   name
 
   """column name"""
+  our_tank_limit
+
+  """column name"""
   promote_owner_frequency
 
   """column name"""
@@ -3952,6 +4074,9 @@ type member_types_var_pop_fields {
   """该会员类型的鱼主导话题的频率（每小时次数）"""
   lead_topic_frequency: Float
 
+  """用户可创建的好友鱼缸数量上限"""
+  our_tank_limit: Float
+
   """该会员类型的鱼宣传主人的频率（每小时次数）"""
   promote_owner_frequency: Float
 }
@@ -3964,6 +4089,9 @@ type member_types_var_samp_fields {
   """该会员类型的鱼主导话题的频率（每小时次数）"""
   lead_topic_frequency: Float
 
+  """用户可创建的好友鱼缸数量上限"""
+  our_tank_limit: Float
+
   """该会员类型的鱼宣传主人的频率（每小时次数）"""
   promote_owner_frequency: Float
 }
@@ -3975,6 +4103,9 @@ type member_types_variance_fields {
 
   """该会员类型的鱼主导话题的频率（每小时次数）"""
   lead_topic_frequency: Float
+
+  """用户可创建的好友鱼缸数量上限"""
+  our_tank_limit: Float
 
   """该会员类型的鱼宣传主人的频率（每小时次数）"""
   promote_owner_frequency: Float
@@ -4591,6 +4722,45 @@ type mutation_root {
   delete_messages_by_pk(id: uuid!): messages
 
   """
+  delete data from the table: "our_tank_fish"
+  """
+  delete_our_tank_fish(
+    """filter the rows which have to be deleted"""
+    where: our_tank_fish_bool_exp!
+  ): our_tank_fish_mutation_response
+
+  """
+  delete single row from the table: "our_tank_fish"
+  """
+  delete_our_tank_fish_by_pk(id: uuid!): our_tank_fish
+
+  """
+  delete data from the table: "our_tank_members"
+  """
+  delete_our_tank_members(
+    """filter the rows which have to be deleted"""
+    where: our_tank_members_bool_exp!
+  ): our_tank_members_mutation_response
+
+  """
+  delete single row from the table: "our_tank_members"
+  """
+  delete_our_tank_members_by_pk(id: uuid!): our_tank_members
+
+  """
+  delete data from the table: "our_tanks"
+  """
+  delete_our_tanks(
+    """filter the rows which have to be deleted"""
+    where: our_tanks_bool_exp!
+  ): our_tanks_mutation_response
+
+  """
+  delete single row from the table: "our_tanks"
+  """
+  delete_our_tanks_by_pk(id: uuid!): our_tanks
+
+  """
   delete data from the table: "payment"
   """
   delete_payment(
@@ -4876,6 +5046,72 @@ type mutation_root {
     """upsert condition"""
     on_conflict: messages_on_conflict
   ): messages
+
+  """
+  insert data into the table: "our_tank_fish"
+  """
+  insert_our_tank_fish(
+    """the rows to be inserted"""
+    objects: [our_tank_fish_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: our_tank_fish_on_conflict
+  ): our_tank_fish_mutation_response
+
+  """
+  insert a single row into the table: "our_tank_fish"
+  """
+  insert_our_tank_fish_one(
+    """the row to be inserted"""
+    object: our_tank_fish_insert_input!
+
+    """upsert condition"""
+    on_conflict: our_tank_fish_on_conflict
+  ): our_tank_fish
+
+  """
+  insert data into the table: "our_tank_members"
+  """
+  insert_our_tank_members(
+    """the rows to be inserted"""
+    objects: [our_tank_members_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: our_tank_members_on_conflict
+  ): our_tank_members_mutation_response
+
+  """
+  insert a single row into the table: "our_tank_members"
+  """
+  insert_our_tank_members_one(
+    """the row to be inserted"""
+    object: our_tank_members_insert_input!
+
+    """upsert condition"""
+    on_conflict: our_tank_members_on_conflict
+  ): our_tank_members
+
+  """
+  insert data into the table: "our_tanks"
+  """
+  insert_our_tanks(
+    """the rows to be inserted"""
+    objects: [our_tanks_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: our_tanks_on_conflict
+  ): our_tanks_mutation_response
+
+  """
+  insert a single row into the table: "our_tanks"
+  """
+  insert_our_tanks_one(
+    """the row to be inserted"""
+    object: our_tanks_insert_input!
+
+    """upsert condition"""
+    on_conflict: our_tanks_on_conflict
+  ): our_tanks
 
   """
   insert data into the table: "payment"
@@ -5360,6 +5596,96 @@ type mutation_root {
   ): [messages_mutation_response]
 
   """
+  update data of the table: "our_tank_fish"
+  """
+  update_our_tank_fish(
+    """sets the columns of the filtered rows to the given values"""
+    _set: our_tank_fish_set_input
+
+    """filter the rows which have to be updated"""
+    where: our_tank_fish_bool_exp!
+  ): our_tank_fish_mutation_response
+
+  """
+  update single row of the table: "our_tank_fish"
+  """
+  update_our_tank_fish_by_pk(
+    """sets the columns of the filtered rows to the given values"""
+    _set: our_tank_fish_set_input
+    pk_columns: our_tank_fish_pk_columns_input!
+  ): our_tank_fish
+
+  """
+  update multiples rows of table: "our_tank_fish"
+  """
+  update_our_tank_fish_many(
+    """updates to execute, in order"""
+    updates: [our_tank_fish_updates!]!
+  ): [our_tank_fish_mutation_response]
+
+  """
+  update data of the table: "our_tank_members"
+  """
+  update_our_tank_members(
+    """sets the columns of the filtered rows to the given values"""
+    _set: our_tank_members_set_input
+
+    """filter the rows which have to be updated"""
+    where: our_tank_members_bool_exp!
+  ): our_tank_members_mutation_response
+
+  """
+  update single row of the table: "our_tank_members"
+  """
+  update_our_tank_members_by_pk(
+    """sets the columns of the filtered rows to the given values"""
+    _set: our_tank_members_set_input
+    pk_columns: our_tank_members_pk_columns_input!
+  ): our_tank_members
+
+  """
+  update multiples rows of table: "our_tank_members"
+  """
+  update_our_tank_members_many(
+    """updates to execute, in order"""
+    updates: [our_tank_members_updates!]!
+  ): [our_tank_members_mutation_response]
+
+  """
+  update data of the table: "our_tanks"
+  """
+  update_our_tanks(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: our_tanks_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: our_tanks_set_input
+
+    """filter the rows which have to be updated"""
+    where: our_tanks_bool_exp!
+  ): our_tanks_mutation_response
+
+  """
+  update single row of the table: "our_tanks"
+  """
+  update_our_tanks_by_pk(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: our_tanks_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: our_tanks_set_input
+    pk_columns: our_tanks_pk_columns_input!
+  ): our_tanks
+
+  """
+  update multiples rows of table: "our_tanks"
+  """
+  update_our_tanks_many(
+    """updates to execute, in order"""
+    updates: [our_tanks_updates!]!
+  ): [our_tanks_mutation_response]
+
+  """
   update data of the table: "payment"
   """
   update_payment(
@@ -5656,6 +5982,1066 @@ enum order_by {
 
   """in descending order, nulls last"""
   desc_nulls_last
+}
+
+"""好友鱼缸中的鱼关联表，不影响原始鱼数据"""
+type our_tank_fish {
+  added_at: timestamptz
+
+  """添加这条鱼的用户ID"""
+  added_by: String!
+
+  """An object relationship"""
+  fish: fish!
+  fish_id: uuid!
+  id: uuid!
+
+  """An object relationship"""
+  our_tank: our_tanks!
+  tank_id: uuid!
+}
+
+"""
+aggregated selection of "our_tank_fish"
+"""
+type our_tank_fish_aggregate {
+  aggregate: our_tank_fish_aggregate_fields
+  nodes: [our_tank_fish!]!
+}
+
+input our_tank_fish_aggregate_bool_exp {
+  count: our_tank_fish_aggregate_bool_exp_count
+}
+
+input our_tank_fish_aggregate_bool_exp_count {
+  arguments: [our_tank_fish_select_column!]
+  distinct: Boolean
+  filter: our_tank_fish_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "our_tank_fish"
+"""
+type our_tank_fish_aggregate_fields {
+  count(columns: [our_tank_fish_select_column!], distinct: Boolean): Int!
+  max: our_tank_fish_max_fields
+  min: our_tank_fish_min_fields
+}
+
+"""
+order by aggregate values of table "our_tank_fish"
+"""
+input our_tank_fish_aggregate_order_by {
+  count: order_by
+  max: our_tank_fish_max_order_by
+  min: our_tank_fish_min_order_by
+}
+
+"""
+input type for inserting array relation for remote table "our_tank_fish"
+"""
+input our_tank_fish_arr_rel_insert_input {
+  data: [our_tank_fish_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: our_tank_fish_on_conflict
+}
+
+"""
+Boolean expression to filter rows from the table "our_tank_fish". All fields are combined with a logical 'AND'.
+"""
+input our_tank_fish_bool_exp {
+  _and: [our_tank_fish_bool_exp!]
+  _not: our_tank_fish_bool_exp
+  _or: [our_tank_fish_bool_exp!]
+  added_at: timestamptz_comparison_exp
+  added_by: String_comparison_exp
+  fish: fish_bool_exp
+  fish_id: uuid_comparison_exp
+  id: uuid_comparison_exp
+  our_tank: our_tanks_bool_exp
+  tank_id: uuid_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "our_tank_fish"
+"""
+enum our_tank_fish_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  our_tank_fish_pkey
+
+  """
+  unique or primary key constraint on columns "fish_id", "tank_id"
+  """
+  our_tank_fish_tank_id_fish_id_key
+}
+
+"""
+input type for inserting data into table "our_tank_fish"
+"""
+input our_tank_fish_insert_input {
+  added_at: timestamptz
+
+  """添加这条鱼的用户ID"""
+  added_by: String
+  fish: fish_obj_rel_insert_input
+  fish_id: uuid
+  id: uuid
+  our_tank: our_tanks_obj_rel_insert_input
+  tank_id: uuid
+}
+
+"""aggregate max on columns"""
+type our_tank_fish_max_fields {
+  added_at: timestamptz
+
+  """添加这条鱼的用户ID"""
+  added_by: String
+  fish_id: uuid
+  id: uuid
+  tank_id: uuid
+}
+
+"""
+order by max() on columns of table "our_tank_fish"
+"""
+input our_tank_fish_max_order_by {
+  added_at: order_by
+
+  """添加这条鱼的用户ID"""
+  added_by: order_by
+  fish_id: order_by
+  id: order_by
+  tank_id: order_by
+}
+
+"""aggregate min on columns"""
+type our_tank_fish_min_fields {
+  added_at: timestamptz
+
+  """添加这条鱼的用户ID"""
+  added_by: String
+  fish_id: uuid
+  id: uuid
+  tank_id: uuid
+}
+
+"""
+order by min() on columns of table "our_tank_fish"
+"""
+input our_tank_fish_min_order_by {
+  added_at: order_by
+
+  """添加这条鱼的用户ID"""
+  added_by: order_by
+  fish_id: order_by
+  id: order_by
+  tank_id: order_by
+}
+
+"""
+response of any mutation on the table "our_tank_fish"
+"""
+type our_tank_fish_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [our_tank_fish!]!
+}
+
+"""
+on_conflict condition type for table "our_tank_fish"
+"""
+input our_tank_fish_on_conflict {
+  constraint: our_tank_fish_constraint!
+  update_columns: [our_tank_fish_update_column!]! = []
+  where: our_tank_fish_bool_exp
+}
+
+"""Ordering options when selecting data from "our_tank_fish"."""
+input our_tank_fish_order_by {
+  added_at: order_by
+  added_by: order_by
+  fish: fish_order_by
+  fish_id: order_by
+  id: order_by
+  our_tank: our_tanks_order_by
+  tank_id: order_by
+}
+
+"""primary key columns input for table: our_tank_fish"""
+input our_tank_fish_pk_columns_input {
+  id: uuid!
+}
+
+"""
+select columns of table "our_tank_fish"
+"""
+enum our_tank_fish_select_column {
+  """column name"""
+  added_at
+
+  """column name"""
+  added_by
+
+  """column name"""
+  fish_id
+
+  """column name"""
+  id
+
+  """column name"""
+  tank_id
+}
+
+"""
+input type for updating data in table "our_tank_fish"
+"""
+input our_tank_fish_set_input {
+  added_at: timestamptz
+
+  """添加这条鱼的用户ID"""
+  added_by: String
+  fish_id: uuid
+  id: uuid
+  tank_id: uuid
+}
+
+"""
+Streaming cursor of the table "our_tank_fish"
+"""
+input our_tank_fish_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: our_tank_fish_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input our_tank_fish_stream_cursor_value_input {
+  added_at: timestamptz
+
+  """添加这条鱼的用户ID"""
+  added_by: String
+  fish_id: uuid
+  id: uuid
+  tank_id: uuid
+}
+
+"""
+update columns of table "our_tank_fish"
+"""
+enum our_tank_fish_update_column {
+  """column name"""
+  added_at
+
+  """column name"""
+  added_by
+
+  """column name"""
+  fish_id
+
+  """column name"""
+  id
+
+  """column name"""
+  tank_id
+}
+
+input our_tank_fish_updates {
+  """sets the columns of the filtered rows to the given values"""
+  _set: our_tank_fish_set_input
+
+  """filter the rows which have to be updated"""
+  where: our_tank_fish_bool_exp!
+}
+
+"""好友鱼缸成员关系表"""
+type our_tank_members {
+  id: uuid!
+  joined_at: timestamptz
+
+  """最后阅读时间，用于计算未读消息数"""
+  last_read_at: timestamptz
+
+  """An object relationship"""
+  our_tank: our_tanks!
+
+  """成员角色：owner（主人）或 member（成员）"""
+  role: String
+  tank_id: uuid!
+  user_id: String!
+}
+
+"""
+aggregated selection of "our_tank_members"
+"""
+type our_tank_members_aggregate {
+  aggregate: our_tank_members_aggregate_fields
+  nodes: [our_tank_members!]!
+}
+
+input our_tank_members_aggregate_bool_exp {
+  count: our_tank_members_aggregate_bool_exp_count
+}
+
+input our_tank_members_aggregate_bool_exp_count {
+  arguments: [our_tank_members_select_column!]
+  distinct: Boolean
+  filter: our_tank_members_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "our_tank_members"
+"""
+type our_tank_members_aggregate_fields {
+  count(columns: [our_tank_members_select_column!], distinct: Boolean): Int!
+  max: our_tank_members_max_fields
+  min: our_tank_members_min_fields
+}
+
+"""
+order by aggregate values of table "our_tank_members"
+"""
+input our_tank_members_aggregate_order_by {
+  count: order_by
+  max: our_tank_members_max_order_by
+  min: our_tank_members_min_order_by
+}
+
+"""
+input type for inserting array relation for remote table "our_tank_members"
+"""
+input our_tank_members_arr_rel_insert_input {
+  data: [our_tank_members_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: our_tank_members_on_conflict
+}
+
+"""
+Boolean expression to filter rows from the table "our_tank_members". All fields are combined with a logical 'AND'.
+"""
+input our_tank_members_bool_exp {
+  _and: [our_tank_members_bool_exp!]
+  _not: our_tank_members_bool_exp
+  _or: [our_tank_members_bool_exp!]
+  id: uuid_comparison_exp
+  joined_at: timestamptz_comparison_exp
+  last_read_at: timestamptz_comparison_exp
+  our_tank: our_tanks_bool_exp
+  role: String_comparison_exp
+  tank_id: uuid_comparison_exp
+  user_id: String_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "our_tank_members"
+"""
+enum our_tank_members_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  our_tank_members_pkey
+
+  """
+  unique or primary key constraint on columns "user_id", "tank_id"
+  """
+  our_tank_members_tank_id_user_id_key
+}
+
+"""
+input type for inserting data into table "our_tank_members"
+"""
+input our_tank_members_insert_input {
+  id: uuid
+  joined_at: timestamptz
+
+  """最后阅读时间，用于计算未读消息数"""
+  last_read_at: timestamptz
+  our_tank: our_tanks_obj_rel_insert_input
+
+  """成员角色：owner（主人）或 member（成员）"""
+  role: String
+  tank_id: uuid
+  user_id: String
+}
+
+"""aggregate max on columns"""
+type our_tank_members_max_fields {
+  id: uuid
+  joined_at: timestamptz
+
+  """最后阅读时间，用于计算未读消息数"""
+  last_read_at: timestamptz
+
+  """成员角色：owner（主人）或 member（成员）"""
+  role: String
+  tank_id: uuid
+  user_id: String
+}
+
+"""
+order by max() on columns of table "our_tank_members"
+"""
+input our_tank_members_max_order_by {
+  id: order_by
+  joined_at: order_by
+
+  """最后阅读时间，用于计算未读消息数"""
+  last_read_at: order_by
+
+  """成员角色：owner（主人）或 member（成员）"""
+  role: order_by
+  tank_id: order_by
+  user_id: order_by
+}
+
+"""aggregate min on columns"""
+type our_tank_members_min_fields {
+  id: uuid
+  joined_at: timestamptz
+
+  """最后阅读时间，用于计算未读消息数"""
+  last_read_at: timestamptz
+
+  """成员角色：owner（主人）或 member（成员）"""
+  role: String
+  tank_id: uuid
+  user_id: String
+}
+
+"""
+order by min() on columns of table "our_tank_members"
+"""
+input our_tank_members_min_order_by {
+  id: order_by
+  joined_at: order_by
+
+  """最后阅读时间，用于计算未读消息数"""
+  last_read_at: order_by
+
+  """成员角色：owner（主人）或 member（成员）"""
+  role: order_by
+  tank_id: order_by
+  user_id: order_by
+}
+
+"""
+response of any mutation on the table "our_tank_members"
+"""
+type our_tank_members_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [our_tank_members!]!
+}
+
+"""
+on_conflict condition type for table "our_tank_members"
+"""
+input our_tank_members_on_conflict {
+  constraint: our_tank_members_constraint!
+  update_columns: [our_tank_members_update_column!]! = []
+  where: our_tank_members_bool_exp
+}
+
+"""Ordering options when selecting data from "our_tank_members"."""
+input our_tank_members_order_by {
+  id: order_by
+  joined_at: order_by
+  last_read_at: order_by
+  our_tank: our_tanks_order_by
+  role: order_by
+  tank_id: order_by
+  user_id: order_by
+}
+
+"""primary key columns input for table: our_tank_members"""
+input our_tank_members_pk_columns_input {
+  id: uuid!
+}
+
+"""
+select columns of table "our_tank_members"
+"""
+enum our_tank_members_select_column {
+  """column name"""
+  id
+
+  """column name"""
+  joined_at
+
+  """column name"""
+  last_read_at
+
+  """column name"""
+  role
+
+  """column name"""
+  tank_id
+
+  """column name"""
+  user_id
+}
+
+"""
+input type for updating data in table "our_tank_members"
+"""
+input our_tank_members_set_input {
+  id: uuid
+  joined_at: timestamptz
+
+  """最后阅读时间，用于计算未读消息数"""
+  last_read_at: timestamptz
+
+  """成员角色：owner（主人）或 member（成员）"""
+  role: String
+  tank_id: uuid
+  user_id: String
+}
+
+"""
+Streaming cursor of the table "our_tank_members"
+"""
+input our_tank_members_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: our_tank_members_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input our_tank_members_stream_cursor_value_input {
+  id: uuid
+  joined_at: timestamptz
+
+  """最后阅读时间，用于计算未读消息数"""
+  last_read_at: timestamptz
+
+  """成员角色：owner（主人）或 member（成员）"""
+  role: String
+  tank_id: uuid
+  user_id: String
+}
+
+"""
+update columns of table "our_tank_members"
+"""
+enum our_tank_members_update_column {
+  """column name"""
+  id
+
+  """column name"""
+  joined_at
+
+  """column name"""
+  last_read_at
+
+  """column name"""
+  role
+
+  """column name"""
+  tank_id
+
+  """column name"""
+  user_id
+}
+
+input our_tank_members_updates {
+  """sets the columns of the filtered rows to the given values"""
+  _set: our_tank_members_set_input
+
+  """filter the rows which have to be updated"""
+  where: our_tank_members_bool_exp!
+}
+
+"""好友鱼缸主表：存储用户创建的私密共享鱼缸"""
+type our_tanks {
+  """邀请码，6-8位字母数字组合，用于分享和加入"""
+  code: String!
+  created_at: timestamptz
+  description: String
+
+  """An array relationship"""
+  group_chats(
+    """distinct select on columns"""
+    distinct_on: [group_chat_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [group_chat_order_by!]
+
+    """filter the rows returned"""
+    where: group_chat_bool_exp
+  ): [group_chat!]!
+
+  """An aggregate relationship"""
+  group_chats_aggregate(
+    """distinct select on columns"""
+    distinct_on: [group_chat_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [group_chat_order_by!]
+
+    """filter the rows returned"""
+    where: group_chat_bool_exp
+  ): group_chat_aggregate!
+  id: uuid!
+
+  """鱼缸最大容量，默认20条鱼"""
+  max_fish_count: Int
+  name: String!
+
+  """An array relationship"""
+  our_tank_fishes(
+    """distinct select on columns"""
+    distinct_on: [our_tank_fish_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tank_fish_order_by!]
+
+    """filter the rows returned"""
+    where: our_tank_fish_bool_exp
+  ): [our_tank_fish!]!
+
+  """An aggregate relationship"""
+  our_tank_fishes_aggregate(
+    """distinct select on columns"""
+    distinct_on: [our_tank_fish_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tank_fish_order_by!]
+
+    """filter the rows returned"""
+    where: our_tank_fish_bool_exp
+  ): our_tank_fish_aggregate!
+
+  """An array relationship"""
+  our_tank_members(
+    """distinct select on columns"""
+    distinct_on: [our_tank_members_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tank_members_order_by!]
+
+    """filter the rows returned"""
+    where: our_tank_members_bool_exp
+  ): [our_tank_members!]!
+
+  """An aggregate relationship"""
+  our_tank_members_aggregate(
+    """distinct select on columns"""
+    distinct_on: [our_tank_members_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tank_members_order_by!]
+
+    """filter the rows returned"""
+    where: our_tank_members_bool_exp
+  ): our_tank_members_aggregate!
+  owner_id: String!
+
+  """可选的加入密码，使用bcrypt加密存储"""
+  password_hash: String
+  updated_at: timestamptz
+}
+
+"""
+aggregated selection of "our_tanks"
+"""
+type our_tanks_aggregate {
+  aggregate: our_tanks_aggregate_fields
+  nodes: [our_tanks!]!
+}
+
+"""
+aggregate fields of "our_tanks"
+"""
+type our_tanks_aggregate_fields {
+  avg: our_tanks_avg_fields
+  count(columns: [our_tanks_select_column!], distinct: Boolean): Int!
+  max: our_tanks_max_fields
+  min: our_tanks_min_fields
+  stddev: our_tanks_stddev_fields
+  stddev_pop: our_tanks_stddev_pop_fields
+  stddev_samp: our_tanks_stddev_samp_fields
+  sum: our_tanks_sum_fields
+  var_pop: our_tanks_var_pop_fields
+  var_samp: our_tanks_var_samp_fields
+  variance: our_tanks_variance_fields
+}
+
+"""aggregate avg on columns"""
+type our_tanks_avg_fields {
+  """鱼缸最大容量，默认20条鱼"""
+  max_fish_count: Float
+}
+
+"""
+Boolean expression to filter rows from the table "our_tanks". All fields are combined with a logical 'AND'.
+"""
+input our_tanks_bool_exp {
+  _and: [our_tanks_bool_exp!]
+  _not: our_tanks_bool_exp
+  _or: [our_tanks_bool_exp!]
+  code: String_comparison_exp
+  created_at: timestamptz_comparison_exp
+  description: String_comparison_exp
+  group_chats: group_chat_bool_exp
+  group_chats_aggregate: group_chat_aggregate_bool_exp
+  id: uuid_comparison_exp
+  max_fish_count: Int_comparison_exp
+  name: String_comparison_exp
+  our_tank_fishes: our_tank_fish_bool_exp
+  our_tank_fishes_aggregate: our_tank_fish_aggregate_bool_exp
+  our_tank_members: our_tank_members_bool_exp
+  our_tank_members_aggregate: our_tank_members_aggregate_bool_exp
+  owner_id: String_comparison_exp
+  password_hash: String_comparison_exp
+  updated_at: timestamptz_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "our_tanks"
+"""
+enum our_tanks_constraint {
+  """
+  unique or primary key constraint on columns "code"
+  """
+  our_tanks_code_key
+
+  """
+  unique or primary key constraint on columns "id"
+  """
+  our_tanks_pkey
+}
+
+"""
+input type for incrementing numeric columns in table "our_tanks"
+"""
+input our_tanks_inc_input {
+  """鱼缸最大容量，默认20条鱼"""
+  max_fish_count: Int
+}
+
+"""
+input type for inserting data into table "our_tanks"
+"""
+input our_tanks_insert_input {
+  """邀请码，6-8位字母数字组合，用于分享和加入"""
+  code: String
+  created_at: timestamptz
+  description: String
+  group_chats: group_chat_arr_rel_insert_input
+  id: uuid
+
+  """鱼缸最大容量，默认20条鱼"""
+  max_fish_count: Int
+  name: String
+  our_tank_fishes: our_tank_fish_arr_rel_insert_input
+  our_tank_members: our_tank_members_arr_rel_insert_input
+  owner_id: String
+
+  """可选的加入密码，使用bcrypt加密存储"""
+  password_hash: String
+  updated_at: timestamptz
+}
+
+"""aggregate max on columns"""
+type our_tanks_max_fields {
+  """邀请码，6-8位字母数字组合，用于分享和加入"""
+  code: String
+  created_at: timestamptz
+  description: String
+  id: uuid
+
+  """鱼缸最大容量，默认20条鱼"""
+  max_fish_count: Int
+  name: String
+  owner_id: String
+
+  """可选的加入密码，使用bcrypt加密存储"""
+  password_hash: String
+  updated_at: timestamptz
+}
+
+"""aggregate min on columns"""
+type our_tanks_min_fields {
+  """邀请码，6-8位字母数字组合，用于分享和加入"""
+  code: String
+  created_at: timestamptz
+  description: String
+  id: uuid
+
+  """鱼缸最大容量，默认20条鱼"""
+  max_fish_count: Int
+  name: String
+  owner_id: String
+
+  """可选的加入密码，使用bcrypt加密存储"""
+  password_hash: String
+  updated_at: timestamptz
+}
+
+"""
+response of any mutation on the table "our_tanks"
+"""
+type our_tanks_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [our_tanks!]!
+}
+
+"""
+input type for inserting object relation for remote table "our_tanks"
+"""
+input our_tanks_obj_rel_insert_input {
+  data: our_tanks_insert_input!
+
+  """upsert condition"""
+  on_conflict: our_tanks_on_conflict
+}
+
+"""
+on_conflict condition type for table "our_tanks"
+"""
+input our_tanks_on_conflict {
+  constraint: our_tanks_constraint!
+  update_columns: [our_tanks_update_column!]! = []
+  where: our_tanks_bool_exp
+}
+
+"""Ordering options when selecting data from "our_tanks"."""
+input our_tanks_order_by {
+  code: order_by
+  created_at: order_by
+  description: order_by
+  group_chats_aggregate: group_chat_aggregate_order_by
+  id: order_by
+  max_fish_count: order_by
+  name: order_by
+  our_tank_fishes_aggregate: our_tank_fish_aggregate_order_by
+  our_tank_members_aggregate: our_tank_members_aggregate_order_by
+  owner_id: order_by
+  password_hash: order_by
+  updated_at: order_by
+}
+
+"""primary key columns input for table: our_tanks"""
+input our_tanks_pk_columns_input {
+  id: uuid!
+}
+
+"""
+select columns of table "our_tanks"
+"""
+enum our_tanks_select_column {
+  """column name"""
+  code
+
+  """column name"""
+  created_at
+
+  """column name"""
+  description
+
+  """column name"""
+  id
+
+  """column name"""
+  max_fish_count
+
+  """column name"""
+  name
+
+  """column name"""
+  owner_id
+
+  """column name"""
+  password_hash
+
+  """column name"""
+  updated_at
+}
+
+"""
+input type for updating data in table "our_tanks"
+"""
+input our_tanks_set_input {
+  """邀请码，6-8位字母数字组合，用于分享和加入"""
+  code: String
+  created_at: timestamptz
+  description: String
+  id: uuid
+
+  """鱼缸最大容量，默认20条鱼"""
+  max_fish_count: Int
+  name: String
+  owner_id: String
+
+  """可选的加入密码，使用bcrypt加密存储"""
+  password_hash: String
+  updated_at: timestamptz
+}
+
+"""aggregate stddev on columns"""
+type our_tanks_stddev_fields {
+  """鱼缸最大容量，默认20条鱼"""
+  max_fish_count: Float
+}
+
+"""aggregate stddev_pop on columns"""
+type our_tanks_stddev_pop_fields {
+  """鱼缸最大容量，默认20条鱼"""
+  max_fish_count: Float
+}
+
+"""aggregate stddev_samp on columns"""
+type our_tanks_stddev_samp_fields {
+  """鱼缸最大容量，默认20条鱼"""
+  max_fish_count: Float
+}
+
+"""
+Streaming cursor of the table "our_tanks"
+"""
+input our_tanks_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: our_tanks_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input our_tanks_stream_cursor_value_input {
+  """邀请码，6-8位字母数字组合，用于分享和加入"""
+  code: String
+  created_at: timestamptz
+  description: String
+  id: uuid
+
+  """鱼缸最大容量，默认20条鱼"""
+  max_fish_count: Int
+  name: String
+  owner_id: String
+
+  """可选的加入密码，使用bcrypt加密存储"""
+  password_hash: String
+  updated_at: timestamptz
+}
+
+"""aggregate sum on columns"""
+type our_tanks_sum_fields {
+  """鱼缸最大容量，默认20条鱼"""
+  max_fish_count: Int
+}
+
+"""
+update columns of table "our_tanks"
+"""
+enum our_tanks_update_column {
+  """column name"""
+  code
+
+  """column name"""
+  created_at
+
+  """column name"""
+  description
+
+  """column name"""
+  id
+
+  """column name"""
+  max_fish_count
+
+  """column name"""
+  name
+
+  """column name"""
+  owner_id
+
+  """column name"""
+  password_hash
+
+  """column name"""
+  updated_at
+}
+
+input our_tanks_updates {
+  """increments the numeric columns with given value of the filtered values"""
+  _inc: our_tanks_inc_input
+
+  """sets the columns of the filtered rows to the given values"""
+  _set: our_tanks_set_input
+
+  """filter the rows which have to be updated"""
+  where: our_tanks_bool_exp!
+}
+
+"""aggregate var_pop on columns"""
+type our_tanks_var_pop_fields {
+  """鱼缸最大容量，默认20条鱼"""
+  max_fish_count: Float
+}
+
+"""aggregate var_samp on columns"""
+type our_tanks_var_samp_fields {
+  """鱼缸最大容量，默认20条鱼"""
+  max_fish_count: Float
+}
+
+"""aggregate variance on columns"""
+type our_tanks_variance_fields {
+  """鱼缸最大容量，默认20条鱼"""
+  max_fish_count: Float
 }
 
 """
@@ -6868,6 +8254,133 @@ type query_root {
 
   """fetch data from the table: "messages" using primary key columns"""
   messages_by_pk(id: uuid!): messages
+
+  """
+  fetch data from the table: "our_tank_fish"
+  """
+  our_tank_fish(
+    """distinct select on columns"""
+    distinct_on: [our_tank_fish_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tank_fish_order_by!]
+
+    """filter the rows returned"""
+    where: our_tank_fish_bool_exp
+  ): [our_tank_fish!]!
+
+  """
+  fetch aggregated fields from the table: "our_tank_fish"
+  """
+  our_tank_fish_aggregate(
+    """distinct select on columns"""
+    distinct_on: [our_tank_fish_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tank_fish_order_by!]
+
+    """filter the rows returned"""
+    where: our_tank_fish_bool_exp
+  ): our_tank_fish_aggregate!
+
+  """fetch data from the table: "our_tank_fish" using primary key columns"""
+  our_tank_fish_by_pk(id: uuid!): our_tank_fish
+
+  """An array relationship"""
+  our_tank_members(
+    """distinct select on columns"""
+    distinct_on: [our_tank_members_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tank_members_order_by!]
+
+    """filter the rows returned"""
+    where: our_tank_members_bool_exp
+  ): [our_tank_members!]!
+
+  """An aggregate relationship"""
+  our_tank_members_aggregate(
+    """distinct select on columns"""
+    distinct_on: [our_tank_members_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tank_members_order_by!]
+
+    """filter the rows returned"""
+    where: our_tank_members_bool_exp
+  ): our_tank_members_aggregate!
+
+  """
+  fetch data from the table: "our_tank_members" using primary key columns
+  """
+  our_tank_members_by_pk(id: uuid!): our_tank_members
+
+  """
+  fetch data from the table: "our_tanks"
+  """
+  our_tanks(
+    """distinct select on columns"""
+    distinct_on: [our_tanks_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tanks_order_by!]
+
+    """filter the rows returned"""
+    where: our_tanks_bool_exp
+  ): [our_tanks!]!
+
+  """
+  fetch aggregated fields from the table: "our_tanks"
+  """
+  our_tanks_aggregate(
+    """distinct select on columns"""
+    distinct_on: [our_tanks_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tanks_order_by!]
+
+    """filter the rows returned"""
+    where: our_tanks_bool_exp
+  ): our_tanks_aggregate!
+
+  """fetch data from the table: "our_tanks" using primary key columns"""
+  our_tanks_by_pk(id: uuid!): our_tanks
 
   """
   fetch data from the table: "payment"
@@ -8290,6 +9803,175 @@ type subscription_root {
     """filter the rows returned"""
     where: messages_bool_exp
   ): [messages!]!
+
+  """
+  fetch data from the table: "our_tank_fish"
+  """
+  our_tank_fish(
+    """distinct select on columns"""
+    distinct_on: [our_tank_fish_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tank_fish_order_by!]
+
+    """filter the rows returned"""
+    where: our_tank_fish_bool_exp
+  ): [our_tank_fish!]!
+
+  """
+  fetch aggregated fields from the table: "our_tank_fish"
+  """
+  our_tank_fish_aggregate(
+    """distinct select on columns"""
+    distinct_on: [our_tank_fish_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tank_fish_order_by!]
+
+    """filter the rows returned"""
+    where: our_tank_fish_bool_exp
+  ): our_tank_fish_aggregate!
+
+  """fetch data from the table: "our_tank_fish" using primary key columns"""
+  our_tank_fish_by_pk(id: uuid!): our_tank_fish
+
+  """
+  fetch data from the table in a streaming manner: "our_tank_fish"
+  """
+  our_tank_fish_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [our_tank_fish_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: our_tank_fish_bool_exp
+  ): [our_tank_fish!]!
+
+  """An array relationship"""
+  our_tank_members(
+    """distinct select on columns"""
+    distinct_on: [our_tank_members_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tank_members_order_by!]
+
+    """filter the rows returned"""
+    where: our_tank_members_bool_exp
+  ): [our_tank_members!]!
+
+  """An aggregate relationship"""
+  our_tank_members_aggregate(
+    """distinct select on columns"""
+    distinct_on: [our_tank_members_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tank_members_order_by!]
+
+    """filter the rows returned"""
+    where: our_tank_members_bool_exp
+  ): our_tank_members_aggregate!
+
+  """
+  fetch data from the table: "our_tank_members" using primary key columns
+  """
+  our_tank_members_by_pk(id: uuid!): our_tank_members
+
+  """
+  fetch data from the table in a streaming manner: "our_tank_members"
+  """
+  our_tank_members_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [our_tank_members_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: our_tank_members_bool_exp
+  ): [our_tank_members!]!
+
+  """
+  fetch data from the table: "our_tanks"
+  """
+  our_tanks(
+    """distinct select on columns"""
+    distinct_on: [our_tanks_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tanks_order_by!]
+
+    """filter the rows returned"""
+    where: our_tanks_bool_exp
+  ): [our_tanks!]!
+
+  """
+  fetch aggregated fields from the table: "our_tanks"
+  """
+  our_tanks_aggregate(
+    """distinct select on columns"""
+    distinct_on: [our_tanks_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [our_tanks_order_by!]
+
+    """filter the rows returned"""
+    where: our_tanks_bool_exp
+  ): our_tanks_aggregate!
+
+  """fetch data from the table: "our_tanks" using primary key columns"""
+  our_tanks_by_pk(id: uuid!): our_tanks
+
+  """
+  fetch data from the table in a streaming manner: "our_tanks"
+  """
+  our_tanks_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [our_tanks_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: our_tanks_bool_exp
+  ): [our_tanks!]!
 
   """
   fetch data from the table: "payment"

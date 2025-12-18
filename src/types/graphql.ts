@@ -676,6 +676,10 @@ export type Fish = {
   messages: Array<Messages>;
   /** An aggregate relationship */
   messages_aggregate: Messages_Aggregate;
+  /** An array relationship */
+  our_tank_fishes: Array<Our_Tank_Fish>;
+  /** An aggregate relationship */
+  our_tank_fishes_aggregate: Our_Tank_Fish_Aggregate;
   /** 鱼的个性描述 - 支持自定义输入（如cheerful, shy, brave, lazy或其他） */
   personality?: Maybe<Scalars['String']['output']>;
   report_count?: Maybe<Scalars['Int']['output']>;
@@ -732,6 +736,26 @@ export type FishMessages_AggregateArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   order_by?: InputMaybe<Array<Messages_Order_By>>;
   where?: InputMaybe<Messages_Bool_Exp>;
+};
+
+
+/** columns and relationships of "fish" */
+export type FishOur_Tank_FishesArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tank_Fish_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tank_Fish_Order_By>>;
+  where?: InputMaybe<Our_Tank_Fish_Bool_Exp>;
+};
+
+
+/** columns and relationships of "fish" */
+export type FishOur_Tank_Fishes_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tank_Fish_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tank_Fish_Order_By>>;
+  where?: InputMaybe<Our_Tank_Fish_Bool_Exp>;
 };
 
 
@@ -885,6 +909,8 @@ export type Fish_Bool_Exp = {
   is_approved?: InputMaybe<Boolean_Comparison_Exp>;
   messages?: InputMaybe<Messages_Bool_Exp>;
   messages_aggregate?: InputMaybe<Messages_Aggregate_Bool_Exp>;
+  our_tank_fishes?: InputMaybe<Our_Tank_Fish_Bool_Exp>;
+  our_tank_fishes_aggregate?: InputMaybe<Our_Tank_Fish_Aggregate_Bool_Exp>;
   personality?: InputMaybe<String_Comparison_Exp>;
   report_count?: InputMaybe<Int_Comparison_Exp>;
   reported?: InputMaybe<Boolean_Comparison_Exp>;
@@ -1152,6 +1178,7 @@ export type Fish_Insert_Input = {
   image_url?: InputMaybe<Scalars['String']['input']>;
   is_approved?: InputMaybe<Scalars['Boolean']['input']>;
   messages?: InputMaybe<Messages_Arr_Rel_Insert_Input>;
+  our_tank_fishes?: InputMaybe<Our_Tank_Fish_Arr_Rel_Insert_Input>;
   /** 鱼的个性描述 - 支持自定义输入（如cheerful, shy, brave, lazy或其他） */
   personality?: InputMaybe<Scalars['String']['input']>;
   report_count?: InputMaybe<Scalars['Int']['input']>;
@@ -1480,6 +1507,7 @@ export type Fish_Order_By = {
   image_url?: InputMaybe<Order_By>;
   is_approved?: InputMaybe<Order_By>;
   messages_aggregate?: InputMaybe<Messages_Aggregate_Order_By>;
+  our_tank_fishes_aggregate?: InputMaybe<Our_Tank_Fish_Aggregate_Order_By>;
   personality?: InputMaybe<Order_By>;
   report_count?: InputMaybe<Order_By>;
   reported?: InputMaybe<Order_By>;
@@ -2227,6 +2255,10 @@ export type Group_Chat = {
   expires_at?: Maybe<Scalars['timestamp']['output']>;
   id: Scalars['uuid']['output'];
   initiator_user_id?: Maybe<Scalars['String']['output']>;
+  /** An object relationship */
+  our_tank?: Maybe<Our_Tanks>;
+  /** 关联的好友鱼缸ID（NULL表示Global/My Tank群聊） */
+  our_tank_id?: Maybe<Scalars['uuid']['output']>;
   /** Array of fish IDs that participated in this chat */
   participant_fish_ids: Array<Scalars['uuid']['output']>;
   /** Time period: morning, afternoon, evening, night */
@@ -2340,6 +2372,8 @@ export type Group_Chat_Bool_Exp = {
   expires_at?: InputMaybe<Timestamp_Comparison_Exp>;
   id?: InputMaybe<Uuid_Comparison_Exp>;
   initiator_user_id?: InputMaybe<String_Comparison_Exp>;
+  our_tank?: InputMaybe<Our_Tanks_Bool_Exp>;
+  our_tank_id?: InputMaybe<Uuid_Comparison_Exp>;
   participant_fish_ids?: InputMaybe<Uuid_Array_Comparison_Exp>;
   time_of_day?: InputMaybe<String_Comparison_Exp>;
   topic?: InputMaybe<String_Comparison_Exp>;
@@ -2392,6 +2426,9 @@ export type Group_Chat_Insert_Input = {
   expires_at?: InputMaybe<Scalars['timestamp']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   initiator_user_id?: InputMaybe<Scalars['String']['input']>;
+  our_tank?: InputMaybe<Our_Tanks_Obj_Rel_Insert_Input>;
+  /** 关联的好友鱼缸ID（NULL表示Global/My Tank群聊） */
+  our_tank_id?: InputMaybe<Scalars['uuid']['input']>;
   /** Array of fish IDs that participated in this chat */
   participant_fish_ids?: InputMaybe<Array<Scalars['uuid']['input']>>;
   /** Time period: morning, afternoon, evening, night */
@@ -2415,6 +2452,8 @@ export type Group_Chat_Max_Fields = {
   expires_at?: Maybe<Scalars['timestamp']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   initiator_user_id?: Maybe<Scalars['String']['output']>;
+  /** 关联的好友鱼缸ID（NULL表示Global/My Tank群聊） */
+  our_tank_id?: Maybe<Scalars['uuid']['output']>;
   /** Array of fish IDs that participated in this chat */
   participant_fish_ids?: Maybe<Array<Scalars['uuid']['output']>>;
   /** Time period: morning, afternoon, evening, night */
@@ -2436,6 +2475,8 @@ export type Group_Chat_Max_Order_By = {
   expires_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   initiator_user_id?: InputMaybe<Order_By>;
+  /** 关联的好友鱼缸ID（NULL表示Global/My Tank群聊） */
+  our_tank_id?: InputMaybe<Order_By>;
   /** Array of fish IDs that participated in this chat */
   participant_fish_ids?: InputMaybe<Order_By>;
   /** Time period: morning, afternoon, evening, night */
@@ -2458,6 +2499,8 @@ export type Group_Chat_Min_Fields = {
   expires_at?: Maybe<Scalars['timestamp']['output']>;
   id?: Maybe<Scalars['uuid']['output']>;
   initiator_user_id?: Maybe<Scalars['String']['output']>;
+  /** 关联的好友鱼缸ID（NULL表示Global/My Tank群聊） */
+  our_tank_id?: Maybe<Scalars['uuid']['output']>;
   /** Array of fish IDs that participated in this chat */
   participant_fish_ids?: Maybe<Array<Scalars['uuid']['output']>>;
   /** Time period: morning, afternoon, evening, night */
@@ -2479,6 +2522,8 @@ export type Group_Chat_Min_Order_By = {
   expires_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   initiator_user_id?: InputMaybe<Order_By>;
+  /** 关联的好友鱼缸ID（NULL表示Global/My Tank群聊） */
+  our_tank_id?: InputMaybe<Order_By>;
   /** Array of fish IDs that participated in this chat */
   participant_fish_ids?: InputMaybe<Order_By>;
   /** Time period: morning, afternoon, evening, night */
@@ -2515,6 +2560,8 @@ export type Group_Chat_Order_By = {
   expires_at?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   initiator_user_id?: InputMaybe<Order_By>;
+  our_tank?: InputMaybe<Our_Tanks_Order_By>;
+  our_tank_id?: InputMaybe<Order_By>;
   participant_fish_ids?: InputMaybe<Order_By>;
   time_of_day?: InputMaybe<Order_By>;
   topic?: InputMaybe<Order_By>;
@@ -2552,6 +2599,8 @@ export enum Group_Chat_Select_Column {
   /** column name */
   InitiatorUserId = 'initiator_user_id',
   /** column name */
+  OurTankId = 'our_tank_id',
+  /** column name */
   ParticipantFishIds = 'participant_fish_ids',
   /** column name */
   TimeOfDay = 'time_of_day',
@@ -2575,6 +2624,8 @@ export type Group_Chat_Set_Input = {
   expires_at?: InputMaybe<Scalars['timestamp']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   initiator_user_id?: InputMaybe<Scalars['String']['input']>;
+  /** 关联的好友鱼缸ID（NULL表示Global/My Tank群聊） */
+  our_tank_id?: InputMaybe<Scalars['uuid']['input']>;
   /** Array of fish IDs that participated in this chat */
   participant_fish_ids?: InputMaybe<Array<Scalars['uuid']['input']>>;
   /** Time period: morning, afternoon, evening, night */
@@ -2645,6 +2696,8 @@ export type Group_Chat_Stream_Cursor_Value_Input = {
   expires_at?: InputMaybe<Scalars['timestamp']['input']>;
   id?: InputMaybe<Scalars['uuid']['input']>;
   initiator_user_id?: InputMaybe<Scalars['String']['input']>;
+  /** 关联的好友鱼缸ID（NULL表示Global/My Tank群聊） */
+  our_tank_id?: InputMaybe<Scalars['uuid']['input']>;
   /** Array of fish IDs that participated in this chat */
   participant_fish_ids?: InputMaybe<Array<Scalars['uuid']['input']>>;
   /** Time period: morning, afternoon, evening, night */
@@ -2685,6 +2738,8 @@ export enum Group_Chat_Update_Column {
   Id = 'id',
   /** column name */
   InitiatorUserId = 'initiator_user_id',
+  /** column name */
+  OurTankId = 'our_tank_id',
   /** column name */
   ParticipantFishIds = 'participant_fish_ids',
   /** column name */
@@ -2802,6 +2857,8 @@ export type Member_Types = {
   lead_topic_frequency: Scalars['Int']['output'];
   /** 会员类型名称（显示用） */
   name: Scalars['String']['output'];
+  /** 用户可创建的好友鱼缸数量上限 */
+  our_tank_limit?: Maybe<Scalars['Int']['output']>;
   /** 该会员类型的鱼宣传主人的频率（每小时次数） */
   promote_owner_frequency: Scalars['Int']['output'];
   updated_at?: Maybe<Scalars['timestamp']['output']>;
@@ -2868,6 +2925,8 @@ export type Member_Types_Avg_Fields = {
   fee_per_year?: Maybe<Scalars['Float']['output']>;
   /** 该会员类型的鱼主导话题的频率（每小时次数） */
   lead_topic_frequency?: Maybe<Scalars['Float']['output']>;
+  /** 用户可创建的好友鱼缸数量上限 */
+  our_tank_limit?: Maybe<Scalars['Float']['output']>;
   /** 该会员类型的鱼宣传主人的频率（每小时次数） */
   promote_owner_frequency?: Maybe<Scalars['Float']['output']>;
 };
@@ -2889,6 +2948,7 @@ export type Member_Types_Bool_Exp = {
   id?: InputMaybe<String_Comparison_Exp>;
   lead_topic_frequency?: InputMaybe<Int_Comparison_Exp>;
   name?: InputMaybe<String_Comparison_Exp>;
+  our_tank_limit?: InputMaybe<Int_Comparison_Exp>;
   promote_owner_frequency?: InputMaybe<Int_Comparison_Exp>;
   updated_at?: InputMaybe<Timestamp_Comparison_Exp>;
   user_subscriptions?: InputMaybe<User_Subscriptions_Bool_Exp>;
@@ -2909,6 +2969,8 @@ export type Member_Types_Inc_Input = {
   fee_per_year?: InputMaybe<Scalars['numeric']['input']>;
   /** 该会员类型的鱼主导话题的频率（每小时次数） */
   lead_topic_frequency?: InputMaybe<Scalars['Int']['input']>;
+  /** 用户可创建的好友鱼缸数量上限 */
+  our_tank_limit?: InputMaybe<Scalars['Int']['input']>;
   /** 该会员类型的鱼宣传主人的频率（每小时次数） */
   promote_owner_frequency?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -2933,6 +2995,8 @@ export type Member_Types_Insert_Input = {
   lead_topic_frequency?: InputMaybe<Scalars['Int']['input']>;
   /** 会员类型名称（显示用） */
   name?: InputMaybe<Scalars['String']['input']>;
+  /** 用户可创建的好友鱼缸数量上限 */
+  our_tank_limit?: InputMaybe<Scalars['Int']['input']>;
   /** 该会员类型的鱼宣传主人的频率（每小时次数） */
   promote_owner_frequency?: InputMaybe<Scalars['Int']['input']>;
   updated_at?: InputMaybe<Scalars['timestamp']['input']>;
@@ -2954,6 +3018,8 @@ export type Member_Types_Max_Fields = {
   lead_topic_frequency?: Maybe<Scalars['Int']['output']>;
   /** 会员类型名称（显示用） */
   name?: Maybe<Scalars['String']['output']>;
+  /** 用户可创建的好友鱼缸数量上限 */
+  our_tank_limit?: Maybe<Scalars['Int']['output']>;
   /** 该会员类型的鱼宣传主人的频率（每小时次数） */
   promote_owner_frequency?: Maybe<Scalars['Int']['output']>;
   updated_at?: Maybe<Scalars['timestamp']['output']>;
@@ -2974,6 +3040,8 @@ export type Member_Types_Min_Fields = {
   lead_topic_frequency?: Maybe<Scalars['Int']['output']>;
   /** 会员类型名称（显示用） */
   name?: Maybe<Scalars['String']['output']>;
+  /** 用户可创建的好友鱼缸数量上限 */
+  our_tank_limit?: Maybe<Scalars['Int']['output']>;
   /** 该会员类型的鱼宣传主人的频率（每小时次数） */
   promote_owner_frequency?: Maybe<Scalars['Int']['output']>;
   updated_at?: Maybe<Scalars['timestamp']['output']>;
@@ -3016,6 +3084,7 @@ export type Member_Types_Order_By = {
   id?: InputMaybe<Order_By>;
   lead_topic_frequency?: InputMaybe<Order_By>;
   name?: InputMaybe<Order_By>;
+  our_tank_limit?: InputMaybe<Order_By>;
   promote_owner_frequency?: InputMaybe<Order_By>;
   updated_at?: InputMaybe<Order_By>;
   user_subscriptions_aggregate?: InputMaybe<User_Subscriptions_Aggregate_Order_By>;
@@ -3054,6 +3123,8 @@ export enum Member_Types_Select_Column {
   /** column name */
   Name = 'name',
   /** column name */
+  OurTankLimit = 'our_tank_limit',
+  /** column name */
   PromoteOwnerFrequency = 'promote_owner_frequency',
   /** column name */
   UpdatedAt = 'updated_at'
@@ -3079,6 +3150,8 @@ export type Member_Types_Set_Input = {
   lead_topic_frequency?: InputMaybe<Scalars['Int']['input']>;
   /** 会员类型名称（显示用） */
   name?: InputMaybe<Scalars['String']['input']>;
+  /** 用户可创建的好友鱼缸数量上限 */
+  our_tank_limit?: InputMaybe<Scalars['Int']['input']>;
   /** 该会员类型的鱼宣传主人的频率（每小时次数） */
   promote_owner_frequency?: InputMaybe<Scalars['Int']['input']>;
   updated_at?: InputMaybe<Scalars['timestamp']['input']>;
@@ -3091,6 +3164,8 @@ export type Member_Types_Stddev_Fields = {
   fee_per_year?: Maybe<Scalars['Float']['output']>;
   /** 该会员类型的鱼主导话题的频率（每小时次数） */
   lead_topic_frequency?: Maybe<Scalars['Float']['output']>;
+  /** 用户可创建的好友鱼缸数量上限 */
+  our_tank_limit?: Maybe<Scalars['Float']['output']>;
   /** 该会员类型的鱼宣传主人的频率（每小时次数） */
   promote_owner_frequency?: Maybe<Scalars['Float']['output']>;
 };
@@ -3102,6 +3177,8 @@ export type Member_Types_Stddev_Pop_Fields = {
   fee_per_year?: Maybe<Scalars['Float']['output']>;
   /** 该会员类型的鱼主导话题的频率（每小时次数） */
   lead_topic_frequency?: Maybe<Scalars['Float']['output']>;
+  /** 用户可创建的好友鱼缸数量上限 */
+  our_tank_limit?: Maybe<Scalars['Float']['output']>;
   /** 该会员类型的鱼宣传主人的频率（每小时次数） */
   promote_owner_frequency?: Maybe<Scalars['Float']['output']>;
 };
@@ -3113,6 +3190,8 @@ export type Member_Types_Stddev_Samp_Fields = {
   fee_per_year?: Maybe<Scalars['Float']['output']>;
   /** 该会员类型的鱼主导话题的频率（每小时次数） */
   lead_topic_frequency?: Maybe<Scalars['Float']['output']>;
+  /** 用户可创建的好友鱼缸数量上限 */
+  our_tank_limit?: Maybe<Scalars['Float']['output']>;
   /** 该会员类型的鱼宣传主人的频率（每小时次数） */
   promote_owner_frequency?: Maybe<Scalars['Float']['output']>;
 };
@@ -3145,6 +3224,8 @@ export type Member_Types_Stream_Cursor_Value_Input = {
   lead_topic_frequency?: InputMaybe<Scalars['Int']['input']>;
   /** 会员类型名称（显示用） */
   name?: InputMaybe<Scalars['String']['input']>;
+  /** 用户可创建的好友鱼缸数量上限 */
+  our_tank_limit?: InputMaybe<Scalars['Int']['input']>;
   /** 该会员类型的鱼宣传主人的频率（每小时次数） */
   promote_owner_frequency?: InputMaybe<Scalars['Int']['input']>;
   updated_at?: InputMaybe<Scalars['timestamp']['input']>;
@@ -3157,6 +3238,8 @@ export type Member_Types_Sum_Fields = {
   fee_per_year?: Maybe<Scalars['numeric']['output']>;
   /** 该会员类型的鱼主导话题的频率（每小时次数） */
   lead_topic_frequency?: Maybe<Scalars['Int']['output']>;
+  /** 用户可创建的好友鱼缸数量上限 */
+  our_tank_limit?: Maybe<Scalars['Int']['output']>;
   /** 该会员类型的鱼宣传主人的频率（每小时次数） */
   promote_owner_frequency?: Maybe<Scalars['Int']['output']>;
 };
@@ -3188,6 +3271,8 @@ export enum Member_Types_Update_Column {
   /** column name */
   Name = 'name',
   /** column name */
+  OurTankLimit = 'our_tank_limit',
+  /** column name */
   PromoteOwnerFrequency = 'promote_owner_frequency',
   /** column name */
   UpdatedAt = 'updated_at'
@@ -3209,6 +3294,8 @@ export type Member_Types_Var_Pop_Fields = {
   fee_per_year?: Maybe<Scalars['Float']['output']>;
   /** 该会员类型的鱼主导话题的频率（每小时次数） */
   lead_topic_frequency?: Maybe<Scalars['Float']['output']>;
+  /** 用户可创建的好友鱼缸数量上限 */
+  our_tank_limit?: Maybe<Scalars['Float']['output']>;
   /** 该会员类型的鱼宣传主人的频率（每小时次数） */
   promote_owner_frequency?: Maybe<Scalars['Float']['output']>;
 };
@@ -3220,6 +3307,8 @@ export type Member_Types_Var_Samp_Fields = {
   fee_per_year?: Maybe<Scalars['Float']['output']>;
   /** 该会员类型的鱼主导话题的频率（每小时次数） */
   lead_topic_frequency?: Maybe<Scalars['Float']['output']>;
+  /** 用户可创建的好友鱼缸数量上限 */
+  our_tank_limit?: Maybe<Scalars['Float']['output']>;
   /** 该会员类型的鱼宣传主人的频率（每小时次数） */
   promote_owner_frequency?: Maybe<Scalars['Float']['output']>;
 };
@@ -3231,6 +3320,8 @@ export type Member_Types_Variance_Fields = {
   fee_per_year?: Maybe<Scalars['Float']['output']>;
   /** 该会员类型的鱼主导话题的频率（每小时次数） */
   lead_topic_frequency?: Maybe<Scalars['Float']['output']>;
+  /** 用户可创建的好友鱼缸数量上限 */
+  our_tank_limit?: Maybe<Scalars['Float']['output']>;
   /** 该会员类型的鱼宣传主人的频率（每小时次数） */
   promote_owner_frequency?: Maybe<Scalars['Float']['output']>;
 };
@@ -3656,6 +3747,18 @@ export type Mutation_Root = {
   delete_messages?: Maybe<Messages_Mutation_Response>;
   /** delete single row from the table: "messages" */
   delete_messages_by_pk?: Maybe<Messages>;
+  /** delete data from the table: "our_tank_fish" */
+  delete_our_tank_fish?: Maybe<Our_Tank_Fish_Mutation_Response>;
+  /** delete single row from the table: "our_tank_fish" */
+  delete_our_tank_fish_by_pk?: Maybe<Our_Tank_Fish>;
+  /** delete data from the table: "our_tank_members" */
+  delete_our_tank_members?: Maybe<Our_Tank_Members_Mutation_Response>;
+  /** delete single row from the table: "our_tank_members" */
+  delete_our_tank_members_by_pk?: Maybe<Our_Tank_Members>;
+  /** delete data from the table: "our_tanks" */
+  delete_our_tanks?: Maybe<Our_Tanks_Mutation_Response>;
+  /** delete single row from the table: "our_tanks" */
+  delete_our_tanks_by_pk?: Maybe<Our_Tanks>;
   /** delete data from the table: "payment" */
   delete_payment?: Maybe<Payment_Mutation_Response>;
   /** delete single row from the table: "payment" */
@@ -3718,6 +3821,18 @@ export type Mutation_Root = {
   insert_messages?: Maybe<Messages_Mutation_Response>;
   /** insert a single row into the table: "messages" */
   insert_messages_one?: Maybe<Messages>;
+  /** insert data into the table: "our_tank_fish" */
+  insert_our_tank_fish?: Maybe<Our_Tank_Fish_Mutation_Response>;
+  /** insert a single row into the table: "our_tank_fish" */
+  insert_our_tank_fish_one?: Maybe<Our_Tank_Fish>;
+  /** insert data into the table: "our_tank_members" */
+  insert_our_tank_members?: Maybe<Our_Tank_Members_Mutation_Response>;
+  /** insert a single row into the table: "our_tank_members" */
+  insert_our_tank_members_one?: Maybe<Our_Tank_Members>;
+  /** insert data into the table: "our_tanks" */
+  insert_our_tanks?: Maybe<Our_Tanks_Mutation_Response>;
+  /** insert a single row into the table: "our_tanks" */
+  insert_our_tanks_one?: Maybe<Our_Tanks>;
   /** insert data into the table: "payment" */
   insert_payment?: Maybe<Payment_Mutation_Response>;
   /** insert a single row into the table: "payment" */
@@ -3804,6 +3919,24 @@ export type Mutation_Root = {
   update_messages_by_pk?: Maybe<Messages>;
   /** update multiples rows of table: "messages" */
   update_messages_many?: Maybe<Array<Maybe<Messages_Mutation_Response>>>;
+  /** update data of the table: "our_tank_fish" */
+  update_our_tank_fish?: Maybe<Our_Tank_Fish_Mutation_Response>;
+  /** update single row of the table: "our_tank_fish" */
+  update_our_tank_fish_by_pk?: Maybe<Our_Tank_Fish>;
+  /** update multiples rows of table: "our_tank_fish" */
+  update_our_tank_fish_many?: Maybe<Array<Maybe<Our_Tank_Fish_Mutation_Response>>>;
+  /** update data of the table: "our_tank_members" */
+  update_our_tank_members?: Maybe<Our_Tank_Members_Mutation_Response>;
+  /** update single row of the table: "our_tank_members" */
+  update_our_tank_members_by_pk?: Maybe<Our_Tank_Members>;
+  /** update multiples rows of table: "our_tank_members" */
+  update_our_tank_members_many?: Maybe<Array<Maybe<Our_Tank_Members_Mutation_Response>>>;
+  /** update data of the table: "our_tanks" */
+  update_our_tanks?: Maybe<Our_Tanks_Mutation_Response>;
+  /** update single row of the table: "our_tanks" */
+  update_our_tanks_by_pk?: Maybe<Our_Tanks>;
+  /** update multiples rows of table: "our_tanks" */
+  update_our_tanks_many?: Maybe<Array<Maybe<Our_Tanks_Mutation_Response>>>;
   /** update data of the table: "payment" */
   update_payment?: Maybe<Payment_Mutation_Response>;
   /** update single row of the table: "payment" */
@@ -3953,6 +4086,42 @@ export type Mutation_RootDelete_MessagesArgs = {
 
 /** mutation root */
 export type Mutation_RootDelete_Messages_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Our_Tank_FishArgs = {
+  where: Our_Tank_Fish_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Our_Tank_Fish_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Our_Tank_MembersArgs = {
+  where: Our_Tank_Members_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Our_Tank_Members_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Our_TanksArgs = {
+  where: Our_Tanks_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootDelete_Our_Tanks_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -4158,6 +4327,48 @@ export type Mutation_RootInsert_MessagesArgs = {
 export type Mutation_RootInsert_Messages_OneArgs = {
   object: Messages_Insert_Input;
   on_conflict?: InputMaybe<Messages_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Our_Tank_FishArgs = {
+  objects: Array<Our_Tank_Fish_Insert_Input>;
+  on_conflict?: InputMaybe<Our_Tank_Fish_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Our_Tank_Fish_OneArgs = {
+  object: Our_Tank_Fish_Insert_Input;
+  on_conflict?: InputMaybe<Our_Tank_Fish_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Our_Tank_MembersArgs = {
+  objects: Array<Our_Tank_Members_Insert_Input>;
+  on_conflict?: InputMaybe<Our_Tank_Members_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Our_Tank_Members_OneArgs = {
+  object: Our_Tank_Members_Insert_Input;
+  on_conflict?: InputMaybe<Our_Tank_Members_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Our_TanksArgs = {
+  objects: Array<Our_Tanks_Insert_Input>;
+  on_conflict?: InputMaybe<Our_Tanks_On_Conflict>;
+};
+
+
+/** mutation root */
+export type Mutation_RootInsert_Our_Tanks_OneArgs = {
+  object: Our_Tanks_Insert_Input;
+  on_conflict?: InputMaybe<Our_Tanks_On_Conflict>;
 };
 
 
@@ -4468,6 +4679,68 @@ export type Mutation_RootUpdate_Messages_ManyArgs = {
 
 
 /** mutation root */
+export type Mutation_RootUpdate_Our_Tank_FishArgs = {
+  _set?: InputMaybe<Our_Tank_Fish_Set_Input>;
+  where: Our_Tank_Fish_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Our_Tank_Fish_By_PkArgs = {
+  _set?: InputMaybe<Our_Tank_Fish_Set_Input>;
+  pk_columns: Our_Tank_Fish_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Our_Tank_Fish_ManyArgs = {
+  updates: Array<Our_Tank_Fish_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Our_Tank_MembersArgs = {
+  _set?: InputMaybe<Our_Tank_Members_Set_Input>;
+  where: Our_Tank_Members_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Our_Tank_Members_By_PkArgs = {
+  _set?: InputMaybe<Our_Tank_Members_Set_Input>;
+  pk_columns: Our_Tank_Members_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Our_Tank_Members_ManyArgs = {
+  updates: Array<Our_Tank_Members_Updates>;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Our_TanksArgs = {
+  _inc?: InputMaybe<Our_Tanks_Inc_Input>;
+  _set?: InputMaybe<Our_Tanks_Set_Input>;
+  where: Our_Tanks_Bool_Exp;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Our_Tanks_By_PkArgs = {
+  _inc?: InputMaybe<Our_Tanks_Inc_Input>;
+  _set?: InputMaybe<Our_Tanks_Set_Input>;
+  pk_columns: Our_Tanks_Pk_Columns_Input;
+};
+
+
+/** mutation root */
+export type Mutation_RootUpdate_Our_Tanks_ManyArgs = {
+  updates: Array<Our_Tanks_Updates>;
+};
+
+
+/** mutation root */
 export type Mutation_RootUpdate_PaymentArgs = {
   _append?: InputMaybe<Payment_Append_Input>;
   _delete_at_path?: InputMaybe<Payment_Delete_At_Path_Input>;
@@ -4650,6 +4923,890 @@ export enum Order_By {
   /** in descending order, nulls last */
   DescNullsLast = 'desc_nulls_last'
 }
+
+/** 好友鱼缸中的鱼关联表，不影响原始鱼数据 */
+export type Our_Tank_Fish = {
+  __typename?: 'our_tank_fish';
+  added_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** 添加这条鱼的用户ID */
+  added_by: Scalars['String']['output'];
+  /** An object relationship */
+  fish: Fish;
+  fish_id: Scalars['uuid']['output'];
+  id: Scalars['uuid']['output'];
+  /** An object relationship */
+  our_tank: Our_Tanks;
+  tank_id: Scalars['uuid']['output'];
+};
+
+/** aggregated selection of "our_tank_fish" */
+export type Our_Tank_Fish_Aggregate = {
+  __typename?: 'our_tank_fish_aggregate';
+  aggregate?: Maybe<Our_Tank_Fish_Aggregate_Fields>;
+  nodes: Array<Our_Tank_Fish>;
+};
+
+export type Our_Tank_Fish_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Our_Tank_Fish_Aggregate_Bool_Exp_Count>;
+};
+
+export type Our_Tank_Fish_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Our_Tank_Fish_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Our_Tank_Fish_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "our_tank_fish" */
+export type Our_Tank_Fish_Aggregate_Fields = {
+  __typename?: 'our_tank_fish_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Our_Tank_Fish_Max_Fields>;
+  min?: Maybe<Our_Tank_Fish_Min_Fields>;
+};
+
+
+/** aggregate fields of "our_tank_fish" */
+export type Our_Tank_Fish_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Our_Tank_Fish_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "our_tank_fish" */
+export type Our_Tank_Fish_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Our_Tank_Fish_Max_Order_By>;
+  min?: InputMaybe<Our_Tank_Fish_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "our_tank_fish" */
+export type Our_Tank_Fish_Arr_Rel_Insert_Input = {
+  data: Array<Our_Tank_Fish_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Our_Tank_Fish_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "our_tank_fish". All fields are combined with a logical 'AND'. */
+export type Our_Tank_Fish_Bool_Exp = {
+  _and?: InputMaybe<Array<Our_Tank_Fish_Bool_Exp>>;
+  _not?: InputMaybe<Our_Tank_Fish_Bool_Exp>;
+  _or?: InputMaybe<Array<Our_Tank_Fish_Bool_Exp>>;
+  added_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  added_by?: InputMaybe<String_Comparison_Exp>;
+  fish?: InputMaybe<Fish_Bool_Exp>;
+  fish_id?: InputMaybe<Uuid_Comparison_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  our_tank?: InputMaybe<Our_Tanks_Bool_Exp>;
+  tank_id?: InputMaybe<Uuid_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "our_tank_fish" */
+export enum Our_Tank_Fish_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  OurTankFishPkey = 'our_tank_fish_pkey',
+  /** unique or primary key constraint on columns "fish_id", "tank_id" */
+  OurTankFishTankIdFishIdKey = 'our_tank_fish_tank_id_fish_id_key'
+}
+
+/** input type for inserting data into table "our_tank_fish" */
+export type Our_Tank_Fish_Insert_Input = {
+  added_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** 添加这条鱼的用户ID */
+  added_by?: InputMaybe<Scalars['String']['input']>;
+  fish?: InputMaybe<Fish_Obj_Rel_Insert_Input>;
+  fish_id?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  our_tank?: InputMaybe<Our_Tanks_Obj_Rel_Insert_Input>;
+  tank_id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** aggregate max on columns */
+export type Our_Tank_Fish_Max_Fields = {
+  __typename?: 'our_tank_fish_max_fields';
+  added_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** 添加这条鱼的用户ID */
+  added_by?: Maybe<Scalars['String']['output']>;
+  fish_id?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  tank_id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by max() on columns of table "our_tank_fish" */
+export type Our_Tank_Fish_Max_Order_By = {
+  added_at?: InputMaybe<Order_By>;
+  /** 添加这条鱼的用户ID */
+  added_by?: InputMaybe<Order_By>;
+  fish_id?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  tank_id?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Our_Tank_Fish_Min_Fields = {
+  __typename?: 'our_tank_fish_min_fields';
+  added_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** 添加这条鱼的用户ID */
+  added_by?: Maybe<Scalars['String']['output']>;
+  fish_id?: Maybe<Scalars['uuid']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  tank_id?: Maybe<Scalars['uuid']['output']>;
+};
+
+/** order by min() on columns of table "our_tank_fish" */
+export type Our_Tank_Fish_Min_Order_By = {
+  added_at?: InputMaybe<Order_By>;
+  /** 添加这条鱼的用户ID */
+  added_by?: InputMaybe<Order_By>;
+  fish_id?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  tank_id?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "our_tank_fish" */
+export type Our_Tank_Fish_Mutation_Response = {
+  __typename?: 'our_tank_fish_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Our_Tank_Fish>;
+};
+
+/** on_conflict condition type for table "our_tank_fish" */
+export type Our_Tank_Fish_On_Conflict = {
+  constraint: Our_Tank_Fish_Constraint;
+  update_columns?: Array<Our_Tank_Fish_Update_Column>;
+  where?: InputMaybe<Our_Tank_Fish_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "our_tank_fish". */
+export type Our_Tank_Fish_Order_By = {
+  added_at?: InputMaybe<Order_By>;
+  added_by?: InputMaybe<Order_By>;
+  fish?: InputMaybe<Fish_Order_By>;
+  fish_id?: InputMaybe<Order_By>;
+  id?: InputMaybe<Order_By>;
+  our_tank?: InputMaybe<Our_Tanks_Order_By>;
+  tank_id?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: our_tank_fish */
+export type Our_Tank_Fish_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "our_tank_fish" */
+export enum Our_Tank_Fish_Select_Column {
+  /** column name */
+  AddedAt = 'added_at',
+  /** column name */
+  AddedBy = 'added_by',
+  /** column name */
+  FishId = 'fish_id',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  TankId = 'tank_id'
+}
+
+/** input type for updating data in table "our_tank_fish" */
+export type Our_Tank_Fish_Set_Input = {
+  added_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** 添加这条鱼的用户ID */
+  added_by?: InputMaybe<Scalars['String']['input']>;
+  fish_id?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  tank_id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** Streaming cursor of the table "our_tank_fish" */
+export type Our_Tank_Fish_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Our_Tank_Fish_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Our_Tank_Fish_Stream_Cursor_Value_Input = {
+  added_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** 添加这条鱼的用户ID */
+  added_by?: InputMaybe<Scalars['String']['input']>;
+  fish_id?: InputMaybe<Scalars['uuid']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  tank_id?: InputMaybe<Scalars['uuid']['input']>;
+};
+
+/** update columns of table "our_tank_fish" */
+export enum Our_Tank_Fish_Update_Column {
+  /** column name */
+  AddedAt = 'added_at',
+  /** column name */
+  AddedBy = 'added_by',
+  /** column name */
+  FishId = 'fish_id',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  TankId = 'tank_id'
+}
+
+export type Our_Tank_Fish_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Our_Tank_Fish_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Our_Tank_Fish_Bool_Exp;
+};
+
+/** 好友鱼缸成员关系表 */
+export type Our_Tank_Members = {
+  __typename?: 'our_tank_members';
+  id: Scalars['uuid']['output'];
+  joined_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** 最后阅读时间，用于计算未读消息数 */
+  last_read_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** An object relationship */
+  our_tank: Our_Tanks;
+  /** 成员角色：owner（主人）或 member（成员） */
+  role?: Maybe<Scalars['String']['output']>;
+  tank_id: Scalars['uuid']['output'];
+  user_id: Scalars['String']['output'];
+};
+
+/** aggregated selection of "our_tank_members" */
+export type Our_Tank_Members_Aggregate = {
+  __typename?: 'our_tank_members_aggregate';
+  aggregate?: Maybe<Our_Tank_Members_Aggregate_Fields>;
+  nodes: Array<Our_Tank_Members>;
+};
+
+export type Our_Tank_Members_Aggregate_Bool_Exp = {
+  count?: InputMaybe<Our_Tank_Members_Aggregate_Bool_Exp_Count>;
+};
+
+export type Our_Tank_Members_Aggregate_Bool_Exp_Count = {
+  arguments?: InputMaybe<Array<Our_Tank_Members_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+  filter?: InputMaybe<Our_Tank_Members_Bool_Exp>;
+  predicate: Int_Comparison_Exp;
+};
+
+/** aggregate fields of "our_tank_members" */
+export type Our_Tank_Members_Aggregate_Fields = {
+  __typename?: 'our_tank_members_aggregate_fields';
+  count: Scalars['Int']['output'];
+  max?: Maybe<Our_Tank_Members_Max_Fields>;
+  min?: Maybe<Our_Tank_Members_Min_Fields>;
+};
+
+
+/** aggregate fields of "our_tank_members" */
+export type Our_Tank_Members_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Our_Tank_Members_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** order by aggregate values of table "our_tank_members" */
+export type Our_Tank_Members_Aggregate_Order_By = {
+  count?: InputMaybe<Order_By>;
+  max?: InputMaybe<Our_Tank_Members_Max_Order_By>;
+  min?: InputMaybe<Our_Tank_Members_Min_Order_By>;
+};
+
+/** input type for inserting array relation for remote table "our_tank_members" */
+export type Our_Tank_Members_Arr_Rel_Insert_Input = {
+  data: Array<Our_Tank_Members_Insert_Input>;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Our_Tank_Members_On_Conflict>;
+};
+
+/** Boolean expression to filter rows from the table "our_tank_members". All fields are combined with a logical 'AND'. */
+export type Our_Tank_Members_Bool_Exp = {
+  _and?: InputMaybe<Array<Our_Tank_Members_Bool_Exp>>;
+  _not?: InputMaybe<Our_Tank_Members_Bool_Exp>;
+  _or?: InputMaybe<Array<Our_Tank_Members_Bool_Exp>>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  joined_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  last_read_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  our_tank?: InputMaybe<Our_Tanks_Bool_Exp>;
+  role?: InputMaybe<String_Comparison_Exp>;
+  tank_id?: InputMaybe<Uuid_Comparison_Exp>;
+  user_id?: InputMaybe<String_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "our_tank_members" */
+export enum Our_Tank_Members_Constraint {
+  /** unique or primary key constraint on columns "id" */
+  OurTankMembersPkey = 'our_tank_members_pkey',
+  /** unique or primary key constraint on columns "user_id", "tank_id" */
+  OurTankMembersTankIdUserIdKey = 'our_tank_members_tank_id_user_id_key'
+}
+
+/** input type for inserting data into table "our_tank_members" */
+export type Our_Tank_Members_Insert_Input = {
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  joined_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** 最后阅读时间，用于计算未读消息数 */
+  last_read_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  our_tank?: InputMaybe<Our_Tanks_Obj_Rel_Insert_Input>;
+  /** 成员角色：owner（主人）或 member（成员） */
+  role?: InputMaybe<Scalars['String']['input']>;
+  tank_id?: InputMaybe<Scalars['uuid']['input']>;
+  user_id?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** aggregate max on columns */
+export type Our_Tank_Members_Max_Fields = {
+  __typename?: 'our_tank_members_max_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+  joined_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** 最后阅读时间，用于计算未读消息数 */
+  last_read_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** 成员角色：owner（主人）或 member（成员） */
+  role?: Maybe<Scalars['String']['output']>;
+  tank_id?: Maybe<Scalars['uuid']['output']>;
+  user_id?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by max() on columns of table "our_tank_members" */
+export type Our_Tank_Members_Max_Order_By = {
+  id?: InputMaybe<Order_By>;
+  joined_at?: InputMaybe<Order_By>;
+  /** 最后阅读时间，用于计算未读消息数 */
+  last_read_at?: InputMaybe<Order_By>;
+  /** 成员角色：owner（主人）或 member（成员） */
+  role?: InputMaybe<Order_By>;
+  tank_id?: InputMaybe<Order_By>;
+  user_id?: InputMaybe<Order_By>;
+};
+
+/** aggregate min on columns */
+export type Our_Tank_Members_Min_Fields = {
+  __typename?: 'our_tank_members_min_fields';
+  id?: Maybe<Scalars['uuid']['output']>;
+  joined_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** 最后阅读时间，用于计算未读消息数 */
+  last_read_at?: Maybe<Scalars['timestamptz']['output']>;
+  /** 成员角色：owner（主人）或 member（成员） */
+  role?: Maybe<Scalars['String']['output']>;
+  tank_id?: Maybe<Scalars['uuid']['output']>;
+  user_id?: Maybe<Scalars['String']['output']>;
+};
+
+/** order by min() on columns of table "our_tank_members" */
+export type Our_Tank_Members_Min_Order_By = {
+  id?: InputMaybe<Order_By>;
+  joined_at?: InputMaybe<Order_By>;
+  /** 最后阅读时间，用于计算未读消息数 */
+  last_read_at?: InputMaybe<Order_By>;
+  /** 成员角色：owner（主人）或 member（成员） */
+  role?: InputMaybe<Order_By>;
+  tank_id?: InputMaybe<Order_By>;
+  user_id?: InputMaybe<Order_By>;
+};
+
+/** response of any mutation on the table "our_tank_members" */
+export type Our_Tank_Members_Mutation_Response = {
+  __typename?: 'our_tank_members_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Our_Tank_Members>;
+};
+
+/** on_conflict condition type for table "our_tank_members" */
+export type Our_Tank_Members_On_Conflict = {
+  constraint: Our_Tank_Members_Constraint;
+  update_columns?: Array<Our_Tank_Members_Update_Column>;
+  where?: InputMaybe<Our_Tank_Members_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "our_tank_members". */
+export type Our_Tank_Members_Order_By = {
+  id?: InputMaybe<Order_By>;
+  joined_at?: InputMaybe<Order_By>;
+  last_read_at?: InputMaybe<Order_By>;
+  our_tank?: InputMaybe<Our_Tanks_Order_By>;
+  role?: InputMaybe<Order_By>;
+  tank_id?: InputMaybe<Order_By>;
+  user_id?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: our_tank_members */
+export type Our_Tank_Members_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "our_tank_members" */
+export enum Our_Tank_Members_Select_Column {
+  /** column name */
+  Id = 'id',
+  /** column name */
+  JoinedAt = 'joined_at',
+  /** column name */
+  LastReadAt = 'last_read_at',
+  /** column name */
+  Role = 'role',
+  /** column name */
+  TankId = 'tank_id',
+  /** column name */
+  UserId = 'user_id'
+}
+
+/** input type for updating data in table "our_tank_members" */
+export type Our_Tank_Members_Set_Input = {
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  joined_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** 最后阅读时间，用于计算未读消息数 */
+  last_read_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** 成员角色：owner（主人）或 member（成员） */
+  role?: InputMaybe<Scalars['String']['input']>;
+  tank_id?: InputMaybe<Scalars['uuid']['input']>;
+  user_id?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Streaming cursor of the table "our_tank_members" */
+export type Our_Tank_Members_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Our_Tank_Members_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Our_Tank_Members_Stream_Cursor_Value_Input = {
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  joined_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** 最后阅读时间，用于计算未读消息数 */
+  last_read_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  /** 成员角色：owner（主人）或 member（成员） */
+  role?: InputMaybe<Scalars['String']['input']>;
+  tank_id?: InputMaybe<Scalars['uuid']['input']>;
+  user_id?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** update columns of table "our_tank_members" */
+export enum Our_Tank_Members_Update_Column {
+  /** column name */
+  Id = 'id',
+  /** column name */
+  JoinedAt = 'joined_at',
+  /** column name */
+  LastReadAt = 'last_read_at',
+  /** column name */
+  Role = 'role',
+  /** column name */
+  TankId = 'tank_id',
+  /** column name */
+  UserId = 'user_id'
+}
+
+export type Our_Tank_Members_Updates = {
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Our_Tank_Members_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Our_Tank_Members_Bool_Exp;
+};
+
+/** 好友鱼缸主表：存储用户创建的私密共享鱼缸 */
+export type Our_Tanks = {
+  __typename?: 'our_tanks';
+  /** 邀请码，6-8位字母数字组合，用于分享和加入 */
+  code: Scalars['String']['output'];
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  /** An array relationship */
+  group_chats: Array<Group_Chat>;
+  /** An aggregate relationship */
+  group_chats_aggregate: Group_Chat_Aggregate;
+  id: Scalars['uuid']['output'];
+  /** 鱼缸最大容量，默认20条鱼 */
+  max_fish_count?: Maybe<Scalars['Int']['output']>;
+  name: Scalars['String']['output'];
+  /** An array relationship */
+  our_tank_fishes: Array<Our_Tank_Fish>;
+  /** An aggregate relationship */
+  our_tank_fishes_aggregate: Our_Tank_Fish_Aggregate;
+  /** An array relationship */
+  our_tank_members: Array<Our_Tank_Members>;
+  /** An aggregate relationship */
+  our_tank_members_aggregate: Our_Tank_Members_Aggregate;
+  owner_id: Scalars['String']['output'];
+  /** 可选的加入密码，使用bcrypt加密存储 */
+  password_hash?: Maybe<Scalars['String']['output']>;
+  updated_at?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+
+/** 好友鱼缸主表：存储用户创建的私密共享鱼缸 */
+export type Our_TanksGroup_ChatsArgs = {
+  distinct_on?: InputMaybe<Array<Group_Chat_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Group_Chat_Order_By>>;
+  where?: InputMaybe<Group_Chat_Bool_Exp>;
+};
+
+
+/** 好友鱼缸主表：存储用户创建的私密共享鱼缸 */
+export type Our_TanksGroup_Chats_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Group_Chat_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Group_Chat_Order_By>>;
+  where?: InputMaybe<Group_Chat_Bool_Exp>;
+};
+
+
+/** 好友鱼缸主表：存储用户创建的私密共享鱼缸 */
+export type Our_TanksOur_Tank_FishesArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tank_Fish_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tank_Fish_Order_By>>;
+  where?: InputMaybe<Our_Tank_Fish_Bool_Exp>;
+};
+
+
+/** 好友鱼缸主表：存储用户创建的私密共享鱼缸 */
+export type Our_TanksOur_Tank_Fishes_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tank_Fish_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tank_Fish_Order_By>>;
+  where?: InputMaybe<Our_Tank_Fish_Bool_Exp>;
+};
+
+
+/** 好友鱼缸主表：存储用户创建的私密共享鱼缸 */
+export type Our_TanksOur_Tank_MembersArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tank_Members_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tank_Members_Order_By>>;
+  where?: InputMaybe<Our_Tank_Members_Bool_Exp>;
+};
+
+
+/** 好友鱼缸主表：存储用户创建的私密共享鱼缸 */
+export type Our_TanksOur_Tank_Members_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tank_Members_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tank_Members_Order_By>>;
+  where?: InputMaybe<Our_Tank_Members_Bool_Exp>;
+};
+
+/** aggregated selection of "our_tanks" */
+export type Our_Tanks_Aggregate = {
+  __typename?: 'our_tanks_aggregate';
+  aggregate?: Maybe<Our_Tanks_Aggregate_Fields>;
+  nodes: Array<Our_Tanks>;
+};
+
+/** aggregate fields of "our_tanks" */
+export type Our_Tanks_Aggregate_Fields = {
+  __typename?: 'our_tanks_aggregate_fields';
+  avg?: Maybe<Our_Tanks_Avg_Fields>;
+  count: Scalars['Int']['output'];
+  max?: Maybe<Our_Tanks_Max_Fields>;
+  min?: Maybe<Our_Tanks_Min_Fields>;
+  stddev?: Maybe<Our_Tanks_Stddev_Fields>;
+  stddev_pop?: Maybe<Our_Tanks_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Our_Tanks_Stddev_Samp_Fields>;
+  sum?: Maybe<Our_Tanks_Sum_Fields>;
+  var_pop?: Maybe<Our_Tanks_Var_Pop_Fields>;
+  var_samp?: Maybe<Our_Tanks_Var_Samp_Fields>;
+  variance?: Maybe<Our_Tanks_Variance_Fields>;
+};
+
+
+/** aggregate fields of "our_tanks" */
+export type Our_Tanks_Aggregate_FieldsCountArgs = {
+  columns?: InputMaybe<Array<Our_Tanks_Select_Column>>;
+  distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Our_Tanks_Avg_Fields = {
+  __typename?: 'our_tanks_avg_fields';
+  /** 鱼缸最大容量，默认20条鱼 */
+  max_fish_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Boolean expression to filter rows from the table "our_tanks". All fields are combined with a logical 'AND'. */
+export type Our_Tanks_Bool_Exp = {
+  _and?: InputMaybe<Array<Our_Tanks_Bool_Exp>>;
+  _not?: InputMaybe<Our_Tanks_Bool_Exp>;
+  _or?: InputMaybe<Array<Our_Tanks_Bool_Exp>>;
+  code?: InputMaybe<String_Comparison_Exp>;
+  created_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+  description?: InputMaybe<String_Comparison_Exp>;
+  group_chats?: InputMaybe<Group_Chat_Bool_Exp>;
+  group_chats_aggregate?: InputMaybe<Group_Chat_Aggregate_Bool_Exp>;
+  id?: InputMaybe<Uuid_Comparison_Exp>;
+  max_fish_count?: InputMaybe<Int_Comparison_Exp>;
+  name?: InputMaybe<String_Comparison_Exp>;
+  our_tank_fishes?: InputMaybe<Our_Tank_Fish_Bool_Exp>;
+  our_tank_fishes_aggregate?: InputMaybe<Our_Tank_Fish_Aggregate_Bool_Exp>;
+  our_tank_members?: InputMaybe<Our_Tank_Members_Bool_Exp>;
+  our_tank_members_aggregate?: InputMaybe<Our_Tank_Members_Aggregate_Bool_Exp>;
+  owner_id?: InputMaybe<String_Comparison_Exp>;
+  password_hash?: InputMaybe<String_Comparison_Exp>;
+  updated_at?: InputMaybe<Timestamptz_Comparison_Exp>;
+};
+
+/** unique or primary key constraints on table "our_tanks" */
+export enum Our_Tanks_Constraint {
+  /** unique or primary key constraint on columns "code" */
+  OurTanksCodeKey = 'our_tanks_code_key',
+  /** unique or primary key constraint on columns "id" */
+  OurTanksPkey = 'our_tanks_pkey'
+}
+
+/** input type for incrementing numeric columns in table "our_tanks" */
+export type Our_Tanks_Inc_Input = {
+  /** 鱼缸最大容量，默认20条鱼 */
+  max_fish_count?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** input type for inserting data into table "our_tanks" */
+export type Our_Tanks_Insert_Input = {
+  /** 邀请码，6-8位字母数字组合，用于分享和加入 */
+  code?: InputMaybe<Scalars['String']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  group_chats?: InputMaybe<Group_Chat_Arr_Rel_Insert_Input>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  /** 鱼缸最大容量，默认20条鱼 */
+  max_fish_count?: InputMaybe<Scalars['Int']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  our_tank_fishes?: InputMaybe<Our_Tank_Fish_Arr_Rel_Insert_Input>;
+  our_tank_members?: InputMaybe<Our_Tank_Members_Arr_Rel_Insert_Input>;
+  owner_id?: InputMaybe<Scalars['String']['input']>;
+  /** 可选的加入密码，使用bcrypt加密存储 */
+  password_hash?: InputMaybe<Scalars['String']['input']>;
+  updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate max on columns */
+export type Our_Tanks_Max_Fields = {
+  __typename?: 'our_tanks_max_fields';
+  /** 邀请码，6-8位字母数字组合，用于分享和加入 */
+  code?: Maybe<Scalars['String']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  /** 鱼缸最大容量，默认20条鱼 */
+  max_fish_count?: Maybe<Scalars['Int']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  owner_id?: Maybe<Scalars['String']['output']>;
+  /** 可选的加入密码，使用bcrypt加密存储 */
+  password_hash?: Maybe<Scalars['String']['output']>;
+  updated_at?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** aggregate min on columns */
+export type Our_Tanks_Min_Fields = {
+  __typename?: 'our_tanks_min_fields';
+  /** 邀请码，6-8位字母数字组合，用于分享和加入 */
+  code?: Maybe<Scalars['String']['output']>;
+  created_at?: Maybe<Scalars['timestamptz']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  id?: Maybe<Scalars['uuid']['output']>;
+  /** 鱼缸最大容量，默认20条鱼 */
+  max_fish_count?: Maybe<Scalars['Int']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  owner_id?: Maybe<Scalars['String']['output']>;
+  /** 可选的加入密码，使用bcrypt加密存储 */
+  password_hash?: Maybe<Scalars['String']['output']>;
+  updated_at?: Maybe<Scalars['timestamptz']['output']>;
+};
+
+/** response of any mutation on the table "our_tanks" */
+export type Our_Tanks_Mutation_Response = {
+  __typename?: 'our_tanks_mutation_response';
+  /** number of rows affected by the mutation */
+  affected_rows: Scalars['Int']['output'];
+  /** data from the rows affected by the mutation */
+  returning: Array<Our_Tanks>;
+};
+
+/** input type for inserting object relation for remote table "our_tanks" */
+export type Our_Tanks_Obj_Rel_Insert_Input = {
+  data: Our_Tanks_Insert_Input;
+  /** upsert condition */
+  on_conflict?: InputMaybe<Our_Tanks_On_Conflict>;
+};
+
+/** on_conflict condition type for table "our_tanks" */
+export type Our_Tanks_On_Conflict = {
+  constraint: Our_Tanks_Constraint;
+  update_columns?: Array<Our_Tanks_Update_Column>;
+  where?: InputMaybe<Our_Tanks_Bool_Exp>;
+};
+
+/** Ordering options when selecting data from "our_tanks". */
+export type Our_Tanks_Order_By = {
+  code?: InputMaybe<Order_By>;
+  created_at?: InputMaybe<Order_By>;
+  description?: InputMaybe<Order_By>;
+  group_chats_aggregate?: InputMaybe<Group_Chat_Aggregate_Order_By>;
+  id?: InputMaybe<Order_By>;
+  max_fish_count?: InputMaybe<Order_By>;
+  name?: InputMaybe<Order_By>;
+  our_tank_fishes_aggregate?: InputMaybe<Our_Tank_Fish_Aggregate_Order_By>;
+  our_tank_members_aggregate?: InputMaybe<Our_Tank_Members_Aggregate_Order_By>;
+  owner_id?: InputMaybe<Order_By>;
+  password_hash?: InputMaybe<Order_By>;
+  updated_at?: InputMaybe<Order_By>;
+};
+
+/** primary key columns input for table: our_tanks */
+export type Our_Tanks_Pk_Columns_Input = {
+  id: Scalars['uuid']['input'];
+};
+
+/** select columns of table "our_tanks" */
+export enum Our_Tanks_Select_Column {
+  /** column name */
+  Code = 'code',
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  Description = 'description',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  MaxFishCount = 'max_fish_count',
+  /** column name */
+  Name = 'name',
+  /** column name */
+  OwnerId = 'owner_id',
+  /** column name */
+  PasswordHash = 'password_hash',
+  /** column name */
+  UpdatedAt = 'updated_at'
+}
+
+/** input type for updating data in table "our_tanks" */
+export type Our_Tanks_Set_Input = {
+  /** 邀请码，6-8位字母数字组合，用于分享和加入 */
+  code?: InputMaybe<Scalars['String']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  /** 鱼缸最大容量，默认20条鱼 */
+  max_fish_count?: InputMaybe<Scalars['Int']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  owner_id?: InputMaybe<Scalars['String']['input']>;
+  /** 可选的加入密码，使用bcrypt加密存储 */
+  password_hash?: InputMaybe<Scalars['String']['input']>;
+  updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Our_Tanks_Stddev_Fields = {
+  __typename?: 'our_tanks_stddev_fields';
+  /** 鱼缸最大容量，默认20条鱼 */
+  max_fish_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Our_Tanks_Stddev_Pop_Fields = {
+  __typename?: 'our_tanks_stddev_pop_fields';
+  /** 鱼缸最大容量，默认20条鱼 */
+  max_fish_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Our_Tanks_Stddev_Samp_Fields = {
+  __typename?: 'our_tanks_stddev_samp_fields';
+  /** 鱼缸最大容量，默认20条鱼 */
+  max_fish_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Streaming cursor of the table "our_tanks" */
+export type Our_Tanks_Stream_Cursor_Input = {
+  /** Stream column input with initial value */
+  initial_value: Our_Tanks_Stream_Cursor_Value_Input;
+  /** cursor ordering */
+  ordering?: InputMaybe<Cursor_Ordering>;
+};
+
+/** Initial value of the column from where the streaming should start */
+export type Our_Tanks_Stream_Cursor_Value_Input = {
+  /** 邀请码，6-8位字母数字组合，用于分享和加入 */
+  code?: InputMaybe<Scalars['String']['input']>;
+  created_at?: InputMaybe<Scalars['timestamptz']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['uuid']['input']>;
+  /** 鱼缸最大容量，默认20条鱼 */
+  max_fish_count?: InputMaybe<Scalars['Int']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  owner_id?: InputMaybe<Scalars['String']['input']>;
+  /** 可选的加入密码，使用bcrypt加密存储 */
+  password_hash?: InputMaybe<Scalars['String']['input']>;
+  updated_at?: InputMaybe<Scalars['timestamptz']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Our_Tanks_Sum_Fields = {
+  __typename?: 'our_tanks_sum_fields';
+  /** 鱼缸最大容量，默认20条鱼 */
+  max_fish_count?: Maybe<Scalars['Int']['output']>;
+};
+
+/** update columns of table "our_tanks" */
+export enum Our_Tanks_Update_Column {
+  /** column name */
+  Code = 'code',
+  /** column name */
+  CreatedAt = 'created_at',
+  /** column name */
+  Description = 'description',
+  /** column name */
+  Id = 'id',
+  /** column name */
+  MaxFishCount = 'max_fish_count',
+  /** column name */
+  Name = 'name',
+  /** column name */
+  OwnerId = 'owner_id',
+  /** column name */
+  PasswordHash = 'password_hash',
+  /** column name */
+  UpdatedAt = 'updated_at'
+}
+
+export type Our_Tanks_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Our_Tanks_Inc_Input>;
+  /** sets the columns of the filtered rows to the given values */
+  _set?: InputMaybe<Our_Tanks_Set_Input>;
+  /** filter the rows which have to be updated */
+  where: Our_Tanks_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Our_Tanks_Var_Pop_Fields = {
+  __typename?: 'our_tanks_var_pop_fields';
+  /** 鱼缸最大容量，默认20条鱼 */
+  max_fish_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Our_Tanks_Var_Samp_Fields = {
+  __typename?: 'our_tanks_var_samp_fields';
+  /** 鱼缸最大容量，默认20条鱼 */
+  max_fish_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Our_Tanks_Variance_Fields = {
+  __typename?: 'our_tanks_variance_fields';
+  /** 鱼缸最大容量，默认20条鱼 */
+  max_fish_count?: Maybe<Scalars['Float']['output']>;
+};
 
 /** columns and relationships of "payment" */
 export type Payment = {
@@ -5442,6 +6599,24 @@ export type Query_Root = {
   messages_aggregate: Messages_Aggregate;
   /** fetch data from the table: "messages" using primary key columns */
   messages_by_pk?: Maybe<Messages>;
+  /** fetch data from the table: "our_tank_fish" */
+  our_tank_fish: Array<Our_Tank_Fish>;
+  /** fetch aggregated fields from the table: "our_tank_fish" */
+  our_tank_fish_aggregate: Our_Tank_Fish_Aggregate;
+  /** fetch data from the table: "our_tank_fish" using primary key columns */
+  our_tank_fish_by_pk?: Maybe<Our_Tank_Fish>;
+  /** An array relationship */
+  our_tank_members: Array<Our_Tank_Members>;
+  /** An aggregate relationship */
+  our_tank_members_aggregate: Our_Tank_Members_Aggregate;
+  /** fetch data from the table: "our_tank_members" using primary key columns */
+  our_tank_members_by_pk?: Maybe<Our_Tank_Members>;
+  /** fetch data from the table: "our_tanks" */
+  our_tanks: Array<Our_Tanks>;
+  /** fetch aggregated fields from the table: "our_tanks" */
+  our_tanks_aggregate: Our_Tanks_Aggregate;
+  /** fetch data from the table: "our_tanks" using primary key columns */
+  our_tanks_by_pk?: Maybe<Our_Tanks>;
   /** fetch data from the table: "payment" */
   payment: Array<Payment>;
   /** fetch aggregated fields from the table: "payment" */
@@ -5690,6 +6865,75 @@ export type Query_RootMessages_AggregateArgs = {
 
 
 export type Query_RootMessages_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootOur_Tank_FishArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tank_Fish_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tank_Fish_Order_By>>;
+  where?: InputMaybe<Our_Tank_Fish_Bool_Exp>;
+};
+
+
+export type Query_RootOur_Tank_Fish_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tank_Fish_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tank_Fish_Order_By>>;
+  where?: InputMaybe<Our_Tank_Fish_Bool_Exp>;
+};
+
+
+export type Query_RootOur_Tank_Fish_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootOur_Tank_MembersArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tank_Members_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tank_Members_Order_By>>;
+  where?: InputMaybe<Our_Tank_Members_Bool_Exp>;
+};
+
+
+export type Query_RootOur_Tank_Members_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tank_Members_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tank_Members_Order_By>>;
+  where?: InputMaybe<Our_Tank_Members_Bool_Exp>;
+};
+
+
+export type Query_RootOur_Tank_Members_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Query_RootOur_TanksArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tanks_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tanks_Order_By>>;
+  where?: InputMaybe<Our_Tanks_Bool_Exp>;
+};
+
+
+export type Query_RootOur_Tanks_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tanks_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tanks_Order_By>>;
+  where?: InputMaybe<Our_Tanks_Bool_Exp>;
+};
+
+
+export type Query_RootOur_Tanks_By_PkArgs = {
   id: Scalars['uuid']['input'];
 };
 
@@ -6473,6 +7717,30 @@ export type Subscription_Root = {
   messages_by_pk?: Maybe<Messages>;
   /** fetch data from the table in a streaming manner: "messages" */
   messages_stream: Array<Messages>;
+  /** fetch data from the table: "our_tank_fish" */
+  our_tank_fish: Array<Our_Tank_Fish>;
+  /** fetch aggregated fields from the table: "our_tank_fish" */
+  our_tank_fish_aggregate: Our_Tank_Fish_Aggregate;
+  /** fetch data from the table: "our_tank_fish" using primary key columns */
+  our_tank_fish_by_pk?: Maybe<Our_Tank_Fish>;
+  /** fetch data from the table in a streaming manner: "our_tank_fish" */
+  our_tank_fish_stream: Array<Our_Tank_Fish>;
+  /** An array relationship */
+  our_tank_members: Array<Our_Tank_Members>;
+  /** An aggregate relationship */
+  our_tank_members_aggregate: Our_Tank_Members_Aggregate;
+  /** fetch data from the table: "our_tank_members" using primary key columns */
+  our_tank_members_by_pk?: Maybe<Our_Tank_Members>;
+  /** fetch data from the table in a streaming manner: "our_tank_members" */
+  our_tank_members_stream: Array<Our_Tank_Members>;
+  /** fetch data from the table: "our_tanks" */
+  our_tanks: Array<Our_Tanks>;
+  /** fetch aggregated fields from the table: "our_tanks" */
+  our_tanks_aggregate: Our_Tanks_Aggregate;
+  /** fetch data from the table: "our_tanks" using primary key columns */
+  our_tanks_by_pk?: Maybe<Our_Tanks>;
+  /** fetch data from the table in a streaming manner: "our_tanks" */
+  our_tanks_stream: Array<Our_Tanks>;
   /** fetch data from the table: "payment" */
   payment: Array<Payment>;
   /** fetch aggregated fields from the table: "payment" */
@@ -6801,6 +8069,96 @@ export type Subscription_RootMessages_StreamArgs = {
   batch_size: Scalars['Int']['input'];
   cursor: Array<InputMaybe<Messages_Stream_Cursor_Input>>;
   where?: InputMaybe<Messages_Bool_Exp>;
+};
+
+
+export type Subscription_RootOur_Tank_FishArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tank_Fish_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tank_Fish_Order_By>>;
+  where?: InputMaybe<Our_Tank_Fish_Bool_Exp>;
+};
+
+
+export type Subscription_RootOur_Tank_Fish_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tank_Fish_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tank_Fish_Order_By>>;
+  where?: InputMaybe<Our_Tank_Fish_Bool_Exp>;
+};
+
+
+export type Subscription_RootOur_Tank_Fish_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootOur_Tank_Fish_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Our_Tank_Fish_Stream_Cursor_Input>>;
+  where?: InputMaybe<Our_Tank_Fish_Bool_Exp>;
+};
+
+
+export type Subscription_RootOur_Tank_MembersArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tank_Members_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tank_Members_Order_By>>;
+  where?: InputMaybe<Our_Tank_Members_Bool_Exp>;
+};
+
+
+export type Subscription_RootOur_Tank_Members_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tank_Members_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tank_Members_Order_By>>;
+  where?: InputMaybe<Our_Tank_Members_Bool_Exp>;
+};
+
+
+export type Subscription_RootOur_Tank_Members_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootOur_Tank_Members_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Our_Tank_Members_Stream_Cursor_Input>>;
+  where?: InputMaybe<Our_Tank_Members_Bool_Exp>;
+};
+
+
+export type Subscription_RootOur_TanksArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tanks_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tanks_Order_By>>;
+  where?: InputMaybe<Our_Tanks_Bool_Exp>;
+};
+
+
+export type Subscription_RootOur_Tanks_AggregateArgs = {
+  distinct_on?: InputMaybe<Array<Our_Tanks_Select_Column>>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<Our_Tanks_Order_By>>;
+  where?: InputMaybe<Our_Tanks_Bool_Exp>;
+};
+
+
+export type Subscription_RootOur_Tanks_By_PkArgs = {
+  id: Scalars['uuid']['input'];
+};
+
+
+export type Subscription_RootOur_Tanks_StreamArgs = {
+  batch_size: Scalars['Int']['input'];
+  cursor: Array<InputMaybe<Our_Tanks_Stream_Cursor_Input>>;
+  where?: InputMaybe<Our_Tanks_Bool_Exp>;
 };
 
 

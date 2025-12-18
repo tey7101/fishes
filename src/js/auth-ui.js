@@ -399,7 +399,7 @@ class AuthUI {
     loginBtn.className = 'game-btn game-btn-orange';
     loginBtn.innerHTML = `
       <span>👤</span>
-      <span>Sign In</span>
+      <span>Get Started</span>
     `;
     loginBtn.onclick = () => this.showLoginModal();
     
@@ -1465,7 +1465,7 @@ class AuthUI {
       // 🔧 修复：确保按钮内容始终正确显示
       this.loginBtn.innerHTML = `
         <span>👤</span>
-        <span>Sign In</span>
+        <span>Get Started</span>
       `;
       this.loginBtn.style.display = 'flex';
       // 移除隐藏类
@@ -2178,6 +2178,27 @@ window.showLoginModal = function() {
   } else {
     console.error('❌ AuthUI not initialized');
   }
+};
+
+/**
+ * 检查 Our Tank 访问权限
+ * 未登录用户点击 Our Tank 链接时弹出登录弹窗
+ * @param {Event} event - 点击事件
+ * @returns {boolean} - 是否允许导航
+ */
+window.checkOurTankAccess = function(event) {
+  // 同步检查：使用 localStorage 中的用户数据或 authUI 的当前用户状态
+  const userData = localStorage.getItem('userData');
+  const isLoggedIn = !!userData || !!(window.authUI && window.authUI.currentUser);
+  
+  if (!isLoggedIn) {
+    event.preventDefault();
+    if (window.authUI && window.authUI.showLoginModal) {
+      window.authUI.showLoginModal();
+    }
+    return false;
+  }
+  return true;
 };
 
 console.log('✅ 认证UI模块已加载');

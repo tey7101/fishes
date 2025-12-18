@@ -1416,15 +1416,50 @@ class CommunityChatManager {
    */
   showUpgradePrompt(message, upgradeSuggestion, limitInfo) {
     // Avoid showing multiple dialogs
-    if (this._upgradePromptShown) {
+    if (this._upgradePromptShown || this._upgradePromptPending) {
       return;
     }
-    this._upgradePromptShown = true;
     
-    // Reset flag after 5 minutes
-    setTimeout(() => {
-      this._upgradePromptShown = false;
-    }, 5 * 60 * 1000);
+    // Mark as pending (waiting for 30s delay)
+    this._upgradePromptPending = true;
+    
+    // Clear any existing pending timeout
+    if (this._upgradePromptTimeout) {
+      clearTimeout(this._upgradePromptTimeout);
+    }
+    
+    console.log('💬 Upgrade prompt will show in 30 seconds...');
+    
+    // Delay showing the modal by 30 seconds
+    this._upgradePromptTimeout = setTimeout(() => {
+      // Check if modal was already shown or user navigated away
+      if (this._upgradePromptShown || document.getElementById('upgradeLimitModal')) {
+        this._upgradePromptPending = false;
+        return;
+      }
+      
+      this._upgradePromptShown = true;
+      this._upgradePromptPending = false;
+      
+      // Reset flag after 5 minutes
+      setTimeout(() => {
+        this._upgradePromptShown = false;
+      }, 5 * 60 * 1000);
+      
+      this._createUpgradeModal(message, upgradeSuggestion, limitInfo);
+    }, 30 * 1000); // 30 seconds delay
+  }
+  
+  /**
+   * Create and display the upgrade modal
+   * @private
+   */
+  _createUpgradeModal(message, upgradeSuggestion, limitInfo) {
+    // 教程期间不显示升级弹窗
+    if (window.onboardingManager && window.onboardingManager.isOnboarding()) {
+      console.log('[CommunityChatManager] Skipping upgrade modal during tutorial');
+      return;
+    }
     
     // Create modal HTML with new design style
     const modalHTML = `

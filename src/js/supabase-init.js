@@ -7,7 +7,8 @@
 // <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 // Supabase客户端（将在配置加载后初始化）
-let supabase = null;
+// 使用 supabaseClient 避免与 CDN 脚本的 window.supabase 冲突
+let supabaseClient = null;
 
 // 初始化Supabase客户端
 async function initializeSupabaseClient() {
@@ -51,9 +52,9 @@ async function initializeSupabaseClient() {
     return null;
   }
   
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   console.log('✅ Supabase client initialized');
-  return supabase;
+  return supabaseClient;
 }
 
 // 立即开始初始化
@@ -70,10 +71,10 @@ initializeSupabaseClient();
  * @returns {Promise<{data, error}>}
  */
 async function signUp(email, password) {
-  if (!supabase) return { data: null, error: new Error('Supabase未初始化') };
+  if (!supabaseClient) return { data: null, error: new Error('Supabase未初始化') };
   
   try {
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await supabaseClient.auth.signUp({
       email,
       password,
       options: {
@@ -116,10 +117,10 @@ async function signUp(email, password) {
  * @returns {Promise<{data, error}>}
  */
 async function signIn(email, password) {
-  if (!supabase) return { data: null, error: new Error('Supabase未初始化') };
+  if (!supabaseClient) return { data: null, error: new Error('Supabase未初始化') };
   
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
       email,
       password
     });
@@ -139,10 +140,10 @@ async function signIn(email, password) {
  * @returns {Promise<{error}>}
  */
 async function signOut() {
-  if (!supabase) return { error: new Error('Supabase未初始化') };
+  if (!supabaseClient) return { error: new Error('Supabase未初始化') };
   
   try {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabaseClient.auth.signOut();
     if (error) throw error;
     
     console.log('✅ 登出成功');
@@ -159,7 +160,7 @@ async function signOut() {
  * @returns {Promise<{data, error}>}
  */
 async function signInWithOAuth(provider) {
-  if (!supabase) return { data: null, error: new Error('Supabase未初始化') };
+  if (!supabaseClient) return { data: null, error: new Error('Supabase未初始化') };
   
   const validProviders = ['google', 'twitter', 'facebook', 'discord', 'apple', 'reddit'];
   if (!validProviders.includes(provider)) {
@@ -191,7 +192,7 @@ async function signInWithOAuth(provider) {
     
     console.log(`🔄 OAuth redirectTo: ${redirectTo}`);
     
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({
       provider: provider,
       options: {
         redirectTo: redirectTo,
@@ -215,7 +216,7 @@ async function signInWithOAuth(provider) {
  * @returns {Promise<User|null>}
  */
 async function getCurrentUser(forceRefresh = false) {
-  if (!supabase) return null;
+  if (!supabaseClient) return null;
   
   // 优先使用缓存
   if (window.authCache && !forceRefresh) {
@@ -226,7 +227,7 @@ async function getCurrentUser(forceRefresh = false) {
   }
   
   try {
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { data: { user }, error } = await supabaseClient.auth.getUser();
     if (error) throw error;
     
     return user;
@@ -242,7 +243,7 @@ async function getCurrentUser(forceRefresh = false) {
  * @returns {Promise<Session|null>}
  */
 async function getSession(forceRefresh = false) {
-  if (!supabase) return null;
+  if (!supabaseClient) return null;
   
   // 优先使用缓存
   if (window.authCache && !forceRefresh) {
@@ -253,7 +254,7 @@ async function getSession(forceRefresh = false) {
   }
   
   try {
-    const { data: { session }, error } = await supabase.auth.getSession();
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
     if (error) throw error;
     
     return session;
@@ -269,12 +270,12 @@ async function getSession(forceRefresh = false) {
  * @returns {Object} 取消订阅的对象
  */
 function onAuthStateChange(callback) {
-  if (!supabase) {
+  if (!supabaseClient) {
     console.warn('⚠️ Supabase未初始化，无法监听认证状态');
     return { data: { subscription: { unsubscribe: () => {} } } };
   }
   
-  const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+  const { data } = supabaseClient.auth.onAuthStateChange(async (event, session) => {
     console.log('🔔 认证状态变化:', event, session?.user?.email);
     
     // 更新缓存
@@ -325,10 +326,10 @@ function onAuthStateChange(callback) {
  * @returns {Promise<{data, error}>}
  */
 async function resetPasswordForEmail(email) {
-  if (!supabase) return { data: null, error: new Error('Supabase未初始化') };
+  if (!supabaseClient) return { data: null, error: new Error('Supabase未初始化') };
   
   try {
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password.html`
     });
     
@@ -348,10 +349,10 @@ async function resetPasswordForEmail(email) {
  * @returns {Promise<{data, error}>}
  */
 async function updatePassword(newPassword) {
-  if (!supabase) return { data: null, error: new Error('Supabase未初始化') };
+  if (!supabaseClient) return { data: null, error: new Error('Supabase未初始化') };
   
   try {
-    const { data, error } = await supabase.auth.updateUser({
+    const { data, error } = await supabaseClient.auth.updateUser({
       password: newPassword
     });
     
@@ -380,10 +381,10 @@ async function getAccessToken() {
  * @returns {Promise<{data, error}>}
  */
 async function signInAnonymously() {
-  if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
+  if (!supabaseClient) return { data: null, error: new Error('Supabase not initialized') };
   
   try {
-    const { data, error } = await supabase.auth.signInAnonymously();
+    const { data, error } = await supabaseClient.auth.signInAnonymously();
     
     if (error) throw error;
     
@@ -402,7 +403,7 @@ async function signInAnonymously() {
  * @returns {Promise<{data, error}>}
  */
 async function upgradeWithEmail(email, password) {
-  if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
+  if (!supabaseClient) return { data: null, error: new Error('Supabase not initialized') };
   
   try {
     const currentUser = await getCurrentUser();
@@ -414,7 +415,7 @@ async function upgradeWithEmail(email, password) {
       return { data: null, error: new Error('Current user is not anonymous') };
     }
     
-    const { data, error } = await supabase.auth.updateUser({
+    const { data, error } = await supabaseClient.auth.updateUser({
       email: email,
       password: password
     });
@@ -442,7 +443,7 @@ async function upgradeWithEmail(email, password) {
  * @returns {Promise<{data, error}>}
  */
 async function upgradeWithOAuth(provider) {
-  if (!supabase) return { data: null, error: new Error('Supabase not initialized') };
+  if (!supabaseClient) return { data: null, error: new Error('Supabase not initialized') };
   
   const validProviders = ['google', 'twitter', 'facebook', 'discord', 'apple', 'reddit'];
   if (!validProviders.includes(provider)) {
@@ -464,7 +465,7 @@ async function upgradeWithOAuth(provider) {
     const redirectOrigin = isLocalhost ? 'http://localhost:3000' : window.location.origin;
     const redirectTo = `${redirectOrigin}/index.html`;
     
-    const { data, error } = await supabase.auth.linkIdentity({
+    const { data, error } = await supabaseClient.auth.linkIdentity({
       provider: provider,
       options: { redirectTo: redirectTo }
     });
@@ -631,7 +632,7 @@ async function getUserDisplayName() {
 window.supabaseAuth = {
   // 客户端（getter，确保获取最新的客户端实例）
   get client() {
-    return supabase;
+    return supabaseClient;
   },
   
   // 认证函数

@@ -6,6 +6,14 @@ let drawing = false;
 let canvasRect = null; // Cache canvas rect to prevent layout thrashing
 let isNotFishModalShowing = false; // 防止"不是鱼"弹窗重复显示
 
+// ===== Our Tank 模式支持 =====
+// 从 URL 参数读取 ourTankId，用于从 Our Tank 页面跳转过来画鱼后自动添加到指定鱼缸
+// 使用 window.urlParams（来自 fish-utils.js）或创建新的实例
+const TARGET_OUR_TANK_ID = (window.urlParams || new URLSearchParams(window.location.search)).get('ourTankId');
+if (TARGET_OUR_TANK_ID) {
+    console.log('[App] 🎯 Our Tank 模式: 画完鱼后将自动添加到鱼缸', TARGET_OUR_TANK_ID);
+}
+
 // ===== 画布提示文字控制 =====
 const canvasHint = document.getElementById('canvas-hint');
 
@@ -930,13 +938,28 @@ function showSuccessModal(fishImageUrl, needsModeration, fishId = null) {
     console.log(`🔍 [SUCCESS MODAL] showSuccessModal called with:`, {
         fishImageUrl,
         needsModeration,
-        fishId
+        fishId,
+        targetOurTankId: TARGET_OUR_TANK_ID
     });
     
-    // 构建跳转URL，如果有fishId则添加到URL中
-    const tankUrl = fishId 
-        ? `tank.html?newFish=${encodeURIComponent(fishId)}&sort=random`
-        : 'tank.html?sort=random';
+    // 构建跳转URL
+    // 如果有 TARGET_OUR_TANK_ID，跳转到指定的 Our Tank 并自动添加鱼
+    // 否则跳转到全局鱼缸
+    let tankUrl;
+    let buttonText;
+    
+    if (TARGET_OUR_TANK_ID && fishId) {
+        // Our Tank 模式：跳转到指定鱼缸并自动添加鱼
+        tankUrl = `tank.html?ourTank=${TARGET_OUR_TANK_ID}&addFish=${encodeURIComponent(fishId)}`;
+        buttonText = '🌊 Add to Our Tank! 🐟';
+        console.log(`🎯 [SUCCESS MODAL] Our Tank 模式: 将跳转到 Our Tank ${TARGET_OUR_TANK_ID} 并添加鱼 ${fishId}`);
+    } else if (fishId) {
+        tankUrl = `tank.html?newFish=${encodeURIComponent(fishId)}&sort=random`;
+        buttonText = '🌊 Let\'s Swim! 🐟';
+    } else {
+        tankUrl = 'tank.html?sort=random';
+        buttonText = '🌊 Let\'s Swim! 🐟';
+    }
     
     console.log(`🔗 [SUCCESS MODAL] Generated tank URL: ${tankUrl}`);
     
@@ -1033,7 +1056,7 @@ function showSuccessModal(fishImageUrl, needsModeration, fishId = null) {
                             transition: all 0.15s ease;
                             transform: translateY(0);
                         ">
-                    <span style="position: relative; z-index: 1;">🌊 Let's Swim! 🐟</span>
+                    <span style="position: relative; z-index: 1;">${buttonText}</span>
                 </button>
             </div>
         </div>
@@ -2991,6 +3014,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         checkAndRestorePendingCanvas();
     }, 1000); // 延迟1秒，确保所有初始化完成
+    
+    // 🎓 初始化新手引导系统
+    if (window.onboardingManager) {
+        window.onboardingManager.init();
+    }
 });
 
 // 🔧 修复：备用画布恢复机制

@@ -1,0 +1,207 @@
+/**
+ * FishTalk Onboarding Tutorial Styles
+ * 自定义 Driver.js 样式以匹配 cute-game-style 主题
+ */
+
+/* 自定义 Popover 样式 */
+.fishtalk-popover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4), 
+              0 0 0 4px rgba(255, 255, 255, 0.2) !important;
+  padding: 0 !important;
+  max-width: 340px !important;
+  animation: popoverBounce 0.4s ease-out !important;
+}
+
+@keyframes popoverBounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  50% {
+    transform: scale(1.02) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Popover 标题 */
+.fishtalk-popover .driver-popover-title {
+  color: #ffffff !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  padding: 20px 20px 8px !important;
+  margin: 0 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Popover 描述 */
+.fishtalk-popover .driver-popover-description {
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+  padding: 0 20px 16px !important;
+  margin: 0 !important;
+  text-align: left !important;
+}
+
+/* Popover 标题也左对齐 */
+.fishtalk-popover .driver-popover-title {
+  text-align: left !important;
+}
+
+/* 进度指示器 - 确保在同一行显示 */
+.fishtalk-popover .driver-popover-progress-text {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 12px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+/* 按钮容器 - 使用 flexbox 确保进度和按钮在同一行 */
+.fishtalk-popover .driver-popover-footer {
+  padding: 12px 20px 20px !important;
+  display: flex !important;
+  gap: 10px !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+  flex-wrap: nowrap !important;
+}
+
+/* 通用按钮样式 */
+.fishtalk-popover .driver-popover-footer button {
+  padding: 10px 20px !important;
+  border-radius: 25px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  border: none !important;
+  outline: none !important;
+  /* 字体渲染优化，防止模糊 */
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  letter-spacing: 0.3px !important;
+  /* 确保按钮文本在一行内 */
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+/* Next 按钮 - 主要操作 */
+.fishtalk-popover .driver-popover-next-btn {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4) !important;
+}
+
+.fishtalk-popover .driver-popover-next-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5) !important;
+}
+
+/* Previous 按钮 */
+.fishtalk-popover .driver-popover-prev-btn {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+.fishtalk-popover .driver-popover-prev-btn:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Close 按钮 - 右上角 X 按钮 */
+.fishtalk-popover .driver-popover-close-btn {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  padding: 0 !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: white !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  z-index: 10 !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.fishtalk-popover .driver-popover-close-btn:hover {
+  background: rgba(255, 255, 255, 0.4) !important;
+  transform: scale(1.1) !important;
+}
+
+.fishtalk-popover .driver-popover-close-btn:active {
+  transform: scale(0.95) !important;
+}
+
+/* 高亮遮罩 - 50%透明度，明确突出目标组件 */
+.driver-overlay {
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 确保 popover 可以接收点击事件 */
+.driver-popover {
+  pointer-events: auto !important;
+}
+
+/* 高亮区域 - 更明亮的高亮效果突出目标组件 */
+.driver-active-element {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 1),
+              0 0 0 8px rgba(102, 126, 234, 0.8),
+              0 0 30px rgba(255, 255, 255, 0.6),
+              0 0 60px rgba(102, 126, 234, 0.4) !important;
+  border-radius: 8px !important;
+  position: relative !important;
+  z-index: 10001 !important;
+  filter: brightness(1.1) !important;
+}
+
+/* 隐藏箭头，使用蒙板+高亮方式 */
+.driver-popover-arrow {
+  display: none !important;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .fishtalk-popover {
+    max-width: calc(100vw - 40px) !important;
+    margin: 0 20px !important;
+  }
+  
+  .fishtalk-popover .driver-popover-title {
+    font-size: 18px !important;
+    padding: 16px 16px 6px !important;
+  }
+  
+  .fishtalk-popover .driver-popover-description {
+    font-size: 14px !important;
+    padding: 0 16px 12px !important;
+  }
+  
+  .fishtalk-popover .driver-popover-footer {
+    padding: 10px 16px 16px !important;
+    flex-wrap: wrap !important;
+  }
+  
+  .fishtalk-popover .driver-popover-footer button {
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+  }
+}

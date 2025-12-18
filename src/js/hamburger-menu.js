@@ -34,6 +34,16 @@
     // 点击汉堡菜单按钮
     hamburgerBtn.addEventListener('click', function(e) {
       e.stopPropagation();
+      
+      // 如果新手引导正在进行中，不打开菜单（除非菜单已经打开需要关闭）
+      if (window.onboardingManager && window.onboardingManager.getDriverInstance && window.onboardingManager.getDriverInstance()) {
+        // 在新手引导期间，只允许关闭菜单，不允许打开
+        if (sidebarMenu.classList.contains('open')) {
+          closeSidebar();
+        }
+        return;
+      }
+      
       if (sidebarMenu.classList.contains('open')) {
         closeSidebar();
       } else {

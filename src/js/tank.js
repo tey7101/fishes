@@ -7,8 +7,10 @@
 // =====================================================
 // Use existing urlParams if already declared (e.g., by fish-utils.js), otherwise create new
 const tankUrlParams = window.urlParams || new URLSearchParams(window.location.search);
-const VIEW_MODE = tankUrlParams.get('view') || 'global'; // 'global' or 'my'
-console.log(`🎯 Tank View Mode: ${VIEW_MODE}`);
+const OUR_TANK_ID = tankUrlParams.get('ourTank') || null; // For 'our' mode
+// Determine view mode: 'our' if ourTank param exists, otherwise check 'view' param
+const VIEW_MODE = OUR_TANK_ID ? 'our' : (tankUrlParams.get('view') || 'global'); // 'global', 'my', or 'our'
+console.log(`🎯 Tank View Mode: ${VIEW_MODE}${OUR_TANK_ID ? `, Tank ID: ${OUR_TANK_ID}` : ''}`);
 
 // Canvas and fishes will be initialized in DOMContentLoaded
 // Don't access DOM elements here as they may not exist yet
@@ -892,6 +894,7 @@ async function updateTankCapacity(newCapacity) {
 
 // Export to window for external access
 window.updateTankCapacity = updateTankCapacity;
+window.dropFoodPellet = dropFoodPellet;
 
 // Load additional fish when capacity is increased
 async function loadAdditionalFish(sortType, count) {
@@ -2172,12 +2175,14 @@ async function createPrivateFishObject(fishData) {
         });
         
         // 🔍 调试：记录私人鱼缸API返回的原始游动参数
+        // 注意：Our Tank API 返回 fishId 作为真正的鱼 ID，id 是 our_tank_fish 表的记录 ID
+        const realFishId = fishData.fishId || fishData.fish_id || fishData.id || fishData.docId;
         console.log('🔍 Private tank API原始游动参数:', {
             speed: fishData.speed,
             amplitude: fishData.amplitude,
             phase: fishData.phase,
             peduncle: fishData.peduncle,
-            docId: fishData.id || fishData.docId
+            docId: realFishId
         });
         
         if (!imageUrl) {
@@ -2189,9 +2194,11 @@ async function createPrivateFishObject(fishData) {
         // 注意：这里直接调用 loadFishImageToTank，与全局鱼缸使用完全相同的代码路径
         return new Promise((resolve) => {
             // 构建与全局鱼缸完全相同的 fishData 对象
+            // 注意：Our Tank API 返回 fishId 作为真正的鱼 ID
             const normalizedFishData = {
                 ...fishData,
-                docId: fishData.id || fishData.docId,
+                id: realFishId,  // 确保 id 也是真正的鱼 ID
+                docId: realFishId,
                 // 确保所有图片URL字段名与全局鱼缸一致
                 image: imageUrl,
                 Image: imageUrl,
@@ -2207,13 +2214,14 @@ async function createPrivateFishObject(fishData) {
                 is_favorited: fishData.is_favorited || fishData.isFavorited || false,
                 is_alive: fishData.is_alive !== false,
                 // 转换字段名以匹配全局鱼缸格式
-                artist: fishData.artist || 'Anonymous',
+                // Our Tank API 返回 artistName，需要映射到 artist
+                artist: fishData.artistName || fishData.artist || 'Anonymous',
                 createdAt: fishData.created_at || fishData.createdAt || null,
                 CreatedAt: fishData.created_at || fishData.createdAt || null,
                 upvotes: fishData.upvotes || 0,
                 userId: fishData.user_id || fishData.userId || null,
                 user_id: fishData.user_id || fishData.userId || null,
-                fish_name: fishData.fish_name || fishData.fishName || null,
+                fish_name: fishData.fishName || fishData.fish_name || null,
                 personality: fishData.personality || (['cheerful', 'funny', 'wise', 'shy', 'bold'][Math.floor(Math.random() * 5)]),
                 health: fishData.health || 100,
                 level: fishData.level || 1,
@@ -2255,6 +2263,938 @@ function updatePrivateTankStats(stats) {
     // Stats can be displayed in UI if needed
     // For now, just log them
 }
+
+// =====================================================
+// Our Tank Functions (好友鱼缸)
+// =====================================================
+
+/**
+ * Load fish for Our Tank mode (好友鱼缸)
+ */
+async function loadOurTankFish() {
+    const loadingEl = document.getElementById('loading-indicator');
+    
+    try {
+        if (loadingEl) {
+            loadingEl.style.display = 'block';
+            loadingEl.textContent = 'Loading Our Tank...';
+        }
+        console.log('🐟 Loading Our Tank fish for tank:', OUR_TANK_ID);
+
+        if (!OUR_TANK_ID) {
+            throw new Error('缺少鱼缸ID参数');
+        }
+
+        // 获取认证 token
+        let token = localStorage.getItem('userToken');
+        if (!token && window.supabaseAuth) {
+            const session = await window.supabaseAuth.getSession();
+            if (session?.access_token) {
+                token = session.access_token;
+                localStorage.setItem('userToken', token);
+            }
+        }
+        
+        if (!token) {
+            throw new Error('请先登录');
+        }
+
+        const BACKEND_URL = window.location.origin;
+        console.log('🌐 Fetching Our Tank detail from:', `${BACKEND_URL}/api/our-tank-api?action=detail&tankId=${OUR_TANK_ID}`);
+        
+        const response = await fetch(`${BACKEND_URL}/api/our-tank-api?action=detail&tankId=${OUR_TANK_ID}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || errorData.error || `HTTP ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('📦 Our Tank API result:', { success: result.success, tankName: result.tank?.name, fishCount: result.fish?.length });
+
+        if (!result.success) {
+            throw new Error(result.error || result.message || '加载失败');
+        }
+
+        // Update page title
+        if (result.tank?.name) {
+            document.title = `${result.tank.name} - Our Tank | FishTalk.app`;
+        }
+
+        const allFish = result.fish || [];
+        console.log(`✅ Loaded ${allFish.length} fish from Our Tank`);
+
+        // 应用鱼数量限制
+        const fishToLoad = allFish.slice(0, maxTankCapacity);
+        console.log(`🎯 Limited to ${fishToLoad.length} fish based on tank capacity (${maxTankCapacity})`);
+
+        if (loadingEl && fishToLoad.length > 0) {
+            loadingEl.textContent = `加载 ${fishToLoad.length} 条鱼...`;
+        }
+
+        // 清空现有鱼
+        fishes.length = 0;
+        nextFishRowIndex = 0;
+
+        console.log(`🔨 开始创建 ${fishToLoad.length} 个鱼对象...`);
+        let successCount = 0;
+        let failCount = 0;
+        
+        // 批量加载
+        const batchSize = 5;
+        for (let i = 0; i < fishToLoad.length; i += batchSize) {
+            const batch = fishToLoad.slice(i, i + batchSize);
+            
+            if (loadingEl) {
+                loadingEl.textContent = `加载 ${i}/${fishToLoad.length} 条鱼...`;
+            }
+            
+            const results = await Promise.allSettled(
+                batch.map(fishData => createPrivateFishObject(fishData))
+            );
+            
+            results.forEach((result, idx) => {
+                if (result.status === 'fulfilled' && result.value) {
+                    fishes.push(result.value);
+                    successCount++;
+                } else {
+                    failCount++;
+                    console.warn(`⚠️ 鱼对象创建失败:`, batch[idx]?.id);
+                }
+            });
+        }
+
+        console.log(`🐟 创建完成: ${successCount} 成功, ${failCount} 失败`);
+
+        // 分配鱼到行
+        if (tankLayoutManager && fishes.length > 0) {
+            setTimeout(() => {
+                tankLayoutManager.assignFishToRows(fishes, true);
+            }, 500);
+        }
+
+        if (fishes.length === 0) {
+            if (loadingEl) {
+                loadingEl.textContent = 'No fish in this tank yet';
+                setTimeout(() => { loadingEl.style.display = 'none'; }, 2000);
+            }
+        } else {
+            if (loadingEl) loadingEl.style.display = 'none';
+        }
+
+        // 保存鱼缸信息供群聊使用
+        window.ourTankInfo = result.tank;
+        window.ourTankMembers = result.members;
+
+        // 初始化 Our Tank UI
+        initOurTankUI();
+        
+        // 加载聊天历史并初始化实时订阅 (Task 15.2, 15.3)
+        await loadOurTankChatHistory();
+        await initOurTankChatSubscription();
+
+    } catch (error) {
+        console.error('❌ Error loading Our Tank fish:', error);
+        
+        if (loadingEl) {
+            loadingEl.textContent = `错误: ${error.message}`;
+            setTimeout(() => { loadingEl.style.display = 'none'; }, 3000);
+        }
+        
+        if (error.message.includes('登录') || error.message.includes('Unauthorized')) {
+            if (window.authUI && window.authUI.showLoginModal) {
+                window.authUI.showLoginModal();
+            } else {
+                window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.href);
+            }
+        }
+    }
+}
+
+// =====================================================
+// Our Tank UI Functions (好友鱼缸 UI)
+// =====================================================
+
+/**
+ * 初始化 Our Tank 模式的 UI
+ */
+function initOurTankUI() {
+    const header = document.getElementById('our-tank-header');
+    if (!header) return;
+    
+    // 显示 Our Tank 信息栏
+    header.style.display = 'block';
+    
+    // 更新鱼缸信息
+    updateOurTankHeader();
+    
+    // 隐藏 Global Tank 特有的控件
+    const sortSelector = document.getElementById('tank-sort-sidebar');
+    const fishCountSelector = document.getElementById('fish-count-selector-sidebar');
+    
+    if (sortSelector) {
+        sortSelector.closest('div').style.display = 'none';
+    }
+    if (fishCountSelector) {
+        fishCountSelector.closest('div').style.display = 'none';
+    }
+    
+    console.log('✅ Our Tank UI initialized');
+}
+
+/**
+ * 更新 Our Tank 信息栏
+ */
+function updateOurTankHeader() {
+    const tankInfo = window.ourTankInfo;
+    const members = window.ourTankMembers;
+    
+    if (!tankInfo) return;
+    
+    // Update tank name
+    const nameEl = document.getElementById('our-tank-name');
+    if (nameEl) {
+        nameEl.textContent = tankInfo.name || 'Friend Tank';
+    }
+    
+    // Update member count (just the number, button text is in HTML)
+    const memberCountEl = document.getElementById('our-tank-member-count');
+    if (memberCountEl && members) {
+        memberCountEl.textContent = members.length;
+    }
+    
+    // Update fish count (hidden element for JS compatibility)
+    const fishCountEl = document.getElementById('our-tank-fish-count');
+    if (fishCountEl) {
+        const fishCount = fishes.filter(f => !f.isDying).length;
+        fishCountEl.textContent = fishCount;
+    }
+    
+    // Update invite code
+    const inviteCodeEl = document.getElementById('our-tank-invite-code');
+    if (inviteCodeEl && tankInfo.code) {
+        inviteCodeEl.textContent = tankInfo.code;
+    }
+}
+
+/**
+ * 显示添加鱼模态框
+ */
+async function showAddFishModal() {
+    const modal = document.getElementById('our-tank-add-fish-modal');
+    if (!modal) return;
+    
+    modal.style.display = 'flex';
+    
+    // 加载用户的鱼列表
+    await loadMyFishForTank();
+}
+
+/**
+ * 关闭添加鱼模态框
+ */
+function closeAddFishModal() {
+    const modal = document.getElementById('our-tank-add-fish-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+/**
+ * Load user's fish list for adding to tank
+ */
+async function loadMyFishForTank() {
+    const listEl = document.getElementById('my-fish-list-for-tank');
+    if (!listEl) return;
+    
+    listEl.innerHTML = '<div style="text-align: center; color: #999; padding: 40px; grid-column: 1/-1;">Loading...</div>';
+    
+    try {
+        let token = localStorage.getItem('userToken');
+        if (!token && window.supabaseAuth) {
+            const session = await window.supabaseAuth.getSession();
+            if (session?.access_token) {
+                token = session.access_token;
+            }
+        }
+        
+        if (!token) {
+            listEl.innerHTML = `
+                <div style="text-align: center; padding: 40px; grid-column: 1/-1;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">🔒</div>
+                    <div style="color: #666; margin-bottom: 16px;">Please sign in to add fish</div>
+                    <a href="login.html?redirect=${encodeURIComponent(window.location.href)}" style="display: inline-block; padding: 10px 24px; background: linear-gradient(180deg, #63A4E8 0%, #4A90E2 100%); color: white; border-radius: 10px; text-decoration: none; font-weight: 700; box-shadow: 0 3px 0 #2C5F8F;">Sign In</a>
+                </div>`;
+            return;
+        }
+        
+        // Get user's fish
+        const response = await fetch(`/api/fish-api?action=my-tank`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!response.ok) throw new Error('Failed to load fish');
+        
+        const result = await response.json();
+        const allFish = result.fish || result.data || [];
+        // Only show user's own fish (not favorited fish) for adding to Our Tank
+        const myFish = allFish.filter(fish => fish.is_own !== false);
+        
+        if (myFish.length === 0) {
+            // 如果是 Our Tank 模式，传递 ourTankId 参数，让用户画完鱼后自动添加到这个鱼缸
+            const drawFishUrl = OUR_TANK_ID ? `index.html?ourTankId=${OUR_TANK_ID}` : 'index.html';
+            listEl.innerHTML = `
+                <div style="text-align: center; padding: 40px; grid-column: 1/-1;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">🎨</div>
+                    <div style="color: #666; margin-bottom: 16px;">You haven't drawn any fish yet</div>
+                    <a href="${drawFishUrl}" style="display: inline-block; padding: 10px 24px; background: linear-gradient(180deg, #4CD964 0%, #3CB54A 100%); color: white; border-radius: 10px; text-decoration: none; font-weight: 700; box-shadow: 0 3px 0 #2E8B3A;">🎨 Draw a Fish</a>
+                </div>`;
+            return;
+        }
+        
+        // 获取已添加到鱼缸的鱼 ID
+        const tankFishIds = new Set(fishes.map(f => f.id || f.docId));
+        
+        // 渲染鱼列表
+        listEl.innerHTML = myFish.map(fish => {
+            const isInTank = tankFishIds.has(fish.id);
+            const fishName = fish.fish_name || 'Unnamed';
+            const imageUrl = fish.image_url || fish.imageUrl;
+            
+            return `
+                <div class="fish-item-for-tank" style="text-align: center; padding: 12px; background: white; border-radius: 12px; border: 2px solid ${isInTank ? '#4CD964' : '#E5E7EB'}; cursor: ${isInTank ? 'default' : 'pointer'}; transition: all 0.2s ease; opacity: ${isInTank ? '0.7' : '1'};" 
+                     ${isInTank ? '' : `onclick="addFishToOurTank('${fish.id}')"`}>
+                    <img src="${imageUrl}" alt="${fishName}" style="width: 80px; height: 60px; object-fit: contain; border-radius: 8px;">
+                    <div style="font-size: 12px; font-weight: 600; color: #333; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${fishName}</div>
+                    ${isInTank ? '<div style="font-size: 11px; color: #4CD964; margin-top: 4px;">✓ Added</div>' : ''}
+                </div>
+            `;
+        }).join('');
+        
+    } catch (error) {
+        console.error('❌ Error loading my fish:', error);
+        listEl.innerHTML = `<div style="text-align: center; color: #C0392B; padding: 40px; grid-column: 1/-1;">Failed to load: ${error.message}</div>`;
+    }
+}
+
+/**
+ * Add fish to Our Tank
+ */
+async function addFishToOurTank(fishId) {
+    if (!OUR_TANK_ID || !fishId) return;
+    
+    try {
+        let token = localStorage.getItem('userToken');
+        if (!token && window.supabaseAuth) {
+            const session = await window.supabaseAuth.getSession();
+            if (session?.access_token) {
+                token = session.access_token;
+            }
+        }
+        
+        const response = await fetch(`/api/our-tank-api?action=add-fish`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                tankId: OUR_TANK_ID,
+                fishId: fishId
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || result.message || 'Failed to add');
+        }
+        
+        console.log('✅ Fish added to Our Tank:', fishId);
+        
+        // Close modal and reload tank
+        closeAddFishModal();
+        await loadOurTankFish();
+        updateOurTankHeader();
+        
+    } catch (error) {
+        console.error('❌ Error adding fish to Our Tank:', error);
+        alert(`Failed to add fish: ${error.message}`);
+    }
+}
+
+/**
+ * 自动添加鱼到 Our Tank（从绘画页面跳转过来时调用）
+ * 与 addFishToOurTank 类似，但不需要关闭模态框，且显示成功提示
+ */
+async function autoAddFishToOurTank(fishId) {
+    if (!OUR_TANK_ID || !fishId) {
+        console.warn('[Auto Add Fish] 缺少必要参数:', { OUR_TANK_ID, fishId });
+        return;
+    }
+    
+    console.log('🎯 [Auto Add Fish] 开始自动添加鱼到 Our Tank:', { tankId: OUR_TANK_ID, fishId });
+    
+    try {
+        let token = localStorage.getItem('userToken');
+        if (!token && window.supabaseAuth) {
+            const session = await window.supabaseAuth.getSession();
+            if (session?.access_token) {
+                token = session.access_token;
+            }
+        }
+        
+        if (!token) {
+            console.error('[Auto Add Fish] 未登录');
+            return;
+        }
+        
+        const response = await fetch(`/api/our-tank-api?action=add-fish`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                tankId: OUR_TANK_ID,
+                fishId: fishId
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok || !result.success) {
+            // 如果鱼已经在鱼缸中，不显示错误
+            if (result.error && result.error.includes('already')) {
+                console.log('[Auto Add Fish] 鱼已经在鱼缸中');
+                return;
+            }
+            throw new Error(result.error || result.message || 'Failed to add');
+        }
+        
+        console.log('✅ [Auto Add Fish] 鱼已成功添加到 Our Tank:', fishId);
+        
+        // 重新加载鱼缸
+        await loadOurTankFish();
+        updateOurTankHeader();
+        
+        // 显示成功提示
+        showAutoAddSuccessToast();
+        
+    } catch (error) {
+        console.error('❌ [Auto Add Fish] 添加失败:', error);
+        // 不显示 alert，只在控制台记录错误
+    }
+}
+
+/**
+ * 显示自动添加成功的 Toast 提示
+ */
+function showAutoAddSuccessToast() {
+    // 移除已存在的 toast
+    const existingToast = document.querySelector('.auto-add-fish-toast');
+    if (existingToast) {
+        existingToast.remove();
+    }
+    
+    const toast = document.createElement('div');
+    toast.className = 'auto-add-fish-toast';
+    toast.innerHTML = '🐟 Your fish has been added to the tank!';
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(180deg, #4CD964 0%, #3CB54A 100%);
+        color: white;
+        padding: 16px 32px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        z-index: 10000;
+        box-shadow: 0 4px 0 #2E8B3A, 0 8px 20px rgba(76, 217, 100, 0.3);
+        animation: fadeInUp 0.3s ease;
+    `;
+    document.body.appendChild(toast);
+    
+    // 3秒后淡出
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+/**
+ * 显示成员列表模态框
+ */
+function showMembersModal() {
+    const modal = document.getElementById('our-tank-members-modal');
+    if (!modal) return;
+    
+    modal.style.display = 'flex';
+    
+    // 渲染成员列表
+    renderMembersList();
+}
+
+/**
+ * 关闭成员列表模态框
+ */
+function closeMembersModal() {
+    const modal = document.getElementById('our-tank-members-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+/**
+ * 渲染成员列表
+ */
+function renderMembersList() {
+    const listEl = document.getElementById('our-tank-members-list');
+    if (!listEl) return;
+    
+    const members = window.ourTankMembers || [];
+    const tankInfo = window.ourTankInfo;
+    const currentUserId = window.currentUser?.id;
+    const isOwner = tankInfo?.owner_id === currentUserId;
+    
+    if (members.length === 0) {
+        listEl.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">No members yet</div>';
+        return;
+    }
+    
+    listEl.innerHTML = members.map(member => {
+        const isCurrentUser = member.userId === currentUserId;
+        const isMemberOwner = member.role === 'owner';
+        const nickName = member.displayName || member.user?.nick_name || member.nick_name || 'Anonymous';
+        
+        return `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: white; border-radius: 12px; margin-bottom: 8px; border: 2px solid #E5E7EB;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #6366F1, #8B5CF6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                        ${nickName.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; color: #333;">${nickName} ${isCurrentUser ? '(You)' : ''}</div>
+                        <div style="font-size: 12px; color: #999;">${isMemberOwner ? '👑 Owner' : '🐟 Member'}</div>
+                    </div>
+                </div>
+                ${isOwner && !isMemberOwner && !isCurrentUser ? `
+                    <button onclick="removeMemberFromTank('${member.userId}')" style="padding: 6px 12px; background: linear-gradient(#FC5C65 0%, #EB3B5A 100%); color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                        Remove
+                    </button>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+/**
+ * Remove member from tank
+ */
+async function removeMemberFromTank(userId) {
+    if (!OUR_TANK_ID || !userId) return;
+    
+    if (!confirm('Are you sure you want to remove this member? All fish added by this member will also be removed.')) {
+        return;
+    }
+    
+    try {
+        let token = localStorage.getItem('userToken');
+        if (!token && window.supabaseAuth) {
+            const session = await window.supabaseAuth.getSession();
+            if (session?.access_token) {
+                token = session.access_token;
+            }
+        }
+        
+        const response = await fetch(`/api/our-tank-api?action=remove-member`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                tankId: OUR_TANK_ID,
+                userId: userId
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || result.message || '移除失败');
+        }
+        
+        console.log('✅ Member removed from Our Tank:', userId);
+        
+        // 重新加载成员列表和鱼缸
+        await loadOurTankFish();
+        renderMembersList();
+        updateOurTankHeader();
+        
+    } catch (error) {
+        console.error('❌ Error removing member:', error);
+        alert(`移除失败: ${error.message}`);
+    }
+}
+
+/**
+ * 显示分享模态框
+ */
+function showShareModal() {
+    const modal = document.getElementById('our-tank-share-modal');
+    if (!modal) return;
+    
+    modal.style.display = 'flex';
+    
+    // 更新邀请码显示
+    const inviteCodeEl = document.getElementById('our-tank-invite-code');
+    if (inviteCodeEl && window.ourTankInfo?.code) {
+        inviteCodeEl.textContent = window.ourTankInfo.code;
+    }
+}
+
+/**
+ * 关闭分享模态框
+ */
+function closeShareModal() {
+    const modal = document.getElementById('our-tank-share-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    
+    // 隐藏复制成功提示
+    const successEl = document.getElementById('share-copy-success');
+    if (successEl) {
+        successEl.style.display = 'none';
+    }
+}
+
+/**
+ * 复制邀请码到剪贴板
+ */
+async function copyInviteCode() {
+    const code = window.ourTankInfo?.code;
+    if (!code) return;
+    
+    try {
+        await navigator.clipboard.writeText(code);
+        
+        // 显示复制成功提示
+        const successEl = document.getElementById('share-copy-success');
+        if (successEl) {
+            successEl.style.display = 'block';
+            setTimeout(() => {
+                successEl.style.display = 'none';
+            }, 2000);
+        }
+        
+        console.log('✅ Invite code copied:', code);
+    } catch (error) {
+        console.error('❌ Failed to copy:', error);
+        // 备用方案：使用 prompt
+        prompt('复制邀请码:', code);
+    }
+}
+
+/**
+ * 复制邀请链接到剪贴板
+ * Requirements: 2.1, 16.2
+ */
+async function copyInviteLink() {
+    const code = window.ourTankInfo?.code;
+    if (!code) return;
+    
+    // 生成邀请链接
+    const baseUrl = window.location.origin;
+    const inviteLink = `${baseUrl}/our-tank-list.html?code=${code}`;
+    
+    try {
+        await navigator.clipboard.writeText(inviteLink);
+        
+        // 显示复制成功提示
+        const successEl = document.getElementById('share-copy-success');
+        if (successEl) {
+            successEl.style.display = 'block';
+            successEl.textContent = '✅ 邀请链接已复制！';
+            setTimeout(() => {
+                successEl.style.display = 'none';
+                successEl.textContent = '✅ 已复制到剪贴板！';
+            }, 2000);
+        }
+        
+        console.log('✅ Invite link copied:', inviteLink);
+    } catch (error) {
+        console.error('❌ Failed to copy link:', error);
+        // 备用方案：使用 prompt
+        prompt('复制邀请链接:', inviteLink);
+    }
+}
+
+/**
+ * 加载 Our Tank 聊天历史
+ * Requirements: 4.3, 15.3
+ */
+async function loadOurTankChatHistory() {
+    if (VIEW_MODE !== 'our' || !OUR_TANK_ID) {
+        console.log('[Our Tank Chat] 非 Our Tank 模式，跳过聊天历史加载');
+        return;
+    }
+    
+    console.log('[Our Tank Chat] 加载聊天历史...');
+    
+    try {
+        const token = localStorage.getItem('userToken');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(`/api/our-tank-api?action=chat-history&tankId=${OUR_TANK_ID}&limit=20`, {
+            method: 'GET',
+            headers: headers
+        });
+        
+        if (!response.ok) {
+            console.error('[Our Tank Chat] 加载聊天历史失败:', response.status);
+            return;
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success || !data.sessions) {
+            console.warn('[Our Tank Chat] 无聊天历史数据');
+            return;
+        }
+        
+        console.log(`[Our Tank Chat] 加载了 ${data.sessions.length} 条聊天记录`);
+        
+        // 显示聊天历史到聊天面板
+        const chatMessages = document.getElementById('chat-messages');
+        if (!chatMessages) return;
+        
+        // 清空现有消息
+        chatMessages.innerHTML = '';
+        
+        // 按时间正序显示（最旧的在上面）
+        const sortedSessions = [...data.sessions].reverse();
+        
+        for (const session of sortedSessions) {
+            // 显示用户消息（如果有）
+            if (session.userMessage) {
+                const userDiv = document.createElement('div');
+                userDiv.className = 'user-chat-message';
+                userDiv.style.cssText = `
+                    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+                    border-radius: 8px;
+                    padding: 8px 12px;
+                    margin-bottom: 6px;
+                    font-size: 13px;
+                    line-height: 1.5;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                    border-left: 3px solid #6366F1;
+                `;
+                userDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                        <span style="font-weight: 600; color: #6366F1; font-size: 12px;">👤 ${session.initiatorName || 'User'}</span>
+                        <span style="font-size: 10px; color: #999;">${formatChatTime(session.createdAt)}</span>
+                    </div>
+                    <div style="color: #333; text-align: left;">${escapeHtml(session.userMessage)}</div>
+                `;
+                chatMessages.appendChild(userDiv);
+            }
+            
+            // 显示鱼的回复
+            if (session.dialogues && session.dialogues.messages) {
+                for (const msg of session.dialogues.messages) {
+                    const fishDiv = document.createElement('div');
+                    fishDiv.className = 'fish-chat-message';
+                    fishDiv.style.cssText = `
+                        background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
+                        border-radius: 8px;
+                        padding: 8px 12px;
+                        margin-bottom: 6px;
+                        font-size: 13px;
+                        line-height: 1.5;
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                        border-left: 3px solid #FFD700;
+                    `;
+                    fishDiv.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                            <span style="font-weight: 600; color: #FF8C00; font-size: 12px;">🐟 ${msg.fishName || 'Fish'}</span>
+                        </div>
+                        <div style="color: #333; text-align: left;">${escapeHtml(msg.message || '')}</div>
+                    `;
+                    chatMessages.appendChild(fishDiv);
+                }
+            }
+        }
+        
+        // 滚动到底部
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+    } catch (error) {
+        console.error('[Our Tank Chat] 加载聊天历史出错:', error);
+    }
+}
+
+/**
+ * 格式化聊天时间
+ */
+function formatChatTime(isoString) {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+}
+
+/**
+ * 初始化 Our Tank 实时聊天订阅
+ * Requirements: 4.5, 15.2
+ */
+async function initOurTankChatSubscription() {
+    if (VIEW_MODE !== 'our' || !OUR_TANK_ID) {
+        return;
+    }
+    
+    // 检查 Supabase 是否可用
+    if (!window.supabaseClient) {
+        console.warn('[Our Tank Chat] Supabase 客户端不可用，无法订阅实时消息');
+        return;
+    }
+    
+    console.log('[Our Tank Chat] 初始化实时聊天订阅...');
+    
+    try {
+        // 订阅 group_chat 表的变化
+        const channel = window.supabaseClient
+            .channel(`our-tank-chat-${OUR_TANK_ID}`)
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'group_chat',
+                filter: `our_tank_id=eq.${OUR_TANK_ID}`
+            }, (payload) => {
+                console.log('[Our Tank Chat] 收到新消息:', payload);
+                handleNewChatMessage(payload.new);
+            })
+            .subscribe((status) => {
+                console.log('[Our Tank Chat] 订阅状态:', status);
+            });
+        
+        // 保存 channel 引用以便后续取消订阅
+        window.ourTankChatChannel = channel;
+        
+    } catch (error) {
+        console.error('[Our Tank Chat] 订阅失败:', error);
+    }
+}
+
+/**
+ * 处理新的聊天消息
+ */
+function handleNewChatMessage(chatData) {
+    if (!chatData) return;
+    
+    const chatMessages = document.getElementById('chat-messages');
+    if (!chatMessages) return;
+    
+    // 显示用户消息（如果有）
+    if (chatData.user_talk) {
+        const userDiv = document.createElement('div');
+        userDiv.className = 'user-chat-message new-message';
+        userDiv.style.cssText = `
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            font-size: 13px;
+            line-height: 1.5;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border-left: 3px solid #6366F1;
+            animation: fadeIn 0.3s ease;
+        `;
+        userDiv.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                <span style="font-weight: 600; color: #6366F1; font-size: 12px;">👤 User</span>
+                <span style="font-size: 10px; color: #999;">just now</span>
+            </div>
+            <div style="color: #333; text-align: left;">${escapeHtml(chatData.user_talk)}</div>
+        `;
+        chatMessages.appendChild(userDiv);
+    }
+    
+    // 显示鱼的回复
+    if (chatData.dialogues && chatData.dialogues.messages) {
+        for (const msg of chatData.dialogues.messages) {
+            const fishDiv = document.createElement('div');
+            fishDiv.className = 'fish-chat-message new-message';
+            fishDiv.style.cssText = `
+                background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
+                border-radius: 8px;
+                padding: 8px 12px;
+                margin-bottom: 6px;
+                font-size: 13px;
+                line-height: 1.5;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                border-left: 3px solid #FFD700;
+                animation: fadeIn 0.3s ease;
+            `;
+            fishDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                    <span style="font-weight: 600; color: #FF8C00; font-size: 12px;">🐟 ${msg.fishName || 'Fish'}</span>
+                </div>
+                <div style="color: #333; text-align: left;">${escapeHtml(msg.message || '')}</div>
+            `;
+            chatMessages.appendChild(fishDiv);
+        }
+    }
+    
+    // 滚动到底部
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// 导出 Our Tank UI 函数到 window
+window.showAddFishModal = showAddFishModal;
+window.closeAddFishModal = closeAddFishModal;
+window.addFishToOurTank = addFishToOurTank;
+window.showMembersModal = showMembersModal;
+window.closeMembersModal = closeMembersModal;
+window.removeMemberFromTank = removeMemberFromTank;
+window.showShareModal = showShareModal;
+window.closeShareModal = closeShareModal;
+window.copyInviteCode = copyInviteCode;
+window.copyInviteLink = copyInviteLink;
+window.loadOurTankChatHistory = loadOurTankChatHistory;
+window.initOurTankChatSubscription = initOurTankChatSubscription;
+
+// =====================================================
+// End Our Tank UI Functions
+// =====================================================
+
+// =====================================================
+// End Our Tank Functions
+// =====================================================
 
 // =====================================================
 // End Private Tank Functions
@@ -2630,6 +3570,77 @@ window.addEventListener('DOMContentLoaded', async () => {
         
         console.log('✅ Authenticated, loading private fish...');
         await loadPrivateFish();
+    } else if (VIEW_MODE === 'our') {
+        // Our Tank mode (好友鱼缸) - require authentication with retry mechanism
+        console.log('🐟 Our Tank mode - checking authentication...');
+        
+        if (!OUR_TANK_ID) {
+            console.error('❌ Our Tank mode requires tankId parameter');
+            window.location.href = '/our-tank-list.html';
+            return;
+        }
+        
+        // 🔧 增加重试机制，解决登录后立即跳转时的时序问题
+        let isAuthenticated = false;
+        let retryCount = 0;
+        const maxRetries = 5;
+        const retryDelay = 500; // 500ms
+        
+        while (!isAuthenticated && retryCount < maxRetries) {
+            if (retryCount > 0) {
+                console.log(`🔄 Our Tank auth check retry ${retryCount}/${maxRetries}...`);
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+            }
+            
+            // 优先使用auth-cache的同步检测
+            if (window.authCache && window.authCache.isLoggedIn) {
+                isAuthenticated = window.authCache.isLoggedIn();
+                if (isAuthenticated) {
+                    console.log('✅ Our Tank: Authentication confirmed via auth-cache');
+                    break;
+                }
+            }
+            
+            // 使用 supabaseAuth 检查
+            if (window.supabaseAuth) {
+                try {
+                    const user = await window.supabaseAuth.getCurrentUser();
+                    if (user) {
+                        isAuthenticated = true;
+                        console.log('✅ Our Tank: User authenticated:', user.email || user.id);
+                        break;
+                    }
+                } catch (error) {
+                    console.log(`⚠️ Our Tank auth check error (retry ${retryCount}):`, error);
+                }
+            }
+            
+            retryCount++;
+        }
+        
+        if (!isAuthenticated) {
+            console.log('❌ Our Tank: Not authenticated, redirecting to login...');
+            window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.href);
+            return;
+        }
+        
+        console.log('✅ Authenticated, loading Our Tank fish...');
+        await loadOurTankFish();
+        
+        // 检查是否有 addFish 参数（从绘画页面跳转过来自动添加鱼）
+        const addFishId = tankUrlParams.get('addFish');
+        if (addFishId) {
+            console.log('🎯 [Auto Add Fish] 检测到 addFish 参数:', addFishId);
+            // 清除 URL 参数，避免刷新时重复添加
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.delete('addFish');
+            window.history.replaceState({}, document.title, newUrl.toString());
+            
+            // 延迟执行添加，确保鱼缸已完全加载
+            setTimeout(async () => {
+                await autoAddFishToOurTank(addFishId);
+            }, 500);
+        }
     } else {
         // Global Tank mode - normal loading
         console.log('🌊 Global Tank mode - loading fish...');
@@ -3102,6 +4113,12 @@ window.handleReport = handleReport;
 window.handleAddToMyTank = handleAddToMyTank;
 
 function showModal(html, onClose, options = {}) {
+    // 教程期间不显示弹窗，避免干扰教程
+    if (window.onboardingManager && window.onboardingManager.isOnboarding && window.onboardingManager.isOnboarding()) {
+        console.log('[Modal] 教程进行中，跳过弹窗显示');
+        return { close: () => {} };
+    }
+    
     let modal = document.createElement('div');
     modal.className = 'modal';
     modal.style.cssText = `
@@ -3265,9 +4282,9 @@ function handleTankTap(e) {
             tapY >= fishY - padding && tapY <= fishY + fish.height + padding
         ) {
             // 点击到了鱼，不执行喂食逻辑，并阻止事件传播
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
+            if (e.preventDefault) e.preventDefault();
+            if (e.stopPropagation) e.stopPropagation();
+            if (e.stopImmediatePropagation) e.stopImmediatePropagation();
             // 记录点击时间，防止后续事件触发移动
             window.lastFishClickTime = Date.now();
             return;
@@ -3277,10 +4294,18 @@ function handleTankTap(e) {
     // 点击空白处 → 在点击位置投放食物，最近的鱼会游过来吃
     // Drop food at click position - nearest fish will swim towards it
     dropFoodPellet(tapX, tapY);
-    e.preventDefault();
+    if (e.preventDefault) e.preventDefault();
 }
 
 function handleFishTap(e) {
+    // 如果新手引导正在进行中，不处理鱼的点击（不显示鱼卡片）
+    // 但仍然允许喂鱼操作（通过 handleTankTap）
+    if (window.onboardingManager && window.onboardingManager.getDriverInstance && window.onboardingManager.getDriverInstance()) {
+        // 在新手引导期间，直接调用喂鱼逻辑
+        handleTankTap(e);
+        return;
+    }
+    
     let rect = swimCanvas.getBoundingClientRect();
     let tapX, tapY;
 
@@ -4438,6 +5463,12 @@ async function sendUserChatMessage() {
             tankFishIds: currentTankFishIds  // 总是传递tankFishIds
         };
         
+        // Our Tank 模式：添加 ourTankId 参数
+        if (VIEW_MODE === 'our' && OUR_TANK_ID) {
+            requestBody.ourTankId = OUR_TANK_ID;
+            console.log('[User Chat Frontend] Our Tank 模式，添加 ourTankId:', OUR_TANK_ID);
+        }
+        
         console.log('[User Chat Frontend] 发送消息到API:', {
             action: 'user-chat-message',
             url: apiUrl,
@@ -4446,7 +5477,8 @@ async function sendUserChatMessage() {
             userName: userInfo.userName,
             hasToken: !!token,
             messageLength: message.length,
-            tankFishCount: currentTankFishIds.length
+            tankFishCount: currentTankFishIds.length,
+            ourTankId: VIEW_MODE === 'our' ? OUR_TANK_ID : null
         });
         
         const response = await fetch(apiUrl, {
@@ -4461,7 +5493,17 @@ async function sendUserChatMessage() {
         if (!response.ok) {
             const errorText = await response.text();
             console.error('[User Chat Frontend] API错误响应:', errorText);
-            throw new Error(`API错误: ${response.status} ${response.statusText}`);
+            
+            // 尝试解析错误响应中的详细信息
+            let errorMessage = `API错误: ${response.status}`;
+            try {
+                const errorData = JSON.parse(errorText);
+                // 提取详细错误信息
+                errorMessage = errorData.details || errorData.message || errorData.error || errorMessage;
+            } catch (e) {
+                // 无法解析 JSON，使用原始错误文本
+            }
+            throw new Error(errorMessage);
         }
         
         const data = await response.json();
@@ -4546,19 +5588,33 @@ async function sendUserChatMessage() {
         console.error('发送消息失败:', error);
         if (errorDiv) {
             let errorMessage = 'Failed to send message. Please try again.';
-            if (error.message) {
-                errorMessage = error.message;
-            } else if (error.response) {
-                // Handle HTTP error responses
-                try {
-                    const errorData = await error.response.json();
-                    errorMessage = errorData.error || errorData.message || errorMessage;
-                } catch (e) {
-                    errorMessage = `Server error: ${error.response.status}`;
+            const errorStr = error.message || '';
+            
+            // 友好的错误提示映射
+            if (errorStr.includes('No valid fish found') || errorStr.includes('No tank fish')) {
+                errorMessage = '🐟 No fish available to chat with. Try refreshing the page!';
+            } else if (errorStr.includes('limit') || errorStr.includes('quota') || errorStr.includes('exceeded')) {
+                errorMessage = '💬 Daily chat limit reached! Upgrade to Plus for unlimited chats.';
+                // 显示升级提示
+                if (typeof showUpgradeModal === 'function') {
+                    showUpgradeModal('chat_limit');
                 }
+            } else if (errorStr.includes('Unauthorized') || errorStr.includes('401')) {
+                errorMessage = '🔐 Please log in to chat with fish.';
+            } else if (errorStr.includes('too long')) {
+                errorMessage = '📝 Message is too long. Please keep it under 200 characters.';
+            } else if (error.message) {
+                // 其他错误，简化显示
+                errorMessage = error.message.replace(/API错误: \d+ /, '');
             }
+            
             errorDiv.textContent = errorMessage;
             errorDiv.style.display = 'block';
+            
+            // 3秒后自动隐藏错误提示
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
         }
         // 移除已显示的用户消息（因为发送失败）
         removeLastUserMessage();

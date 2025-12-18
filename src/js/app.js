@@ -2541,11 +2541,34 @@ let ortSession = null;
 let lastFishCheck = true;
 let isModelLoading = false;
 let modelLoadPromise = null;
+let modelLoadCount = 0; // 追踪加载次数，用于调试
 
 // Cache API 配置
 const ONNX_CACHE_NAME = 'onnx-model-cache-v2'; // 更新版本以使用新的 CDN URL
 // 使用七牛云 CDN 加速模型加载
 const MODEL_URL = 'https://cdn.fishart.online/fishart_web/ONNX/fish_doodle_classifier.onnx';
+
+// 检查模型是否已缓存（用于调试）
+async function checkModelCacheStatus() {
+    if (!('caches' in window)) {
+        console.log('🔍 Cache API not available');
+        return { cached: false, reason: 'Cache API not supported' };
+    }
+    try {
+        const cache = await caches.open(ONNX_CACHE_NAME);
+        const cachedResponse = await cache.match(MODEL_URL);
+        if (cachedResponse) {
+            console.log('🔍 Model IS cached - no CDN download needed');
+            return { cached: true };
+        } else {
+            console.log('🔍 Model NOT cached - will download from CDN');
+            return { cached: false, reason: 'Not in cache' };
+        }
+    } catch (error) {
+        console.log('🔍 Cache check failed:', error);
+        return { cached: false, reason: error.message };
+    }
+}
 
 // 初始化 Cache API
 async function initModelCache() {
@@ -2634,8 +2657,14 @@ async function downloadWithProgress(url, onProgress) {
 async function loadModelWithCache() {
     const cache = await initModelCache();
     
-    // 更新进度条的辅助函数
+    // 更新进度条的辅助函数（只增不减，避免进度回退）
+    let lastProgress = 0;
     const updateProgress = (percent, text) => {
+        // 只有当新进度大于上次进度时才更新，避免进度回退
+        if (percent < lastProgress && percent !== 0) {
+            return;
+        }
+        lastProgress = percent;
         const progressBar = document.getElementById('onnx-progress-bar');
         const progressText = document.getElementById('onnx-progress-text');
         if (progressBar) progressBar.style.width = percent + '%';
@@ -2646,15 +2675,15 @@ async function loadModelWithCache() {
         // 检查缓存中是否有模型
         const cachedResponse = await cache.match(MODEL_URL);
         if (cachedResponse) {
-            console.log('📦 Loading ONNX model from cache...');
-            updateProgress(50, 'Loading from cache...');
+            console.log('📦 Loading ONNX model from cache (no network request)...');
+            updateProgress(30, 'Loading from cache...');
             try {
                 // 从缓存获取 ArrayBuffer
                 const arrayBuffer = await cachedResponse.arrayBuffer();
-                updateProgress(70, 'Initializing AI...');
+                updateProgress(60, 'Initializing AI...');
                 // ONNX Runtime 支持从 ArrayBuffer 加载
                 const session = await window.ort.InferenceSession.create(arrayBuffer);
-                console.log('✅ ONNX model loaded from cache');
+                console.log('✅ ONNX model loaded from cache (0 bytes downloaded from CDN)');
                 return session;
             } catch (error) {
                 // 如果从缓存加载失败，尝试重新下载
@@ -2713,19 +2742,25 @@ async function loadModelWithCache() {
 async function loadFishModel() {
     // If already loaded, return immediately
     if (ortSession) {
+        console.log('📦 ONNX model already loaded, reusing session (load count:', modelLoadCount, ')');
         return ortSession;
     }
     
     // If already loading, return the existing promise
     if (isModelLoading && modelLoadPromise) {
+        console.log('⏳ ONNX model is loading, waiting for existing promise... (load count:', modelLoadCount, ')');
         return modelLoadPromise;
     }
     
     // Start loading
     isModelLoading = true;
-    console.log('Loading fish model...');
+    modelLoadCount++;
+    console.log('🚀 Starting ONNX model load #' + modelLoadCount);
     
-    // 显示进度条
+    // 先检查缓存状态
+    await checkModelCacheStatus();
+    
+    // 显示进度条（但不重置进度值，让 loadModelWithCache 控制进度）
     const progressContainer = document.getElementById('onnx-loading-progress');
     const progressBar = document.getElementById('onnx-progress-bar');
     const progressText = document.getElementById('onnx-progress-text');
@@ -2734,9 +2769,13 @@ async function loadFishModel() {
         progressContainer.style.display = 'block';
     }
     
-    // 初始化进度条
-    if (progressBar) progressBar.style.width = '0%';
-    if (progressText) progressText.textContent = 'Starting...';
+    // 初始化进度条为 0%，但立即让 loadModelWithCache 接管进度更新
+    if (progressBar) {
+        progressBar.style.width = '0%';
+    }
+    if (progressText) {
+        progressText.textContent = 'Checking cache...';
+    }
     
     modelLoadPromise = (async () => {
         try {
@@ -2767,9 +2806,6 @@ async function loadFishModel() {
             return ortSession;
         } catch (error) {
             console.error('Failed to load fish model:', error);
-            
-            // 清除进度更新
-            clearInterval(progressInterval);
             
             // 隐藏进度条
             if (progressContainer) {

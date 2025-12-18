@@ -361,7 +361,7 @@
     
     return [
       {
-        // 1/7 喂鱼指导：高亮整个鱼缸画布，允许用户点击喂鱼
+        // 1/8 喂鱼指导：高亮整个鱼缸画布，允许用户点击喂鱼
         // 位置参数：side(top/bottom/left/right/over), align(start/center/end)
         // 偏移参数：onPopoverRender: createPopoverOffsetHook(Y偏移, X偏移)
         element: '#swim-canvas',
@@ -402,7 +402,7 @@
         }
       },
       {
-        // 2/7 汉堡菜单按钮：弹窗在下方，侧边栏保持关闭状态
+        // 2/8 汉堡菜单按钮：弹窗在下方，侧边栏保持关闭状态
         element: '#hamburger-menu-btn',
         popover: {
           title: '☰ Settings Menu',
@@ -414,7 +414,7 @@
         // 注意：此步骤不打开侧边栏，让用户看到汉堡菜单按钮
       },
       {
-        // 3/7 语言选择：弹窗在底部
+        // 3/8 语言选择：弹窗在底部
         // 移动端：不向右偏移，避免超出屏幕
         element: '#language-selection-container',
         popover: {
@@ -438,7 +438,7 @@
         }
       },
       {
-        // 4/7 鱼数量选择：弹窗在底部
+        // 4/8 鱼数量选择：弹窗在底部
         // 移动端：改为底部显示，不向右偏移
         element: '#fish-count-selector-sidebar',
         popover: {
@@ -455,7 +455,29 @@
         }
       },
       {
-        // 5/7 Fish Talk 开关：告诉用户可以开启鱼的对话功能
+        // 5/8 Refresh 按钮：告诉用户可以刷新看新的鱼
+        element: '#refresh-tank-sidebar',
+        popover: {
+          title: '🔄 Discover New Fish!',
+          description: 'Click Refresh to see a new batch of fish you haven\'t seen before!',
+          side: 'bottom',
+          align: 'start',
+          onPopoverRender: createPopoverOffsetHook(50, 0)
+        },
+        onHighlightStarted: () => {
+          // 确保侧边栏打开
+          const sidebar = document.getElementById('sidebar-menu');
+          const overlay = document.getElementById('sidebar-overlay');
+          if (sidebar && !sidebar.classList.contains('open')) {
+            sidebar.classList.add('open');
+            if (overlay) overlay.classList.add('active');
+          }
+          elevateElementZIndex('#sidebar-menu');
+          elevateElementZIndex('#refresh-tank-sidebar');
+        }
+      },
+      {
+        // 6/8 Fish Talk 开关：告诉用户可以开启鱼的对话功能
         element: '#fish-talk-toggle',
         popover: {
           title: '💬 Fish Talk',
@@ -478,7 +500,7 @@
         }
       },
       {
-        // 6/7 聊天输入框：告诉用户可以和鱼对话
+        // 7/8 聊天输入框：告诉用户可以和鱼对话
         element: '#user-chat-input',
         popover: {
           title: '🗣️ Talk to Fish!',
@@ -507,7 +529,7 @@
         }
       },
       {
-        // 7/7 Our Tank：告诉用户可以创建私人鱼缸（最后一步）
+        // 8/8 Our Tank：告诉用户可以创建私人鱼缸（最后一步）
         element: 'a[href="our-tank-list.html"]',
         popover: {
           title: '🏠 Create Your Own Tank!',
@@ -698,18 +720,20 @@
         cleanup();
         console.log('[Onboarding] Tutorial completed for page:', page);
         
-        // Tank 页面：引导结束后恢复状�?
+        // Tank 页面：引导结束后恢复状态
         if (page === 'tank') {
           const chatReopenBtn = document.getElementById('chat-reopen-btn');
           if (chatReopenBtn) {
             chatReopenBtn.style.display = '';
           }
-          // 恢复独白状�?
+          // 恢复独白状态
           if (window.communityChatManager && window._onboardingMonologueState !== undefined) {
             window.communityChatManager.setMonologueEnabled(window._onboardingMonologueState);
             console.log('[Onboarding] Monologue restored to:', window._onboardingMonologueState);
             delete window._onboardingMonologueState;
           }
+          // 新手教程完成后启动推广定时器
+          initOurTankPromoTimer();
         }
       },
       steps: steps
@@ -745,7 +769,7 @@
       return;
     }
     
-    // 关键优化：非首次访问时，检查是否需要启动 Our Tank 推广
+    // 非首次访问时，直接启动推广定时器
     if (!isFirstVisit()) {
       // Tank 页面：启动 Our Tank 推广定时器
       if (page === 'tank') {
@@ -753,6 +777,8 @@
       }
       return;
     }
+    
+    // 首次访问时，推广定时器会在新手教程完成后启动（见 onDestroyed 回调）
 
     console.log('[Onboarding] First visit detected for', page);
 
@@ -830,7 +856,7 @@
   function getOurTankPromoSteps() {
     return [
       {
-        // 1/3 欢迎弹窗
+        // 1/2 欢迎弹窗
         popover: {
           title: '👥 Create Your Own Tank!',
           description: 'Enjoying the Global Tank? Create a private "Our Tank" to share with friends and family!',
@@ -856,14 +882,14 @@
         }
       },
       {
-        // 2/3 Our Tank 链接
+        // 2/2 Our Tank 链接
         element: 'a[href="our-tank-list.html"]',
         popover: {
           title: '🏠 Your Private Tank',
           description: 'Click here to create your own tank. Invite friends to add their fish and watch them swim together!',
           side: 'bottom',
           align: 'start',
-          onPopoverRender: createPopoverOffsetHook(50, 0)
+          onPopoverRender: createPopoverOffsetHook(30, 0)
         },
         onHighlightStarted: () => {
           // 展开侧边栏
@@ -875,21 +901,6 @@
           }
           elevateElementZIndex('#sidebar-menu');
           elevateElementZIndex('a[href="our-tank-list.html"]');
-        }
-      },
-      {
-        // 3/3 分享提示
-        element: '#tank-share-btn-sidebar',
-        popover: {
-          title: '📤 Share with Friends!',
-          description: 'Share your tank on social media and invite friends to join! The more fish, the more fun!',
-          side: 'bottom',
-          align: 'start',
-          onPopoverRender: createPopoverOffsetHook(50, 0)
-        },
-        onHighlightStarted: () => {
-          elevateElementZIndex('#sidebar-menu');
-          elevateElementZIndex('#tank-share-btn-sidebar');
         }
       }
     ];

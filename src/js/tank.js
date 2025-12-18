@@ -3878,7 +3878,7 @@ function showFishInfoModal(fish) {
                     showForm: true,
                     showFishInfo: false,
                     showDeleteBtn: true,
-                    title: '💬 Messages'
+                    title: '💬 Comments'
                 });
             } catch (error) {
                 console.warn('MessageUI error:', error);

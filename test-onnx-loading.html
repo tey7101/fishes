@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ONNX Loading Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        h2 { color: #666; margin-top: 0; }
+        .log {
+            background: #1a1a1a;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .log .error { color: #f66; }
+        .log .warn { color: #ff0; }
+        .log .info { color: #6cf; }
+        button {
+            background: #4A90E2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #357ABD; }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.cached { background: #d4edda; color: #155724; }
+        .status.not-cached { background: #fff3cd; color: #856404; }
+        .status.loading { background: #cce5ff; color: #004085; }
+        .status.error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🐟 ONNX Model Loading Test</h1>
+    
+    <div class="test-section">
+        <h2>Cache Status</h2>
+        <div id="cache-status" class="status">Checking...</div>
+        <button onclick="checkCache()">Check Cache</button>
+        <button onclick="clearCache()">Clear Cache</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Load Test</h2>
+        <p>Test loading the ONNX model and monitor for duplicate loads.</p>
+        <button onclick="testLoad()">Load Model</button>
+        <button onclick="testMultipleLoads()">Test Multiple Loads (should reuse)</button>
+        <button onclick="location.reload()">Refresh Page</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Console Log</h2>
+        <div id="log" class="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script>
+        const ONNX_CACHE_NAME = 'onnx-model-cache-v2';
+        const MODEL_URL = 'https://cdn.fishart.online/fishart_web/ONNX/fish_doodle_classifier.onnx';
+        
+        const logEl = document.getElementById('log');
+        const statusEl = document.getElementById('cache-status');
+        
+        function log(msg, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = `[${time}] ${msg}`;
+            logEl.appendChild(line);
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(msg);
+        }
+        
+        function clearLog() {
+            logEl.innerHTML = '';
+        }
+        
+        async function checkCache() {
+            log('Checking cache status...');
+            statusEl.className = 'status loading';
+            statusEl.textContent = 'Checking...';
+            
+            if (!('caches' in window)) {
+                statusEl.className = 'status error';
+                statusEl.textContent = 'Cache API not supported';
+                log('Cache API not supported', 'error');
+                return;
+            }
+            
+            try {
+                const cache = await caches.open(ONNX_CACHE_NAME);
+                const cachedResponse = await cache.match(MODEL_URL);
+                
+                if (cachedResponse) {
+                    statusEl.className = 'status cached';
+                    statusEl.textContent = '✅ Model IS cached - no CDN download needed';
+                    log('Model IS cached - no CDN download needed', 'info');
+                } else {
+                    statusEl.className = 'status not-cached';
+                    statusEl.textContent = '⚠️ Model NOT cached - will download from CDN';
+                    log('Model NOT cached - will download from CDN', 'warn');
+                }
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = 'Error checking cache: ' + error.message;
+                log('Error checking cache: ' + error.message, 'error');
+            }
+        }
+        
+        async function clearCache() {
+            log('Clearing cache...');
+            try {
+                const deleted = await caches.delete(ONNX_CACHE_NAME);
+                if (deleted) {
+                    log('Cache cleared successfully', 'info');
+                } else {
+                    log('Cache was already empty', 'warn');
+                }
+                await checkCache();
+            } catch (error) {
+                log('Error clearing cache: ' + error.message, 'error');
+            }
+        }
+        
+        async function testLoad() {
+            log('=== Starting load test ===');
+            log('Opening index.html in new tab to test loading...');
+            window.open('index.html', '_blank');
+        }
+        
+        async function testMultipleLoads() {
+            log('=== Testing multiple simultaneous loads ===');
+            log('This should only trigger ONE actual load');
+            
+            // Open multiple tabs to test
+            window.open('index.html?test=1', '_blank');
+            setTimeout(() => window.open('index.html?test=2', '_blank'), 100);
+            setTimeout(() => window.open('index.html?test=3', '_blank'), 200);
+        }
+        
+        // Initial check
+        checkCache();
+    </script>
+</body>
+</html>

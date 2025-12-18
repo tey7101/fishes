@@ -432,7 +432,7 @@ const MessageUI = {
           ${showTitle ? `<div class="messages-section-title">${title.replace('💬 ', '')} (${messages.length})</div>` : ''}
           ${messageListHtml}
           ${currentUserId && showForm ? messageFormHtml : ''}
-          ${!currentUserId && showForm ? '<div class="messages-empty">Please log in to send messages</div>' : ''}
+          ${!currentUserId && showForm ? '<div class="messages-empty">Please log in to comment</div>' : ''}
         </div>
       `;
 

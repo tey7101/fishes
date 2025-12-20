@@ -774,3 +774,432 @@
   overflow: hidden;
 }
 
+
+
+/* ============================================
+   评论系统样式 (Comments - Profile 页面)
+   ============================================ */
+
+.comments-section {
+  margin-top: 12px;
+  padding-top: 0;
+  border-top: none;
+  height: auto;
+}
+
+.comments-section-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.comments-section-title::before {
+  content: '💬';
+  font-size: 16px;
+}
+
+.comments-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+}
+
+.comments-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.comments-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+
+.comments-list::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+.comments-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.5);
+}
+
+.comments-empty {
+  text-align: center;
+  padding: 10px;
+  color: #999;
+  font-size: 13px;
+}
+
+.comments-empty::before {
+  content: '📭';
+  display: block;
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.comments-loading {
+  text-align: center;
+  padding: 20px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.comments-loading::before {
+  content: '⏳';
+  display: block;
+  font-size: 30px;
+  margin-bottom: 8px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* 评论卡片 */
+.comment-card {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F5F5F5 100%);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  transition: all 0.3s ease;
+  position: relative;
+  box-shadow: 
+    0 3px 0 rgba(0, 0, 0, 0.15),
+    0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.comment-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
+  border-radius: 12px 12px 0 0;
+  pointer-events: none;
+}
+
+.comment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 0 rgba(0, 0, 0, 0.15),
+    0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  gap: 10px;
+}
+
+.comment-sender {
+  font-weight: 700;
+  color: #4A90E2;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-sender-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #63A4E8 0%, #4A90E2 50%, #357ABD 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  flex-shrink: 0;
+  box-shadow: 
+    0 2px 0 rgba(0, 0, 0, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.comment-time {
+  font-size: 11px;
+  color: #64748b;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.comment-content {
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+/* 评论中的鱼信息 */
+.comment-fish-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: linear-gradient(180deg, #E8F4FD 0%, #D4ECFA 100%);
+  border-radius: 8px;
+  border: 1px solid #B8DCEF;
+}
+
+.comment-fish-info img {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.comment-fish-info span {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2563EB;
+}
+
+/* 评论操作按钮 */
+.comment-delete-btn {
+  background: linear-gradient(180deg, #FF6259 0%, #FF3B30 50%, #CC2920 100%);
+  border: none;
+  border-bottom: 2px solid #991F19;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.comment-delete-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
+  border-radius: 8px 8px 0 0;
+  pointer-events: none;
+}
+
+.comment-delete-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+}
+
+.comment-delete-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.comment-reply-btn {
+  background: linear-gradient(180deg, #63A4E8 0%, #4A90E2 50%, #357ABD 100%);
+  border: none;
+  border-bottom: 2px solid #2C5F8F;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.comment-reply-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
+  border-radius: 8px 8px 0 0;
+  pointer-events: none;
+}
+
+.comment-reply-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+}
+
+.comment-reply-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.profile-comment-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #f1f5f9;
+}
+
+/* 评论分组样式 */
+.comments-group {
+  margin-bottom: 12px;
+}
+
+.comments-group-title {
+  font-size: 14px;
+  font-weight: 900;
+  color: #333;
+  margin-bottom: 6px;
+  padding: 10px 16px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F0F0F0 50%, #D0D0D0 100%);
+  border-radius: 12px;
+  border: none;
+  border-bottom: 3px solid #A0A0A0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.comments-group-title::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
+  border-radius: 12px 12px 0 0;
+  pointer-events: none;
+}
+
+.comments-group-title:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
+}
+
+.comments-group-title:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+
+.comments-group-title.public {
+  background: linear-gradient(180deg, #63A4E8 0%, #4A90E2 50%, #357ABD 100%);
+  border-bottom: 3px solid #2C5F8F;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.comments-group-title.public::before {
+  content: '🌍';
+  font-size: 16px;
+}
+
+.comments-group-title.private {
+  background: linear-gradient(180deg, #B07CC6 0%, #9B59B6 50%, #7D3C98 100%);
+  border-bottom: 3px solid #5E2C73;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.comments-group-title.private::before {
+  content: '🔒';
+  font-size: 16px;
+}
+
+.comments-group-title .group-icon {
+  font-size: 12px;
+  transition: transform 0.2s ease;
+  color: rgba(255, 255, 255, 0.9);
+  margin-left: auto;
+  display: inline-block;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.comments-group-title.public .group-icon,
+.comments-group-title.private .group-icon {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.comments-group-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  padding-left: 8px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+/* Profile 页面评论区域 */
+.profile-comments-section {
+  margin-top: 30px;
+}
+
+.profile-comments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.profile-comments-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+.profile-comments-count {
+  background: #6366F1;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.comment-error {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.comment-error::before {
+  content: '⚠️';
+}

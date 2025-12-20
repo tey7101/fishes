@@ -105,6 +105,267 @@ const MessageUI = {
   },
 
   /**
+   * 渲染单个留言卡片（用于 comments）
+   * @param {object} message - 留言对象
+   * @param {object} options - 选项
+   * @returns {string} HTML 字符串
+   */
+  renderCommentCard(message, options = {}) {
+    const { showFishInfo = false, showDeleteBtn = false } = options;
+    
+    const senderName = message.sender?.nick_name || 'Anonymous';
+    const senderInitial = senderName.charAt(0).toUpperCase();
+    const content = MessageClient.escapeHtml(message.content);
+    const time = MessageClient.formatTime(message.created_at);
+    const visibility = message.visibility || 'public';
+    const visibilityText = visibility === 'public' ? 'Public' : 'Private';
+    const currentUserId = MessageClient.getCurrentUserId();
+    const canDelete = showDeleteBtn && currentUserId && 
+                      (message.sender_id === currentUserId || message.receiver_id === currentUserId);
+
+    // 检查是否可以回复（当前用户是接收者，且消息有发送者）
+    const canReply = currentUserId && message.sender_id && 
+                     (message.receiver_id === currentUserId || !message.receiver_id);
+    
+    // 鱼信息（如果有）
+    let fishInfoHtml = '';
+    if (showFishInfo && message.fish) {
+      const fishName = message.fish.fish_name || 'Unknown Fish';
+      const fishImage = message.fish.image_url || '';
+      fishInfoHtml = `
+        <div class="comment-fish-info" style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px; padding: 6px 10px; background: linear-gradient(180deg, #E8F4FD 0%, #D4ECFA 100%); border-radius: 8px; border: 1px solid #B8DCEF;">
+          ${fishImage ? `<img src="${fishImage}" alt="${MessageClient.escapeHtml(fishName)}" style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">` : '<span style="font-size: 20px;">🐟</span>'}
+          <span style="font-size: 12px; font-weight: 700; color: #2563EB;">🐟 ${MessageClient.escapeHtml(fishName)}</span>
+        </div>
+      `;
+    }
+    
+    let actionButtonsHtml = '';
+    if (canReply || canDelete) {
+      actionButtonsHtml = `
+        <div class="profile-comment-actions" style="display: flex; gap: 8px; align-items: center;">
+          ${canReply ? `
+            <button class="comment-reply-btn" onclick="MessageUI.showReplyForm('${message.id}', '${message.sender_id}', '${MessageClient.escapeHtml(senderName)}')">
+              Reply
+            </button>
+          ` : ''}
+          ${canDelete ? `
+            <button class="comment-delete-btn" onclick="MessageUI.handleDelete('${message.id}')">
+              Delete
+            </button>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    return `
+      <div class="comment-card" data-message-id="${message.id}" style="display: flex; flex-direction: column;">
+        ${fishInfoHtml}
+        <div class="comment-content" style="margin-bottom: 8px; flex: 1;">${content}</div>
+        <div class="comment-header" style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;">
+          <div class="comment-sender" style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+            <div class="comment-sender-avatar">${senderInitial}</div>
+            <span style="font-weight: 700; color: #4A90E2; white-space: nowrap;">${MessageClient.escapeHtml(senderName)}</span>
+          </div>
+          <div class="comment-time" style="color: #999; font-size: 12px; white-space: nowrap; flex-shrink: 0;">${time}</div>
+          ${actionButtonsHtml}
+        </div>
+      </div>
+    `;
+  },
+
+  /**
+   * 渲染评论列表（用于 profile 页面）
+   * @param {Array} messages - 留言数组
+   * @param {object} options - 选项 { showFishInfo, showDeleteBtn, groupByType }
+   * @returns {string} HTML 字符串
+   */
+  renderCommentList(messages, options = {}) {
+    const { showFishInfo = false, showDeleteBtn = false, groupByType = false } = options;
+
+    if (!messages || messages.length === 0) {
+      return '';
+    }
+
+    // 如果需要分组显示（用于profile页面）
+    if (groupByType) {
+      const publicMessages = messages.filter(msg => !msg.visibility || msg.visibility === 'public');
+      const privateMessages = messages.filter(msg => msg.visibility === 'private');
+
+      const publicUnreadCount = publicMessages.filter(msg => !msg.is_read).length;
+      const publicTotalCount = publicMessages.length;
+      const privateUnreadCount = privateMessages.filter(msg => !msg.is_read).length;
+      const privateTotalCount = privateMessages.length;
+
+      let html = '';
+
+      if (publicMessages.length > 0) {
+        const publicCards = publicMessages.map(msg => {
+          return this.renderCommentCard(msg, { showFishInfo, showDeleteBtn });
+        }).join('');
+
+        const publicCountDisplay = publicUnreadCount > 0 
+          ? `${publicUnreadCount}/${publicTotalCount}` 
+          : `${publicTotalCount}`;
+
+        html += `
+          <div class="comments-group">
+            <div class="comments-group-title public collapsed" onclick="MessageUI.toggleCommentGroup(this)">
+              <span class="group-icon">▶</span>
+              <span>Public Comments (${publicCountDisplay})</span>
+            </div>
+            <div class="comments-group-list" style="display: none;">
+              ${publicCards}
+            </div>
+          </div>
+        `;
+      }
+
+      if (privateMessages.length > 0) {
+        const privateCards = privateMessages.map(msg => {
+          return this.renderCommentCard(msg, { showFishInfo, showDeleteBtn });
+        }).join('');
+
+        const privateCountDisplay = privateUnreadCount > 0 
+          ? `${privateUnreadCount}/${privateTotalCount}` 
+          : `${privateTotalCount}`;
+
+        html += `
+          <div class="comments-group">
+            <div class="comments-group-title private collapsed" onclick="MessageUI.toggleCommentGroup(this)">
+              <span class="group-icon">▶</span>
+              <span>Private Comments (${privateCountDisplay})</span>
+            </div>
+            <div class="comments-group-list" style="display: none;">
+              ${privateCards}
+            </div>
+          </div>
+        `;
+      }
+
+      if (!html || html.trim() === '') {
+        return '';
+      }
+
+      return `
+        <div class="comments-list">
+          ${html}
+        </div>
+      `;
+    }
+
+    // 默认不分组的显示方式
+    const commentCards = messages.map(msg => {
+      return this.renderCommentCard(msg, { showFishInfo, showDeleteBtn });
+    }).join('');
+
+    return `
+      <div class="comments-list">
+        ${commentCards}
+      </div>
+    `;
+  },
+
+  /**
+   * 切换评论分组展开/收起
+   * @param {HTMLElement} titleElement - 标题元素
+   */
+  toggleCommentGroup(titleElement) {
+    const group = titleElement.closest('.comments-group');
+    const list = group.querySelector('.comments-group-list');
+    const icon = titleElement.querySelector('.group-icon');
+    
+    if (list.style.display === 'none') {
+      list.style.display = 'flex';
+      titleElement.classList.remove('collapsed');
+      if (icon) icon.textContent = '▼';
+    } else {
+      list.style.display = 'none';
+      titleElement.classList.add('collapsed');
+      if (icon) icon.textContent = '▶';
+    }
+  },
+
+  /**
+   * 渲染完整的评论区域（用于 profile 页面）
+   * @param {string} containerId - 容器ID
+   * @param {string} messageType - 留言类型
+   * @param {string} targetId - 目标ID
+   * @param {object} options - 选项
+   */
+  async renderCommentsSection(containerId, messageType, targetId, options = {}) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const { 
+      showForm = true, 
+      showFishInfo = false,
+      showDeleteBtn = false,
+      title = '💬 Comments'
+    } = options;
+
+    try {
+      // 显示加载状态
+      container.innerHTML = `
+        <div class="comments-section">
+          <div class="comments-section-title">${title.replace('💬 ', '')}</div>
+          <div class="comments-loading">Loading...</div>
+        </div>
+      `;
+
+      // 加载留言
+      let messagesData;
+      if (messageType === 'to_fish') {
+        messagesData = await MessageClient.getFishMessages(targetId);
+      } else {
+        messagesData = await MessageClient.getUserMessages(targetId);
+      }
+
+      const messages = messagesData.messages || [];
+      const currentUserId = MessageClient.getCurrentUserId();
+      const canShowDelete = showDeleteBtn && currentUserId;
+
+      // 如果是用户查看自己的消息，自动标记未读消息为已读
+      if (messageType === 'to_owner' && currentUserId === targetId) {
+        const unreadMessages = messages.filter(msg => !msg.is_read);
+        if (unreadMessages.length > 0) {
+          const unreadIds = unreadMessages.map(msg => msg.id);
+          this.markMessagesAsRead(currentUserId, unreadIds).catch(error => {
+            console.error('Failed to mark messages as read:', error);
+          });
+        }
+      }
+
+      // 渲染评论列表（profile页面使用分组显示）
+      const commentListHtml = this.renderCommentList(messages, { 
+        showFishInfo, 
+        showDeleteBtn: canShowDelete,
+        groupByType: messageType === 'to_owner'
+      });
+
+      // 更新容器（profile页面不显示标题）
+      const showTitle = !(messageType === 'to_owner' && !showForm);
+      container.innerHTML = `
+        <div class="comments-section">
+          ${showTitle ? `<div class="comments-section-title">${title.replace('💬 ', '')} (${messages.length})</div>` : ''}
+          ${commentListHtml}
+          ${!currentUserId && showForm ? '<div class="comments-empty">Please log in to comment</div>' : ''}
+        </div>
+      `;
+
+    } catch (error) {
+      console.error('Render comments section error:', error);
+      container.innerHTML = `
+        <div class="comments-section">
+          <div class="comment-error">
+            ${error.message || 'Failed to load, please refresh the page'}
+          </div>
+        </div>
+      `;
+    }
+  },
+
+  /**
    * 渲染单个留言卡片
    * @param {object} message - 留言对象
    * @param {object} options - 选项

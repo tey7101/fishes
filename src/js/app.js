@@ -1859,7 +1859,7 @@ swimBtn.addEventListener('click', async () => {
                 </label>
                 <input type='text' id='user-info' 
                     value='${escapeHtml(defaultUserInfo)}'
-                    placeholder='e.g., My owner loves pizza' 
+                    placeholder='e.g., I love pizza' 
                     style='width: 100%; padding: 14px 16px; border: 3px solid #e2e8f0; border-radius: 12px; font-size: 15px; box-sizing: border-box;
                     background: linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%);
                     box-shadow: 0 3px 0 rgba(0, 0, 0, 0.1), inset 0 2px 4px rgba(255, 255, 255, 0.5);
@@ -3621,7 +3621,7 @@ async function setupAuthListener() {
                                 </label>
                                 <input type='text' id='user-info' 
                                     value='${escapeHtml(defaultUserInfo)}'
-                                    placeholder='e.g., My owner loves pizza' 
+                                    placeholder='e.g., I love pizza' 
                                     style='width: 100%; padding: 14px 16px; border: 3px solid #e2e8f0; border-radius: 12px; font-size: 15px; box-sizing: border-box;
                                     background: linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%);
                                     box-shadow: 0 3px 0 rgba(0, 0, 0, 0.1), inset 0 2px 4px rgba(255, 255, 255, 0.5);

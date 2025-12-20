@@ -572,9 +572,9 @@ function displayProfile(profile, searchedUserId = null) {
     document.getElementById('profile-content').style.display = 'block';
     document.getElementById('profile-empty').style.display = 'none';
     
-    // Load messages if MessageUI is available
+    // Load comments if MessageUI is available
     if (typeof MessageUI !== 'undefined' && profileUserId) {
-        loadUserMessages(profileUserId);
+        loadUserComments(profileUserId);
     }
     
     // Load subscription info if user is viewing own profile
@@ -585,8 +585,8 @@ function displayProfile(profile, searchedUserId = null) {
     // 检查是否为匿名用户，显示升级区域
     checkAndShowAnonymousUpgrade(isCurrentUser);
     
-    // Handle #messages hash - scroll to messages section if present
-    handleMessagesHashOnLoad();
+    // Handle #comments hash - scroll to comments section if present
+    handleCommentsHashOnLoad();
 }
 
 /**
@@ -1738,72 +1738,72 @@ function createBackgroundBubbles() {
 createBackgroundBubbles();
 
 /**
- * 加载用户收到的留言
+ * 加载用户收到的评论
  * @param {string} userId - 用户ID
  */
-async function loadUserMessages(userId) {
+async function loadUserComments(userId) {
     try {
-        const messagesSection = document.getElementById('profile-messages-section');
-        const messagesContainer = document.getElementById('profile-messages-container');
-        const messagesCount = document.getElementById('profile-messages-count');
+        const commentsSection = document.getElementById('profile-comments-section');
+        const commentsContainer = document.getElementById('profile-comments-container');
+        const commentsCount = document.getElementById('profile-comments-count');
         
-        if (!messagesSection || !messagesContainer) {
-            console.warn('⚠️ Messages section or container not found');
+        if (!commentsSection || !commentsContainer) {
+            console.warn('⚠️ Comments section or container not found');
             return;
         }
 
-        // 显示留言区域
-        messagesSection.style.display = 'block';
-        console.log('✅ Messages section displayed');
+        // 显示评论区域
+        commentsSection.style.display = 'block';
+        console.log('✅ Comments section displayed');
         
         // 显示加载状态
-        messagesContainer.innerHTML = '<div class="messages-loading" style="text-align: center; padding: 20px; color: #666;">Loading messages...</div>';
+        commentsContainer.innerHTML = '<div class="comments-loading" style="text-align: center; padding: 20px; color: #666;">Loading comments...</div>';
 
-        // 使用 MessageUI 渲染留言
+        // 使用 MessageUI 渲染评论
         if (typeof MessageUI !== 'undefined') {
-            await MessageUI.renderMessagesSection('profile-messages-container', 'to_owner', userId, {
+            await MessageUI.renderCommentsSection('profile-comments-container', 'to_owner', userId, {
                 showForm: false,
                 showFishInfo: true,
                 showDeleteBtn: true,
-                title: 'Received Messages'
+                title: 'Received Comments'
             });
 
-            // 检查是否有消息
-            const messages = messagesContainer.querySelectorAll('.message-card');
-            if (messages.length === 0) {
-                // 如果没有消息，显示空状态
-                messagesContainer.innerHTML = `
-                    <div class="messages-empty" style="text-align: center; padding: 40px 20px; color: #999;">
+            // 检查是否有评论
+            const comments = commentsContainer.querySelectorAll('.comment-card');
+            if (comments.length === 0) {
+                // 如果没有评论，显示空状态
+                commentsContainer.innerHTML = `
+                    <div class="comments-empty" style="text-align: center; padding: 40px 20px; color: #999;">
                         <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
-                        <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">No messages yet</div>
-                        <div style="font-size: 14px;">You haven't received any messages.</div>
+                        <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">No comments yet</div>
+                        <div style="font-size: 14px;">You haven't received any comments.</div>
                     </div>
                 `;
             }
             
-            // 更新留言数量
-            if (messagesCount) {
-                messagesCount.textContent = messages.length;
+            // 更新评论数量
+            if (commentsCount) {
+                commentsCount.textContent = comments.length;
             }
-            console.log(`✅ Loaded ${messages.length} messages`);
+            console.log(`✅ Loaded ${comments.length} comments`);
         } else {
             console.warn('⚠️ MessageUI not available');
-            messagesContainer.innerHTML = `
-                <div class="messages-empty" style="text-align: center; padding: 40px 20px; color: #999;">
+            commentsContainer.innerHTML = `
+                <div class="comments-empty" style="text-align: center; padding: 40px 20px; color: #999;">
                     <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
-                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Message system unavailable</div>
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Comment system unavailable</div>
                     <div style="font-size: 14px;">Please refresh the page to try again.</div>
                 </div>
             `;
         }
     } catch (error) {
-        console.error('❌ Load user messages error:', error);
-        const messagesContainer = document.getElementById('profile-messages-container');
-        if (messagesContainer) {
-            messagesContainer.innerHTML = `
-                <div class="message-error" style="text-align: center; padding: 40px 20px; color: #e74c3c;">
+        console.error('❌ Load user comments error:', error);
+        const commentsContainer = document.getElementById('profile-comments-container');
+        if (commentsContainer) {
+            commentsContainer.innerHTML = `
+                <div class="comment-error" style="text-align: center; padding: 40px 20px; color: #e74c3c;">
                     <div style="font-size: 48px; margin-bottom: 16px;">❌</div>
-                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Failed to load messages</div>
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Failed to load comments</div>
                     <div style="font-size: 14px;">${error.message || 'Unknown error'}</div>
                     <button onclick="location.reload()" style="margin-top: 16px; padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Refresh Page</button>
                 </div>
@@ -1813,29 +1813,29 @@ async function loadUserMessages(userId) {
 }
 
 /**
- * 处理 #messages hash - 在页面加载时滚动到消息区域
+ * 处理 #comments hash - 在页面加载时滚动到评论区域
  */
-function handleMessagesHashOnLoad() {
+function handleCommentsHashOnLoad() {
     // 检查URL hash
-    if (window.location.hash === '#messages') {
-        console.log('🎯 Hash #messages detected, scrolling to messages section');
+    if (window.location.hash === '#comments') {
+        console.log('🎯 Hash #comments detected, scrolling to comments section');
         setTimeout(() => {
-            const messagesSection = document.getElementById('profile-messages-section');
-            if (messagesSection) {
-                // 确保消息区域可见
-                messagesSection.style.display = 'block';
+            const commentsSection = document.getElementById('profile-comments-section');
+            if (commentsSection) {
+                // 确保评论区域可见
+                commentsSection.style.display = 'block';
                 
-                // 滚动到消息区域
-                messagesSection.scrollIntoView({ 
+                // 滚动到评论区域
+                commentsSection.scrollIntoView({ 
                     behavior: 'smooth', 
                     block: 'start' 
                 });
                 
-                // 展开所有消息分组
-                const groupTitles = messagesSection.querySelectorAll('.messages-group-title.collapsed');
+                // 展开所有评论分组
+                const groupTitles = commentsSection.querySelectorAll('.comments-group-title.collapsed');
                 groupTitles.forEach(title => {
-                    const group = title.closest('.messages-group');
-                    const list = group.querySelector('.messages-group-list');
+                    const group = title.closest('.comments-group');
+                    const list = group.querySelector('.comments-group-list');
                     const icon = title.querySelector('.group-icon');
                     
                     if (list && list.style.display === 'none') {
@@ -1845,18 +1845,18 @@ function handleMessagesHashOnLoad() {
                     }
                 });
                 
-                console.log('✅ Scrolled to messages section and expanded groups');
+                console.log('✅ Scrolled to comments section and expanded groups');
             } else {
-                console.warn('⚠️ Messages section not found for scrolling');
+                console.warn('⚠️ Comments section not found for scrolling');
             }
-        }, 500); // 等待消息加载完成
+        }, 500); // 等待评论加载完成
     }
 }
 
 // 监听 hash 变化
 window.addEventListener('hashchange', function() {
-    if (window.location.hash === '#messages') {
-        handleMessagesHashOnLoad();
+    if (window.location.hash === '#comments') {
+        handleCommentsHashOnLoad();
     }
 });
 

@@ -17,7 +17,7 @@
 
 - **运行时**: Node.js
 - **部署**: Vercel Serverless Functions / Railway
-- **数据库**: PostgreSQL (Supabase)
+- **数据库**: PostgreSQL (Hasura)
 - **数据访问**: Hasura GraphQL
 - **缓存**: Redis (Upstash)
 - **图片存储**: 七牛云 CDN
@@ -26,7 +26,7 @@
 
 ```json
 {
-  "@supabase/supabase-js": "用户认证和数据库",
+  "@supabase/supabase-js": "用户认证",
   "stripe": "支付处理",
   "@paypal/paypal-server-sdk": "PayPal 支付",
   "ioredis": "Redis 客户端",

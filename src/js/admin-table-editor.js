@@ -450,37 +450,25 @@ function formatValue(value, column) {
                       column === 'current_period_end';
   
   if (isTimeField && value) {
-    // 显示为北京时间 (UTC+8)
-    // 数据库存储的是UTC时间，但PostgreSQL返回的时间字符串没有Z后缀
-    // 需要手动添加Z来标记为UTC时间
-    let timeStr = value;
-    
-    // 如果时间字符串没有Z后缀且不包含时区信息，添加Z
-    if (typeof timeStr === 'string' && 
-        !timeStr.endsWith('Z') && 
-        !timeStr.includes('+') && 
-        !timeStr.includes(' ')) {
-      timeStr = timeStr + 'Z';
-    }
-    
-    const date = new Date(timeStr);
+    // Hasura/PostgreSQL 返回的时间字符串没有时区信息（如 "2025-12-20T15:52:43"）
+    // 但实际存储的已经是北京时间，不需要再做时区转换
+    // 直接解析并格式化显示即可
+    const date = new Date(value);
     
     // 检查时间是否合理
     if (isNaN(date.getTime())) {
       return '<span class="null-badge">Invalid Date</span>';
     }
     
-    // 转换为北京时间显示
-    return date.toLocaleString('zh-CN', {
-      timeZone: 'Asia/Shanghai',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    });
+    // 直接格式化显示（不做时区转换，因为数据库存的就是北京时间）
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    
+    return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
   }
 
   if (typeof value === 'object') {

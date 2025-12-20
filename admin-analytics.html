@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>网站表现 - FishTalk 管理中心</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      padding: 2rem;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    /* 日期选择器 */
+    .date-controls {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .date-controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .date-input-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .date-input-group label {
+      font-weight: 500;
+      color: #4a5568;
+    }
+
+    .date-input-group input {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .quick-select {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .quick-btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .quick-btn:hover {
+      background: #f7fafc;
+      border-color: #cbd5e0;
+    }
+
+    .quick-btn.active {
+      background: #4299e1;
+      color: white;
+      border-color: #4299e1;
+    }
+
+    .refresh-btn {
+      padding: 0.5rem 1rem;
+      background: #48bb78;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+
+    .refresh-btn:hover {
+      background: #38a169;
+    }
+
+    /* 统计卡片 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .stat-card-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .stat-icon {
+      font-size: 1.5rem;
+      margin-right: 0.75rem;
+    }
+
+    .stat-title {
+      font-size: 0.9rem;
+      color: #718096;
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2d3748;
+    }
+
+    .stat-detail {
+      font-size: 0.85rem;
+      color: #a0aec0;
+      margin-top: 0.5rem;
+    }
+
+    .stat-card-clickable {
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card-clickable:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+
+    /* 图表区域 */
+    .chart-container {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 1rem;
+    }
+
+    .chart-wrapper {
+      position: relative;
+      height: 300px;
+    }
+
+    /* 加载状态 */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      color: #718096;
+    }
+
+    .loading-spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid #e2e8f0;
+      border-top-color: #4299e1;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 0.75rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* 错误状态 */
+    .error {
+      background: #fed7d7;
+      color: #c53030;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .error-retry {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: #c53030;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* 返回按钮 */
+    .footer {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      background: #4a5568;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .back-button:hover {
+      background: #2d3748;
+    }
+
+    .back-button svg {
+      margin-right: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
+      .header h1 {
+        font-size: 1.5rem;
+      }
+
+      .date-controls-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📊 网站表现</h1>
+      <p>查看网站关键业务指标</p>
+    </div>
+
+    <!-- 日期选择器 -->
+    <div class="date-controls">
+      <div class="date-controls-row">
+        <div class="date-input-group">
+          <label>开始日期:</label>
+          <input type="datetime-local" id="startDate">
+        </div>
+        <div class="date-input-group">
+          <label>结束日期:</label>
+          <input type="datetime-local" id="endDate">
+        </div>
+        <div class="quick-select">
+          <button class="quick-btn active" data-range="1">24小时</button>
+          <button class="quick-btn" data-range="7">7天</button>
+          <button class="quick-btn" data-range="30">30天</button>
+        </div>
+        <button class="refresh-btn" id="refreshBtn">🔄 刷新数据</button>
+      </div>
+    </div>
+
+    <!-- 错误提示 -->
+    <div id="errorContainer" class="error" style="display: none;">
+      <span id="errorMessage"></span>
+      <button class="error-retry" id="retryBtn">重试</button>
+    </div>
+
+    <!-- 统计卡片 -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-icon">👥</span>
+          <span class="stat-title">新增用户</span>
+        </div>
+        <div class="stat-value" id="totalUsers">-</div>
+        <div class="stat-detail" id="userDetail">匿名: - | 注册: -</div>
+      </div>
+      <div class="stat-card stat-card-clickable" id="groupChatsCard">
+        <div class="stat-card-header">
+          <span class="stat-icon">💬</span>
+          <span class="stat-title">群聊数</span>
+        </div>
+        <div class="stat-value" id="groupChats">-</div>
+      </div>
+      <div class="stat-card stat-card-clickable" id="userGroupChatsCard">
+        <div class="stat-card-header">
+          <span class="stat-icon">🗣️</span>
+          <span class="stat-title">用户群聊数</span>
+        </div>
+        <div class="stat-value" id="userGroupChats">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-icon">🐠</span>
+          <span class="stat-title">Our Tank</span>
+        </div>
+        <div class="stat-value" id="ourTanks">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-header">
+          <span class="stat-icon">💳</span>
+          <span class="stat-title">订单数</span>
+        </div>
+        <div class="stat-value" id="payments">-</div>
+      </div>
+    </div>
+
+    <!-- 图表 -->
+    <div class="chart-container">
+      <div class="chart-title">📈 数据趋势</div>
+      <div class="chart-wrapper">
+        <canvas id="trendChart"></canvas>
+      </div>
+    </div>
+
+    <!-- 加载状态 -->
+    <div id="loadingOverlay" class="loading" style="display: none;">
+      <div class="loading-spinner"></div>
+      <span>加载中...</span>
+    </div>
+
+    <!-- 返回按钮 -->
+    <div class="footer">
+      <a href="admin-center.html" class="back-button">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        返回管理中心
+      </a>
+    </div>
+  </div>
+
+  <script src="public/supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="src/js/supabase-init.js"></script>
+  <script src="src/js/admin-auth.js"></script>
+  <script src="src/js/admin-analytics.js"></script>
+</body>
+</html>

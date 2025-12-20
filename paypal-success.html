@@ -45,6 +45,15 @@
       });
     </script>
     
+    <!-- Mixpanel Analytics -->
+    <script src="src/js/mixpanel-init.js?v=1.0"></script>
+    <script>
+      // Track PayPal purchase in Mixpanel
+      if (window.MixpanelTracker) {
+        window.MixpanelTracker.track('Purchase Complete', { provider: 'PayPal' });
+      }
+    </script>
+    
     <style>
         .success-container {
             max-width: 600px;

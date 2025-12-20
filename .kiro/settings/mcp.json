@@ -21,7 +21,8 @@
         "list_services",
         "list_logs",
         "list_deploys",
-        "get_deploy"
+        "get_deploy",
+        "list_workspaces"
       ]
     },
     "chrome-devtools": {

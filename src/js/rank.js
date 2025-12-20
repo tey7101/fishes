@@ -139,6 +139,16 @@ function createFishImageDataUrl(imgUrl, callback) {
 
 // Handle vote button click - rank page specific
 function handleVote(fishId, voteType, button) {
+    // Check if user is logged in
+    const isLoggedIn = window.authCache && window.authCache.isLoggedIn();
+    if (!isLoggedIn) {
+        // 弹出登录弹窗
+        if (window.authUI && window.authUI.showLoginModal) {
+            window.authUI.showLoginModal('Sign in to vote for your favorite fish! 👍');
+        }
+        return;
+    }
+    
     handleVoteGeneric(fishId, voteType, button, (result, voteType) => {
         // Update the fish data in allFishData array
         const fish = allFishData.find(f => f.docId === fishId);
@@ -232,8 +242,8 @@ function createFishCard(fish) {
     const fishImageContainer =
         `<div class="fish-image-container">`;
     
-    // Only show favorite button for other users' fish and if user is logged in
-    const showFavoriteButton = userToken && !isCurrentUserFish;
+    // Show favorite button for other users' fish (regardless of login status)
+    const showFavoriteButton = !isCurrentUserFish;
     
     return `
         <div class="fish-card${userFishClass}" data-fish-id="${fish.docId}" data-fish-name="${escapeHtml(fish.fish_name || fish.Artist || 'Unnamed')}" data-fish-personality="${escapeHtml(fish.personality || 'random')}">
@@ -1160,6 +1170,16 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 // Handle reporting - rank page specific
 function handleReport(fishId, button) {
+    // Check if user is logged in
+    const isLoggedIn = window.authCache && window.authCache.isLoggedIn();
+    if (!isLoggedIn) {
+        // 弹出登录弹窗
+        if (window.authUI && window.authUI.showLoginModal) {
+            window.authUI.showLoginModal('Sign in to report content 🚩');
+        }
+        return;
+    }
+    
     handleReportGeneric(fishId, button);
 }
 
@@ -1620,7 +1640,12 @@ async function handleFavoriteClick(fishId, event) {
     // Check if user is logged in - 使用缓存快速检测
     const isLoggedIn = window.authCache && window.authCache.isLoggedIn();
     if (!isLoggedIn) {
-        FishTankFavorites.showToast('Please login to favorite fish', 'info');
+        // 弹出登录弹窗
+        if (window.authUI && window.authUI.showLoginModal) {
+            window.authUI.showLoginModal('Sign in to save your favorite fish! ⭐');
+        } else {
+            FishTankFavorites.showToast('Please login to favorite fish', 'info');
+        }
         return;
     }
     

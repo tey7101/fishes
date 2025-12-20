@@ -74,14 +74,31 @@ async function ensureUserRecordExists(user) {
   }
 }
 
-window.onload = () => {
+// 初始化函数 - 绑定表单事件
+function initLoginPage() {
+  console.log('🔐 Initializing login page...');
+  
   // Check if user is already logged in
   checkIfAlreadyLoggedIn();
   
-  // Setup form event listeners
-  document.getElementById('signin-form').addEventListener('submit', handleSignIn);
-  document.getElementById('signup-form').addEventListener('submit', handleSignUp);
-  document.getElementById('forgot-password-form').addEventListener('submit', handleForgotPassword);
+  // Setup form event listeners - 使用更可靠的方式绑定
+  const signinForm = document.getElementById('signin-form');
+  const signupForm = document.getElementById('signup-form');
+  const forgotForm = document.getElementById('forgot-password-form');
+  
+  if (signinForm) {
+    // 移除可能存在的旧监听器，使用 onsubmit 确保优先级
+    signinForm.onsubmit = handleSignIn;
+    console.log('✅ Sign in form handler bound');
+  }
+  if (signupForm) {
+    signupForm.onsubmit = handleSignUp;
+    console.log('✅ Sign up form handler bound');
+  }
+  if (forgotForm) {
+    forgotForm.onsubmit = handleForgotPassword;
+    console.log('✅ Forgot password form handler bound');
+  }
   
   // Check for success messages from redirects
   checkForSuccessMessage();
@@ -91,7 +108,26 @@ window.onload = () => {
   
   // Load test credentials in development
   loadTestCredentials();
-};
+}
+
+// 使用 DOMContentLoaded 确保在 DOM 准备好后立即执行
+// 同时保留 window.onload 作为备份
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLoginPage);
+} else {
+  // DOM 已经加载完成，直接执行
+  initLoginPage();
+}
+
+// 备份：如果 DOMContentLoaded 没有触发，使用 window.onload
+window.addEventListener('load', () => {
+  // 检查表单是否已绑定，如果没有则重新绑定
+  const signinForm = document.getElementById('signin-form');
+  if (signinForm && !signinForm.onsubmit) {
+    console.log('⚠️ Form handlers not bound, re-initializing...');
+    initLoginPage();
+  }
+});
 
 // Load test credentials from environment (development only)
 async function loadTestCredentials() {

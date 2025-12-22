@@ -19,7 +19,6 @@
 - **部署**: Vercel Serverless Functions / Railway
 - **数据库**: PostgreSQL (Hasura)
 - **数据访问**: Hasura GraphQL
-- **缓存**: Redis (Upstash)
 - **图片存储**: 七牛云 CDN
 
 ## 主要依赖
@@ -29,7 +28,6 @@
   "@supabase/supabase-js": "用户认证",
   "stripe": "支付处理",
   "@paypal/paypal-server-sdk": "PayPal 支付",
-  "ioredis": "Redis 客户端",
   "qiniu": "七牛云存储",
   "node-fetch": "HTTP 请求",
   "formidable": "文件上传处理",
@@ -59,7 +57,6 @@ npm run test:affiliate
 
 # 测试后端连接
 npm run test:hasura
-npm run test:redis
 npm run test:api
 npm run test:all
 
@@ -79,7 +76,6 @@ npm run download:schema
 - `SUPABASE_URL` / `SUPABASE_ANON_KEY` - Supabase 配置
 - `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` - Stripe 支付
 - `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` - PayPal 支付
-- `REDIS_URL` - Redis 连接
 - `QINIU_*` - 七牛云存储配置
 - `COZE_*` - Coze AI 聊天配置
 

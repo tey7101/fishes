@@ -5,6 +5,19 @@ Write-Host "`n===================================================" -ForegroundCo
 Write-Host "  Stripe Webhook 转发启动" -ForegroundColor Cyan
 Write-Host "===================================================" -ForegroundColor Cyan
 
+# 读取 .env.local 中的 PORT
+$envFile = ".env.local"
+$port = "3000"
+if (Test-Path $envFile) {
+    $envContent = Get-Content $envFile
+    foreach ($line in $envContent) {
+        if ($line -match "^PORT=(\d+)") {
+            $port = $matches[1]
+            break
+        }
+    }
+}
+
 # 刷新 PATH
 Write-Host "`n1. 刷新环境变量..." -ForegroundColor Yellow
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","User") + ";" + [System.Environment]::GetEnvironmentVariable("Path","Machine")
@@ -35,7 +48,7 @@ if ($loginTest -like "*login*" -or $loginTest -like "*authentication*") {
 
 # 启动 webhook 转发
 Write-Host "`n4. 启动 Webhook 转发..." -ForegroundColor Yellow
-Write-Host "   转发地址: http://localhost:3000/api/payment?action=webhook" -ForegroundColor Gray
+Write-Host "   转发地址: http://localhost:$port/api/payment?action=webhook" -ForegroundColor Gray
 Write-Host "`n===================================================" -ForegroundColor Cyan
 Write-Host "  重要提示：" -ForegroundColor Yellow
 Write-Host "  1. 请复制下面显示的 webhook secret (whsec_...)" -ForegroundColor White
@@ -45,5 +58,5 @@ Write-Host "  4. 按 Ctrl+C 可停止转发" -ForegroundColor White
 Write-Host "===================================================" -ForegroundColor Cyan
 Write-Host ""
 
-stripe listen --forward-to "localhost:3000/api/payment?action=webhook"
+stripe listen --forward-to "localhost:$port/api/payment?action=webhook"
 

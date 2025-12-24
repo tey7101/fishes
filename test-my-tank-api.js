@@ -58,9 +58,10 @@ async function testMyTankAPI() {
     console.log('   Email:', user.email);
     console.log('');
     
+    const API_BASE = `http://localhost:${process.env.PORT || 3000}`;
     // 测试 API
-    console.log('🌐 调用 API: http://localhost:3000/api/fish/my-tank');
-    const response = await fetch('http://localhost:3000/api/fish/my-tank', {
+    console.log(`🌐 调用 API: ${API_BASE}/api/fish/my-tank`);
+    const response = await fetch(`${API_BASE}/api/fish/my-tank`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

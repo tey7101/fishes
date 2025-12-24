@@ -4,6 +4,19 @@ Write-Host "`n===================================================" -ForegroundCo
 Write-Host "  FishTalk.app 服务器启动" -ForegroundColor Cyan
 Write-Host "===================================================" -ForegroundColor Cyan
 
+# 读取 .env.local 中的 PORT
+$envFile = ".env.local"
+$port = "3000"
+if (Test-Path $envFile) {
+    $envContent = Get-Content $envFile
+    foreach ($line in $envContent) {
+        if ($line -match "^PORT=(\d+)") {
+            $port = $matches[1]
+            break
+        }
+    }
+}
+
 # 检查 node_modules
 if (-not (Test-Path "node_modules")) {
     Write-Host "`n1. 安装依赖..." -ForegroundColor Yellow
@@ -16,9 +29,9 @@ if (-not (Test-Path "node_modules")) {
 Write-Host "2. 启动服务器..." -ForegroundColor Yellow
 Write-Host "`n===================================================" -ForegroundColor Cyan
 Write-Host "  服务器将在以下地址运行：" -ForegroundColor Yellow
-Write-Host "  http://localhost:3000" -ForegroundColor White
+Write-Host "  http://localhost:$port" -ForegroundColor White
 Write-Host "`n  访问会员页面：" -ForegroundColor Yellow
-Write-Host "  http://localhost:3000/membership.html" -ForegroundColor White
+Write-Host "  http://localhost:$port/membership.html" -ForegroundColor White
 Write-Host "`n  按 Ctrl+C 可停止服务器" -ForegroundColor Gray
 Write-Host "===================================================" -ForegroundColor Cyan
 Write-Host ""

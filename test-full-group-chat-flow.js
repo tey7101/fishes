@@ -7,7 +7,7 @@ require('dotenv').config({ path: '.env.local' });
 const fetch = require('node-fetch');
 const { executeGraphQL } = require('./lib/hasura');
 
-const API_BASE = 'http://localhost:3000';
+const API_BASE = `http://localhost:${process.env.PORT || 3000}`;
 const TEST_USER_ID = '11312701-f1d2-43f8-a13d-260eac812b7a';
 
 async function testFullGroupChatFlow() {

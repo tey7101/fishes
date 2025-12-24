@@ -24,12 +24,13 @@ async function testUpload() {
   });
   
   try {
-    console.log('📤 发送请求到 http://localhost:3000/api/fish-api?action=upload');
+    const API_BASE = `http://localhost:${process.env.PORT || 3000}`;
+    console.log(`📤 发送请求到 ${API_BASE}/api/fish-api?action=upload`);
     console.log('');
     
     const startTime = Date.now();
     
-    const response = await fetch('http://localhost:3000/api/fish-api?action=upload', {
+    const response = await fetch(`${API_BASE}/api/fish-api?action=upload`, {
       method: 'POST',
       body: formData,
       headers: formData.getHeaders()

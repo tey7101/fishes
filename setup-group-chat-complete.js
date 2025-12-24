@@ -237,8 +237,9 @@ ${colors.magenta}-- 2. 在 Hasura Console 的 Data 页面中设置关联:
 async function testGroupChatAPI() {
     log('blue', '🌐 测试群聊API端点...');
     
+    const API_BASE = `http://localhost:${process.env.PORT || 3000}`;
     try {
-        const response = await fetch('http://localhost:3000/api/fish/chat/group', {
+        const response = await fetch(`${API_BASE}/api/fish/chat/group`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

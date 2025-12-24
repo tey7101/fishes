@@ -149,7 +149,7 @@ async function testRedis() {
 async function testAPIs() {
   log('\n🌐 Testing API Endpoints...', 'info');
   
-  const baseUrl = 'http://localhost:3000'; // 或你的Vercel URL
+  const baseUrl = `http://localhost:${process.env.PORT || 3000}`;
   
   // Test 1: Fish List API
   try {

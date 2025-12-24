@@ -13,8 +13,8 @@
 
   // DOM 元素
   let startDateInput, endDateInput, refreshBtn, retryBtn;
-  let totalUsersEl, userDetailEl, groupChatsEl, userGroupChatsEl, ourTanksEl, paymentsEl;
-  let groupChatsCard, userGroupChatsCard;
+  let totalUsersEl, userDetailEl, groupChatsEl, userGroupChatsEl, ourTanksEl, paymentsEl, fishCountEl;
+  let groupChatsCard, userGroupChatsCard, ourTanksCard;
   let loadingOverlay, errorContainer, errorMessage;
   let trendChart = null;
 
@@ -46,8 +46,10 @@
     userGroupChatsEl = document.getElementById('userGroupChats');
     groupChatsCard = document.getElementById('groupChatsCard');
     userGroupChatsCard = document.getElementById('userGroupChatsCard');
+    ourTanksCard = document.getElementById('ourTanksCard');
     ourTanksEl = document.getElementById('ourTanks');
     paymentsEl = document.getElementById('payments');
+    fishCountEl = document.getElementById('fishCount');
     loadingOverlay = document.getElementById('loadingOverlay');
     errorContainer = document.getElementById('errorContainer');
     errorMessage = document.getElementById('errorMessage');
@@ -98,6 +100,11 @@
     });
     userGroupChatsCard.addEventListener('click', () => {
       window.location.href = 'admin-chat-viewer.html';
+    });
+
+    // Our Tank 卡片点击跳转
+    ourTanksCard.addEventListener('click', () => {
+      window.location.href = 'admin-our-tank-analytics.html';
     });
   }
 
@@ -228,6 +235,7 @@
     
     ourTanksEl.textContent = data.ourTanks ?? 0;
     paymentsEl.textContent = data.payments ?? 0;
+    fishCountEl.textContent = data.fish ?? 0;
   }
 
   /**
@@ -286,6 +294,14 @@
             data: timeline?.payments || [],
             borderColor: '#9f7aea',
             backgroundColor: 'rgba(159, 122, 234, 0.1)',
+            tension: 0.3,
+            fill: true
+          },
+          {
+            label: '画鱼',
+            data: timeline?.fish || [],
+            borderColor: '#f56565',
+            backgroundColor: 'rgba(245, 101, 101, 0.1)',
             tension: 0.3,
             fill: true
           }

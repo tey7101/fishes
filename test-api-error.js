@@ -17,7 +17,8 @@ async function testGroupChatAPI() {
     console.log('Request body:', JSON.stringify(requestBody, null, 2));
     
     try {
-        const response = await fetch('http://localhost:3000/api/fish-api?action=group-chat', {
+    const API_BASE = `http://localhost:${process.env.PORT || 3000}`;
+        const response = await fetch(`${API_BASE}/api/fish-api?action=group-chat`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

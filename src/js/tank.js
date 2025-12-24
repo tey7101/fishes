@@ -5241,6 +5241,15 @@ async function getCurrentUserInfo() {
                               user.email?.split('@')[0] || 
                               'User';
                     
+                    // 确保 localStorage 中有 userToken（OAuth 登录后可能没有）
+                    if (!localStorage.getItem('userToken') && window.supabaseAuth.getSession) {
+                        const session = await window.supabaseAuth.getSession();
+                        if (session?.access_token) {
+                            localStorage.setItem('userToken', session.access_token);
+                            console.log('✅ [getCurrentUserInfo] 已从 session 同步 userToken');
+                        }
+                    }
+                    
                     // 尝试从数据库获取nick_name
                     try {
                         const backendUrl = window.BACKEND_URL || '';
@@ -5270,6 +5279,31 @@ async function getCurrentUserInfo() {
                 }
             } catch (error) {
                 console.warn('⚠️ Supabase获取用户信息失败:', error);
+            }
+        }
+        
+        // 尝试从 Supabase session 获取用户（OAuth 登录后可能需要这种方式）
+        if (window.supabaseAuth && typeof window.supabaseAuth.getSession === 'function') {
+            try {
+                const session = await window.supabaseAuth.getSession();
+                if (session?.user) {
+                    userId = session.user.id;
+                    userName = session.user.user_metadata?.name || 
+                              session.user.user_metadata?.nick_name || 
+                              session.user.user_metadata?.full_name ||
+                              session.user.email?.split('@')[0] || 
+                              'User';
+                    
+                    // 同步 token 到 localStorage
+                    if (session.access_token) {
+                        localStorage.setItem('userToken', session.access_token);
+                    }
+                    
+                    console.log('✅ [getCurrentUserInfo] 从 session 获取到用户:', userId);
+                    return { userId, userName };
+                }
+            } catch (error) {
+                console.warn('⚠️ 从 session 获取用户失败:', error);
             }
         }
         
@@ -5395,7 +5429,23 @@ async function sendUserChatMessage() {
             userName: userInfo.userName
         });
         
-        const token = localStorage.getItem('userToken');
+        // 获取 token（优先从 localStorage，如果没有则从 session 获取）
+        let token = localStorage.getItem('userToken');
+        
+        // 如果 localStorage 中没有 token，尝试从 Supabase session 获取
+        if (!token && window.supabaseAuth && typeof window.supabaseAuth.getSession === 'function') {
+            try {
+                const session = await window.supabaseAuth.getSession();
+                if (session?.access_token) {
+                    token = session.access_token;
+                    localStorage.setItem('userToken', token);
+                    console.log('✅ [User Chat Frontend] 已从 session 同步 userToken');
+                }
+            } catch (error) {
+                console.warn('⚠️ [User Chat Frontend] 从 session 获取 token 失败:', error);
+            }
+        }
+        
         const headers = {
             'Content-Type': 'application/json'
         };
@@ -5403,6 +5453,8 @@ async function sendUserChatMessage() {
         // 如果有token，添加到Authorization header
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
+        } else {
+            console.warn('⚠️ [User Chat Frontend] 没有找到 userToken，请求可能会失败');
         }
         
         // 获取当前鱼缸中的鱼ID（用于后端自动创建会话）
@@ -5599,7 +5651,11 @@ async function sendUserChatMessage() {
                 if (typeof showUpgradeModal === 'function') {
                     showUpgradeModal('chat_limit');
                 }
-            } else if (errorStr.includes('Unauthorized') || errorStr.includes('401')) {
+            } else if (errorStr.includes('access token expired') || errorStr.includes('Coze API error')) {
+                // Coze AI 服务错误（不是用户认证问题）
+                errorMessage = '🤖 AI service temporarily unavailable. Please try again later.';
+            } else if (errorStr.includes('Unauthorized') && !errorStr.includes('Coze')) {
+                // 只有非 Coze 的 401 错误才提示登录
                 errorMessage = '🔐 Please log in to chat with fish.';
             } else if (errorStr.includes('too long')) {
                 errorMessage = '📝 Message is too long. Please keep it under 200 characters.';
@@ -5611,7 +5667,7 @@ async function sendUserChatMessage() {
             errorDiv.textContent = errorMessage;
             errorDiv.style.display = 'block';
             
-            // 3秒后自动隐藏错误提示
+            // 5秒后自动隐藏错误提示
             setTimeout(() => {
                 errorDiv.style.display = 'none';
             }, 5000);

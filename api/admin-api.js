@@ -8,6 +8,7 @@
  * - chat-list: 群聊列表
  * - chat-detail: 群聊详情
  * - conversation-list: 会话列表（按 conversation 分组）
+ * - our-tank-analytics: Our Tank 数据分析
  */
 
 const tablesHandler = require('../lib/api_handlers/admin/tables.js');
@@ -15,6 +16,7 @@ const analyticsHandler = require('../lib/api_handlers/admin/analytics.js');
 const chatListHandler = require('../lib/api_handlers/admin/chat-list.js');
 const chatDetailHandler = require('../lib/api_handlers/admin/chat-detail.js');
 const conversationListHandler = require('../lib/api_handlers/admin/conversation-list.js');
+const ourTankAnalyticsHandler = require('../lib/api_handlers/admin/our-tank-analytics.js');
 
 module.exports = async function handler(req, res) {
   const { action, tableName } = req.query;
@@ -34,10 +36,12 @@ module.exports = async function handler(req, res) {
       return await chatDetailHandler(req, res);
     } else if (action === 'conversation-list') {
       return await conversationListHandler(req, res);
+    } else if (action === 'our-tank-analytics') {
+      return await ourTankAnalyticsHandler(req, res);
     } else {
       return res.status(400).json({ 
         error: 'Invalid action',
-        available: ['tables', 'table-detail (requires tableName parameter)', 'analytics', 'chat-list', 'chat-detail', 'conversation-list']
+        available: ['tables', 'table-detail (requires tableName parameter)', 'analytics', 'chat-list', 'chat-detail', 'conversation-list', 'our-tank-analytics']
       });
     }
   } catch (error) {

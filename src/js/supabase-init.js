@@ -179,14 +179,12 @@ async function signInWithOAuth(provider) {
     }
     
     // 获取正确的回调 URL
-    // 在生产环境，使用当前域名；在开发环境，使用 localhost
+    // 在生产环境，使用当前域名；在开发环境，使用当前端口
     const isLocalhost = window.location.hostname === 'localhost' || 
                        window.location.hostname === '127.0.0.1';
     
-    // 如果是生产环境，使用当前 origin；否则使用 localhost:3000
-    const redirectOrigin = isLocalhost 
-      ? 'http://localhost:3000' 
-      : window.location.origin;
+    // 使用当前页面的 origin（自动包含正确的端口）
+    const redirectOrigin = window.location.origin;
     
     const redirectTo = `${redirectOrigin}/index.html`;
     
@@ -460,9 +458,8 @@ async function upgradeWithOAuth(provider) {
       return { data: null, error: new Error('Current user is not anonymous') };
     }
     
-    const isLocalhost = window.location.hostname === 'localhost' || 
-                       window.location.hostname === '127.0.0.1';
-    const redirectOrigin = isLocalhost ? 'http://localhost:3000' : window.location.origin;
+    // 使用当前页面的 origin（自动包含正确的端口）
+    const redirectOrigin = window.location.origin;
     const redirectTo = `${redirectOrigin}/index.html`;
     
     const { data, error } = await supabaseClient.auth.linkIdentity({

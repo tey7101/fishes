@@ -470,12 +470,24 @@ class CommunityChatManager {
    */
   displayGroupChatMessageInPanel(fish, message) {
     const chatMessages = document.getElementById('chat-messages');
+    const chatPanel = document.getElementById('chat-panel');
+    
     if (!chatMessages) {
       console.log('聊天面板不存在，跳过面板消息显示');
       return;
     }
 
-    // 确保聊天面板容器可见
+    // 不再自动打开聊天面板，只在面板已打开时显示消息
+    // 用户可以通过点击重新打开按钮或菜单来打开面板
+    const isPanelOpen = chatPanel && (chatPanel.style.right === '0px' || chatPanel.style.right === '0');
+    
+    if (!isPanelOpen) {
+      // 面板未打开时，只记录日志，不自动打开
+      console.log('💬 [群聊] 面板未打开，消息将在用户打开面板后显示');
+      // 消息仍然会添加到面板中，用户打开面板后可以看到
+    }
+    
+    // 确保消息容器可见（即使面板关闭，也添加消息以便用户打开后能看到）
     if (chatMessages.style.display === 'none') {
       chatMessages.style.display = 'block';
     }

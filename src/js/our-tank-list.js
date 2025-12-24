@@ -386,9 +386,16 @@ function closeJoinModal() {
 }
 
 // 处理创建鱼缸
+let isCreating = false; // 防止重复提交
 async function handleCreateTank(e) {
     e.preventDefault();
     console.log('[Our Tank List] handleCreateTank called');
+    
+    // 防止重复提交
+    if (isCreating) {
+        console.log('[Our Tank List] Already creating, ignoring duplicate submit');
+        return;
+    }
     
     const name = document.getElementById('tank-name').value.trim();
     const description = document.getElementById('tank-description').value.trim();
@@ -399,6 +406,8 @@ async function handleCreateTank(e) {
         showToast('Please enter tank name');
         return;
     }
+    
+    isCreating = true; // 标记正在创建
     
     try {
         const session = await getSession();
@@ -424,12 +433,21 @@ async function handleCreateTank(e) {
         showToast('Tank created successfully!');
         closeCreateModal();
         
-        // 刷新列表
+        // 创建成功后直接跳转到新创建的 tank 页面
+        if (data.tank && data.tank.id) {
+            console.log('[Our Tank List] Redirecting to new tank:', data.tank.id);
+            window.location.href = `/tank.html?view=our&tankId=${data.tank.id}`;
+            return;
+        }
+        
+        // 如果没有返回 tank id，则刷新列表
         await loadTanks();
         
     } catch (error) {
         console.error('[Our Tank List] Create error:', error);
         showToast('Create failed: ' + error.message);
+    } finally {
+        isCreating = false; // 重置标志
     }
 }
 
